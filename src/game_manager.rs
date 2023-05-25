@@ -4,8 +4,12 @@ use sdl2::rect::Rect;
 use sdl2::pixels::Color;
 use sdl2::video::WindowContext;
 
+use crate::level_manager;
 use crate::player_manager;
 use crate::texture_manager;
+
+const SCREEN_WIDTH: u32 = 800;
+const SCREEN_HEIGHT: u32 = 600;
 
 pub struct GameManager {
     pub quit: bool,
@@ -22,8 +26,9 @@ impl GameManager {
     pub fn new(sdl_context: &sdl2::Sdl) -> GameManager {
         let video_subsystem = sdl_context.video().unwrap();
         let window = video_subsystem
-            .window("Bedlam Asylum", 800, 600)
+            .window("Bedlam Asylum", SCREEN_WIDTH, SCREEN_HEIGHT)
             .resizable()
+            .fullscreen_desktop()
             .position_centered()
             .build()
             .expect("Failed to initialize window");
@@ -53,13 +58,13 @@ impl GameManager {
         self.canvas.clear();
     }
 
-    pub fn update_game(&mut self, player: &mut player_manager::PlayerManager, tex_man: &mut texture_manager::TextureManager<WindowContext>) {
+    pub fn update_game(&mut self, player: &mut player_manager::PlayerManager, tex_man: &mut texture_manager::TextureManager<WindowContext>, level: &mut level_manager::LevelManager) {
 
+        level.render_level(self);
         self.test_rect();
         player.update_player(self, tex_man);
-
-/*         println!("X: {}, Y: {}", player.x, player.y); */
     }
+
     fn test_rect(&mut self) {
         let rect = Rect::new(self.cam_x, self.cam_y, 100, 200);
         let color = Color::RGBA(255, 0, 0, 255);

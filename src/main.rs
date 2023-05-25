@@ -1,9 +1,4 @@
-use sdl2::pixels::Color; 
-use sdl2::render::WindowCanvas;
 use sdl2::video::WindowContext;
-
-use sdl2::rect::Rect;
-use sdl2::rect::Point;
 
 use std::time::Duration;
 // use std::path::Path;
@@ -12,6 +7,7 @@ pub mod texture_manager;
 pub mod game_manager;
 pub mod event_manager;
 pub mod player_manager;
+pub mod level_manager;
 
 // const IMAGE_WIDTH:u32 = 100;
 // const IMAGE_HEIGHT:u32 = 100;
@@ -25,16 +21,15 @@ fn game_loop <'l, T>(
     mut events: &mut event_manager::EventManager, 
     mut tex_man: &mut texture_manager::TextureManager<WindowContext>, 
     mut player: &mut player_manager::PlayerManager,
+    mut level: &mut level_manager::LevelManager,
 ) -> Result<(), String> {
     while !game.quit {
         game.prepare_background();
 
-        game.update_game(&mut player, &mut tex_man);
+        game.update_game(&mut player, &mut tex_man, &mut level);
         events.do_keyboard_event(game);
         //add render error handling
 /*         render(&mut game.canvas, tex_man).unwrap(); */
-
-
 
         game.canvas.present();
 
@@ -51,6 +46,8 @@ fn main() -> Result<(), String> {
     let mut tex_man = texture_manager::TextureManager::new(&texture_creator);
     let mut events = event_manager::EventManager::new(&sdl_context);
     let mut player = player_manager::PlayerManager::new();
+    let mut level = level_manager::LevelManager::new();
+    level.create_level();
 
     // Load the images before the main loop so we don't try and load during gameplay
     player.texture_path = "assets/gothicvania/Gothic-hero-Files/PNG/gothic-hero-idle.png".to_string();
@@ -62,7 +59,7 @@ fn main() -> Result<(), String> {
     // font.set_style(sdl2::ttf::FontStyle::BOLD);
 
     //Add game loop error handling
-    game_loop::<()>(&mut game, &mut events, &mut tex_man, &mut player).unwrap();
+    game_loop::<()>(&mut game, &mut events, &mut tex_man, &mut player, &mut level).unwrap();
 
 
 
