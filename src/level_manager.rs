@@ -1,5 +1,8 @@
-use crate::game_manager::GameManager;
 use sdl2::rect::Rect;
+
+use crate::game_manager::GameManager;
+use crate::player_manager::PlayerManager;
+
 
 const MAX_WIDTH: u32 = 300;
 const MAX_HEIGHT: u32 = 30;
@@ -29,13 +32,13 @@ impl LevelManager {
         }
     }
 
-    pub fn render_level(&mut self, game: &mut GameManager) {
+    pub fn render_level(&mut self, game: &mut GameManager, player: &mut PlayerManager) {
         let mut color;
         for (row_index, row) in self.level_vec.iter().enumerate() {
             for (col_index, &tile_type) in row.iter().enumerate() {
                 let rect = Rect::new(
-                    (TILE_SIZE as i32 * col_index as i32).try_into().unwrap(),
-                    (TILE_SIZE as i32 * row_index as i32).try_into().unwrap(),
+                    (TILE_SIZE as i32 * col_index as i32) - game.cam_x,
+                    (TILE_SIZE as i32 * row_index as i32) - game.cam_y,
                     TILE_SIZE,
                     TILE_SIZE,
                 );  

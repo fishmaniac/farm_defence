@@ -3,6 +3,7 @@ use sdl2::event::Event;
 
 use crate::game_manager::GameManager;
 
+
 //Option allows to hold either Some(event) or None
 
 pub struct EventManager {

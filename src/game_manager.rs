@@ -8,8 +8,10 @@ use crate::level_manager;
 use crate::player_manager;
 use crate::texture_manager;
 
-const SCREEN_WIDTH: u32 = 800;
-const SCREEN_HEIGHT: u32 = 600;
+
+//~!~FIXME: REQUIRES MATCHING SCREEN_WIDTH & HEIGHT DEFINITION IN PLAYER_MANAGER~!~
+const SCREEN_WIDTH: i32 = 1920;
+const SCREEN_HEIGHT: i32 = 1080;
 
 pub struct GameManager {
     pub quit: bool,
@@ -17,8 +19,8 @@ pub struct GameManager {
     pub down: bool,
     pub left: bool,
     pub right: bool,
-    cam_x: i32,
-    cam_y: i32,
+    pub cam_x: i32,
+    pub cam_y: i32,
     pub canvas: Canvas<Window>,
 }
 
@@ -26,7 +28,7 @@ impl GameManager {
     pub fn new(sdl_context: &sdl2::Sdl) -> GameManager {
         let video_subsystem = sdl_context.video().unwrap();
         let window = video_subsystem
-            .window("Bedlam Asylum", SCREEN_WIDTH, SCREEN_HEIGHT)
+            .window("Bedlam Asylum", SCREEN_WIDTH.try_into().unwrap(), SCREEN_HEIGHT.try_into().unwrap())
             .resizable()
             .fullscreen_desktop()
             .position_centered()
@@ -59,10 +61,10 @@ impl GameManager {
     }
 
     pub fn update_game(&mut self, player: &mut player_manager::PlayerManager, tex_man: &mut texture_manager::TextureManager<WindowContext>, level: &mut level_manager::LevelManager) {
-
-        level.render_level(self);
         self.test_rect();
+        level.render_level(self, player);
         player.update_player(self, tex_man);
+        self.update_camera(player);
     }
 
     fn test_rect(&mut self) {
@@ -70,6 +72,10 @@ impl GameManager {
         let color = Color::RGBA(255, 0, 0, 255);
         self.canvas.set_draw_color(color);
         self.canvas.fill_rect(rect).unwrap();
+    }
+    fn update_camera(&mut self, player: &mut player_manager::PlayerManager) {
+        self.cam_x = player.x;
+        self.cam_y = player.y;
     }
 }
 
