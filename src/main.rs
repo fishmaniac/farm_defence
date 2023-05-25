@@ -23,10 +23,22 @@ fn game_loop <'l, T>(
     mut player: &mut player_manager::PlayerManager,
     mut level: &mut level_manager::LevelManager,
 ) -> Result<(), String> {
+    let texture_path:String = "assets/tile1.png".to_string();
+    let texture = &tex_man.load(&texture_path);
+    let clone = texture.clone();
+
     while !game.quit {
         game.prepare_background();
 
-        game.update_game(&mut player, &mut tex_man, &mut level);
+        match clone {
+            Ok(ref tex) => {
+                game.update_game(&mut player, &mut tex_man, &mut level, tex);
+            }
+            Err(ref err) => {
+                // Handle the error case here
+                println!("Error: {}", err);
+            }
+        }
         events.do_keyboard_event(game);
         //add render error handling
 
@@ -46,7 +58,8 @@ fn main() -> Result<(), String> {
     let mut events = event_manager::EventManager::new(&sdl_context);
     let mut player = player_manager::PlayerManager::new();
     let mut level = level_manager::LevelManager::new();
-    level.create_level();
+
+    level.create_level(); 
     level.read_file("level0.txt").unwrap();
 
     // Load the images before the main loop so we don't try and load during gameplay

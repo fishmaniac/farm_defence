@@ -75,13 +75,14 @@ impl PlayerManager {
             self.y_vel -= self.y_vel.signum() * 5; // Reduce y velocity by 5 units
         }
         
-        self.render_player(game, tex_man).unwrap();
+        
     }
 
-    fn render_player(&mut self, game: &mut game_manager::GameManager, tex_man: &mut texture_manager::TextureManager<WindowContext>) -> Result<(), String> {
+    pub fn render_player(&mut self, game: &mut game_manager::GameManager, tex_man: &mut texture_manager::TextureManager<WindowContext>) -> Result<(), String> {
         let src = Rect::new(0,0,IMAGE_WIDTH,IMAGE_HEIGHT);
         let dest = Rect::new(self.x - game.cam_x + (SCREEN_WIDTH / 2), self.y - game.cam_y + (SCREEN_HEIGHT / 2), OUTPUT_WIDTH, OUTPUT_HEIGHT);    
-        let center = Point::new( (OUTPUT_WIDTH/2) as i32, (OUTPUT_HEIGHT) as i32);
+        let center = Point::new((dest.width() / 2) as i32, (dest.height() / 2) as i32);
+/*         println!("TEXTURE: {}", &self.texture_path); */
         let texture = tex_man.load(&self.texture_path)?;
         game.canvas.copy_ex(
             &texture, // Texture object

@@ -3,6 +3,9 @@ use sdl2::render::Canvas;
 use sdl2::rect::Rect;
 use sdl2::pixels::Color;
 use sdl2::video::WindowContext;
+use sdl2::render::Texture;
+
+use std::rc::Rc;
 
 use crate::level_manager;
 use crate::player_manager;
@@ -38,7 +41,7 @@ impl GameManager {
         let mut canvas = window.into_canvas()
             .build()
             .expect("Failed to initialize canvas");
-        
+
 
         let game = GameManager {  
             quit: false,
@@ -58,11 +61,14 @@ impl GameManager {
         self.canvas.clear();
     }
 
-    pub fn update_game(&mut self, player: &mut player_manager::PlayerManager, tex_man: &mut texture_manager::TextureManager<WindowContext>, level: &mut level_manager::LevelManager) {
+    pub fn update_game(&mut self, player: &mut player_manager::PlayerManager, tex_man: &mut texture_manager::TextureManager<WindowContext>, level: &mut level_manager::LevelManager, texture: &Rc<Texture<'_>>) {
+
         self.test_rect();
-        level.render_level(self, player);
         player.update_player(self, tex_man);
         self.update_camera(player);
+        level.render_level(self, player, tex_man, texture).unwrap();
+        player.render_player(self, tex_man).unwrap();
+
     }
 
     fn test_rect(&mut self) {
