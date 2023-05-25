@@ -29,7 +29,6 @@ fn game_loop <'l, T>(
         game.update_game(&mut player, &mut tex_man, &mut level);
         events.do_keyboard_event(game);
         //add render error handling
-/*         render(&mut game.canvas, tex_man).unwrap(); */
 
         game.canvas.present();
 
@@ -48,6 +47,7 @@ fn main() -> Result<(), String> {
     let mut player = player_manager::PlayerManager::new();
     let mut level = level_manager::LevelManager::new();
     level.create_level();
+    level.read_file("level0.txt").unwrap();
 
     // Load the images before the main loop so we don't try and load during gameplay
     player.texture_path = "assets/gothicvania/Gothic-hero-Files/PNG/gothic-hero-idle.png".to_string();
