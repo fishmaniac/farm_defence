@@ -65,9 +65,6 @@ impl PlayerManager {
         self.x_vel = self.x_vel.max(-PLAYER_MAX_VELOCITY).min(PLAYER_MAX_VELOCITY);
         self.y_vel = self.y_vel.max(-PLAYER_MAX_VELOCITY).min(PLAYER_MAX_VELOCITY);
 
-        // self.x = self.x - game.cam_x;
-        // self.y = self.y - game.cam_y;
-
         if self.x_vel != 0 {
             self.x += self.x_vel;
             self.x_vel -= self.x_vel.signum() * 5; // Reduce x velocity by 5 units
@@ -80,9 +77,10 @@ impl PlayerManager {
         
         self.render_player(game, tex_man).unwrap();
     }
+
     fn render_player(&mut self, game: &mut game_manager::GameManager, tex_man: &mut texture_manager::TextureManager<WindowContext>) -> Result<(), String> {
         let src = Rect::new(0,0,IMAGE_WIDTH,IMAGE_HEIGHT);
-        let dest = Rect::new(self.x, self.y, OUTPUT_WIDTH, OUTPUT_HEIGHT);    
+        let dest = Rect::new(self.x - game.cam_x + (SCREEN_WIDTH / 2), self.y - game.cam_y + (SCREEN_HEIGHT / 2), OUTPUT_WIDTH, OUTPUT_HEIGHT);    
         let center = Point::new( (OUTPUT_WIDTH/2) as i32, (OUTPUT_HEIGHT) as i32);
         let texture = tex_man.load(&self.texture_path)?;
         game.canvas.copy_ex(

@@ -55,8 +55,6 @@ impl GameManager {
 
     pub fn prepare_background(&mut self) {
         self.canvas.set_draw_color(Color::RGBA(69, 69, 69, 255));
-
-        self.canvas.present();
         self.canvas.clear();
     }
 
