@@ -2,6 +2,8 @@ use sdl2::EventPump;
 use sdl2::event::Event;
 
 use crate::game_manager::GameManager;
+use crate::level_manager::{LevelManager, self};
+use crate::player_manager::PlayerManager;
 
 
 //Option allows to hold either Some(event) or None

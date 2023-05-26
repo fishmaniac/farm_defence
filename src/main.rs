@@ -1,7 +1,7 @@
 use sdl2::video::WindowContext;
 
 use std::time::Duration;
-// use std::path::Path;
+use std::path::Path;
 
 pub mod texture_manager;
 pub mod game_manager;
@@ -25,11 +25,12 @@ fn game_loop (
 ) {
     while !game.quit {
         game.prepare_background();
-
+        events.do_keyboard_event(game);
 
         game.update_game(&mut player, &mut tex_man, &mut level);
 
-        events.do_keyboard_event(game);
+
+
         game.canvas.present();
 
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
@@ -51,16 +52,14 @@ fn main() -> Result<(), String> {
     //~!~!~!~FIXME: Load the images before the main loop so we don't try and load during gameplay~!~!~!~
 
 
-    // Prepare fonts
-    // let ttf_context = sdl2::ttf::init().map_err(|e| e.to_string())?; 
-    // let font_path: &Path = Path::new(&"assets/font/slkscr.ttf");
-    // let mut font = ttf_context.load_font(font_path, 128)?;
-    // font.set_style(sdl2::ttf::FontStyle::BOLD);
+    /*     Prepare fonts */
+    let ttf_context = sdl2::ttf::init().map_err(|e| e.to_string())?; 
+    let font_path: &Path = Path::new(&"assets/font/slkscr.ttf");
+    let mut font = ttf_context.load_font(font_path, 128)?;
+    font.set_style(sdl2::ttf::FontStyle::BOLD);
 
     //Add game loop error handling
     game_loop(&mut game, &mut events, &mut tex_man, &mut player, &mut level);
-
-
 
     Ok(())
 }
