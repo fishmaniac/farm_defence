@@ -82,8 +82,10 @@ impl PlayerManager {
         let src = Rect::new(0,0,IMAGE_WIDTH,IMAGE_HEIGHT);
         let dest = Rect::new(self.x - game.cam_x + (SCREEN_WIDTH / 2), self.y - game.cam_y + (SCREEN_HEIGHT / 2), OUTPUT_WIDTH, OUTPUT_HEIGHT);    
         let center = Point::new((dest.width() / 2) as i32, (dest.height() / 2) as i32);
+        self.texture_path = "assets/gothicvania/Gothic-hero-Files/PNG/gothic-hero-idle.png".to_string();
 /*         println!("TEXTURE: {}", &self.texture_path); */
         let texture = tex_man.load(&self.texture_path)?;
+
         game.canvas.copy_ex(
             &texture, // Texture object
             src,      // source rect

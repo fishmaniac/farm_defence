@@ -39,6 +39,7 @@ pub struct LevelManager {
 
 pub struct LevelTile {
     tile_type: char,
+    texture_path: String,
 }
 
 impl LevelManager {
@@ -56,19 +57,21 @@ impl LevelManager {
             for _ in 0..MAX_WIDTH {
                 row.push(LevelTile { 
                     tile_type: '0',
+                    texture_path: "assets/tile1.png".to_string(),
                 });
             }
-
             self.level_vec.push(row);
         }
     }
 
-    pub fn render_level(&mut self, game: &mut GameManager, player: &mut PlayerManager, tex_man: &mut TextureManager<WindowContext>, texture: &Rc<Texture<'_>>) -> Result<(), String> {
+    pub fn render_level(&mut self, game: &mut GameManager, player: &mut PlayerManager, tex_man: &mut TextureManager<WindowContext>) -> Result<(), String> {
         let mut color:sdl2::pixels::Color = sdl2::pixels::Color::RGBA(0, 0, 0, 255);
         let mut temp_tile:LevelTile;
-        
+
         for (row_index, row) in self.level_vec.iter().enumerate() {
             for (col_index, temp_tile) in row.iter().enumerate() {
+                
+
                 let src = Rect::new(
                     (TILE_SIZE as i32 * col_index as i32) - game.cam_x,
                     (TILE_SIZE as i32 * row_index as i32) - game.cam_y,
@@ -76,6 +79,7 @@ impl LevelManager {
                     TILE_SIZE,
                 );  
 
+                let texture = tex_man.load(&temp_tile.texture_path)?;
                 game.canvas.copy_ex(
                     &texture, // Texture object
                     None,      // source rect
@@ -85,6 +89,7 @@ impl LevelManager {
                     false,    // flip horizontal
                     false,     // flip vertical
                 )?;
+
             }
         }
         Ok(())
@@ -100,10 +105,31 @@ impl LevelManager {
             let mut row_vec: Vec<LevelTile> = Vec::new();
 
             for ch in line.chars() {
-                let tile = LevelTile { 
-                    tile_type: ch,
-                };
-                row_vec.push(tile);
+                match ch {
+                    '0' => {
+                        let tile = LevelTile {
+                            tile_type: ch,
+                            texture_path: "assets/tile1.png".to_string(),
+                        };
+                        row_vec.push(tile);
+                    }
+                    '2' => {
+                        let tile = LevelTile {
+                            tile_type: ch,
+                            texture_path: "assets/tile2.png".to_string(),
+                        };
+                        row_vec.push(tile);
+                    }
+                    '3' => {
+                        let tile = LevelTile {
+                            tile_type: ch,
+                            texture_path: "assets/tile3.png".to_string(),
+                        };
+                        row_vec.push(tile);
+                    }
+                    _ => {} // Handle other cases if needed
+                }
+
             }
 
             temp_vec.push(row_vec);

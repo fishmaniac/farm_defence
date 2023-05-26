@@ -61,12 +61,12 @@ impl GameManager {
         self.canvas.clear();
     }
 
-    pub fn update_game(&mut self, player: &mut player_manager::PlayerManager, tex_man: &mut texture_manager::TextureManager<WindowContext>, level: &mut level_manager::LevelManager, texture: &Rc<Texture<'_>>) {
+    pub fn update_game(&mut self, player: &mut player_manager::PlayerManager, tex_man: &mut texture_manager::TextureManager<WindowContext>, level: &mut level_manager::LevelManager) {
 
         self.test_rect();
         player.update_player(self, tex_man);
         self.update_camera(player);
-        level.render_level(self, player, tex_man, texture).unwrap();
+        level.render_level(self, player, tex_man).unwrap();
         player.render_player(self, tex_man).unwrap();
 
     }
