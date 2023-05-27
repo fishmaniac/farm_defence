@@ -202,7 +202,6 @@ impl PlayerManager {
             false     // flip vertical
         )?;
 
-
         Ok(())
     }
 

@@ -9,13 +9,6 @@ pub mod event_manager;
 pub mod player_manager;
 pub mod level_manager;
 
-// const IMAGE_WIDTH:u32 = 100;
-// const IMAGE_HEIGHT:u32 = 100;
-// const OUTPUT_WIDTH: u32 = 50;
-// const OUTPUT_HEIGHT: u32 = 50;
-// const SCREEN_WIDTH: i32 = 800;
-// const SCREEN_HEIGHT: i32 = 600;
-
 fn game_loop (
     mut game: &mut game_manager::GameManager, 
     mut events: &mut event_manager::EventManager, 
@@ -29,10 +22,7 @@ fn game_loop (
 
         game.update_game(&mut player, &mut tex_man, &mut level);
 
-
-
         game.canvas.present();
-
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
 }

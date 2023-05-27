@@ -143,6 +143,7 @@ impl LevelManager {
         }
         Ok(())
     }
+
     fn update_farms(game: &mut GameManager, temp_tile: &mut LevelTile) {
         match temp_tile.tile_type {
             'F' | 'G' | 'H' => temp_tile.state += 1,
@@ -164,5 +165,4 @@ impl LevelManager {
             temp_tile.state = 0;
         }
     }
-
 }

@@ -105,4 +105,3 @@ impl GameManager {
         self.cam_y = player.y;
     }
 }
-
