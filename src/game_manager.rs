@@ -98,7 +98,6 @@ impl GameManager {
         self.update_camera(player);
         level.render_level(self, player, tex_man).unwrap();
         player.render_player(self, tex_man).unwrap();
-
     }
 
     fn update_camera(&mut self, player: &mut player_manager::PlayerManager) {
