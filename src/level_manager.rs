@@ -93,24 +93,19 @@ impl LevelManager {
                     false,    // flip horizontal
                     false,     // flip vertical
                 )?;
-                // if /* Self::check_collisions(player, temp_tile) */ player.rect.has_intersection(temp_tile.rect) && temp_tile.tile_type == '2'{
-                //     println!("COLLIDING X:{} Y:{}", player.x, player.y);
-                //     player.colliding = true;
-                // }
-                // else {
-                //     player.colliding = false;
-                // }
-                if Self::check_collisions_x(player, temp_tile) {
-                    player.colliding = true;
+                if Rect::has_intersection(&player.rect, temp_tile.rect){
+                    if temp_tile.tile_type == '2' {
+                        player.colliding = true;
+                    }
+                    else {
+                        player.colliding = false;
+                    }
                 }
-                else if Self::check_collisions_y(player, temp_tile) {
-                    player.colliding = false;
-                }
-
             }
         }
         Ok(())
     }
+
     pub fn read_file(&mut self, filename: &str) -> Result<(), std::io::Error> {
         println!("Reading from dir: {:?}", env::current_dir()?);
         let file = File::open(filename)?;
@@ -173,42 +168,8 @@ impl LevelManager {
     pub fn check_all_collisions(&mut self, player: &mut PlayerManager) -> bool {
         for (row_index, row) in self.level_vec.iter_mut().enumerate() {
             for (col_index, temp_tile) in row.iter_mut().enumerate() {
-                if temp_tile.tile_type == '2' && Self::check_collisions(player, temp_tile) {
+                if temp_tile.tile_type == '2' && Rect::has_intersection(&player.rect, temp_tile.rect) {
                     return true
-                }
-            }
-        }
-        false
-    }
-
-    pub fn check_collisions_x(player: &mut PlayerManager, level_tile: &mut LevelTile) -> bool {
-        player.rect.x() + player.rect.width() as i32 >= level_tile.rect.x() &&
-        level_tile.rect.x() + level_tile.rect.width() as i32 >= player.rect.x()
-    }
-
-    pub fn check_collisions_y(player: &mut PlayerManager, level_tile: &mut LevelTile) -> bool {
-        player.rect.y() + player.rect.height() as i32 >= level_tile.rect.y() &&
-        level_tile.rect.y() + level_tile.rect.height() as i32 >= player.rect.y()
-    }
-
-    pub fn check_all_collisions_x(&mut self, player: &mut PlayerManager) -> bool {
-        for (row_index, row) in self.level_vec.iter_mut().enumerate() {
-            for (col_index, temp_tile) in row.iter_mut().enumerate() {
-                if temp_tile.tile_type == '2' && Self::check_collisions_x(player, temp_tile) {
-                    println!("RETURNING TRUE ALL X");
-                    return true;
-                }
-            }
-        }
-        false
-    }
-
-    pub fn check_all_collisions_y(&mut self, player: &mut PlayerManager) -> bool {
-        for (row_index, row) in self.level_vec.iter_mut().enumerate() {
-            for (col_index, temp_tile) in row.iter_mut().enumerate() {
-                if temp_tile.tile_type == '2' && Self::check_collisions_y(player, temp_tile) {
-                    println!("RETURNING TRUE ALL Y");
-                    return true;
                 }
             }
         }

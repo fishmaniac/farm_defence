@@ -3,17 +3,7 @@ use sdl2::event::Event;
 
 use crate::game_manager::GameManager;
 use crate::level_manager::{LevelManager, self};
-use crate::player_manager::PlayerManager;
-
-
-//Option allows to hold either Some(event) or None
-
 pub struct EventManager {
-    // up: bool,
-    // down: bool,
-    // left: bool,
-    // right: bool,
-    // event: Option<EventType>,
     event_pump: EventPump,
 }
 
@@ -21,11 +11,6 @@ impl EventManager {
     pub fn new(sdl_context: &sdl2::Sdl) -> EventManager {
         let event_pump = sdl_context.event_pump().unwrap(); 
         let event = EventManager {  
-            // up: false,
-            // down: false,
-            // left: false,
-            // right: false,
-            // event: None,
             event_pump,
         };
         event
@@ -89,7 +74,9 @@ impl EventManager {
             sdl2::keyboard::Keycode::D => {
                 game.right = false;
             }
-            _ => {}
+            _ => {
+                println!("INVALID INPUT");
+            }
         }
     }
 }

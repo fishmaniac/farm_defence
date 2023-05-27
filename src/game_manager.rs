@@ -75,12 +75,10 @@ impl GameManager {
 
     pub fn prepare_background(&mut self) {
         self.canvas.set_draw_color(Color::RGBA(69, 69, 69, 255));
-        self.canvas.clear();
+        self.canvas.clear(); 
     }
 
     pub fn update_game(&mut self, player: &mut player_manager::PlayerManager, tex_man: &mut texture_manager::TextureManager<WindowContext>, level: &mut level_manager::LevelManager) {
-
-/*         self.test_rect(); */
         player.update_player(self, tex_man, level);
         self.update_camera(player);
         level.render_level(self, player, tex_man).unwrap();
@@ -88,12 +86,6 @@ impl GameManager {
 
     }
 
-    fn test_rect(&mut self) {
-        let rect = Rect::new(self.cam_x, self.cam_y, 100, 200);
-        let color = Color::RGBA(255, 0, 0, 255);
-        self.canvas.set_draw_color(color);
-        self.canvas.fill_rect(rect).unwrap();
-    }
     fn update_camera(&mut self, player: &mut player_manager::PlayerManager) {
         self.cam_x = player.x;
         self.cam_y = player.y;
