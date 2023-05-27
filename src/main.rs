@@ -25,7 +25,7 @@ fn game_loop (
 ) {
     while !game.quit {
         game.prepare_background();
-        events.do_keyboard_event(game);
+        events.do_event(game);
 
         game.update_game(&mut player, &mut tex_man, &mut level);
 

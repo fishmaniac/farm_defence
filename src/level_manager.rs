@@ -1,3 +1,4 @@
+use sdl2::mouse::MouseButton;
 use sdl2::rect::Rect;
 use sdl2::video::WindowContext;
 
@@ -5,31 +6,13 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::env;
 
-
 use crate::game_manager::GameManager;
 use crate::player_manager::PlayerManager;
 use crate::texture_manager::TextureManager;
 
-
-const SCREEN_WIDTH: i32 = 1920;
-const SCREEN_HEIGHT: i32 = 1080;
-
-const IMAGE_WIDTH:u32 = 32;
-const IMAGE_HEIGHT:u32 = 32;
-
-const OUTPUT_WIDTH: u32 = IMAGE_WIDTH;
-const OUTPUT_HEIGHT: u32 = IMAGE_HEIGHT;
-
-const PLAYER_VELOCITY: i32 = 10;
-const PLAYER_MAX_VELOCITY: i32 = 40;
-const PLAYER_SPEED: i32 = 64;
-
 const TILE_SIZE: u32 = 32;
 const MAX_HEIGHT: u32 = 30;
 const MAX_WIDTH: u32 = 300;
-
-
-
 
 pub struct LevelManager {
     level_vec: Vec<Vec<LevelTile>>,
@@ -38,8 +21,8 @@ pub struct LevelManager {
 pub struct LevelTile {
     tile_type: char,
     texture_path: String,
-    is_colliding: bool,
     pub rect: Rect,
+    state: i32,
 }
 
 impl LevelManager {
@@ -50,8 +33,6 @@ impl LevelManager {
         level
     }
 
-
-
     pub fn create_level(&mut self) {
         for _ in 0..MAX_HEIGHT {
             let mut row = Vec::new();
@@ -61,8 +42,8 @@ impl LevelManager {
                 row.push(LevelTile { 
                     tile_type: '0',
                     texture_path: "assets/tile1.png".to_string(),
-                    is_colliding: false,
                     rect,
+                    state: 0,
                 });
             }
             self.level_vec.push(row);
@@ -70,19 +51,14 @@ impl LevelManager {
     }
 
     pub fn render_level(&mut self, game: &mut GameManager, player: &mut PlayerManager, tex_man: &mut TextureManager<WindowContext>) -> Result<(), String> {
-        let mut color:sdl2::pixels::Color = sdl2::pixels::Color::RGBA(0, 0, 0, 255);
-        let mut temp_tile:LevelTile;
-
         for (row_index, row) in self.level_vec.iter_mut().enumerate() {
             for (col_index, mut temp_tile) in row.iter_mut().enumerate() {
-                
                 temp_tile.rect = Rect::new(
                     (TILE_SIZE as i32 * col_index as i32) - game.cam_x,
                     (TILE_SIZE as i32 * row_index as i32) - game.cam_y,
                     TILE_SIZE,
                     TILE_SIZE,
                 );  
-
                 let texture = tex_man.load(&temp_tile.texture_path)?;
                 game.canvas.copy_ex(
                     &texture, // Texture object
@@ -93,6 +69,7 @@ impl LevelManager {
                     false,    // flip horizontal
                     false,     // flip vertical
                 )?;
+
                 if Rect::has_intersection(&player.rect, temp_tile.rect){
                     if temp_tile.tile_type == '2' {
                         player.colliding = true;
@@ -100,6 +77,14 @@ impl LevelManager {
                     else {
                         player.colliding = false;
                     }
+                }
+                if game.placing && game.mouse_button == MouseButton::Left && Rect::contains_point(&temp_tile.rect, game.mouse_point) {
+                    temp_tile.tile_type = 'F';
+                    temp_tile.texture_path = "assets/field0.png".to_string();
+                }
+                if temp_tile.tile_type == 'F' {
+                    temp_tile.state += 1;
+                    println!("TILE STATE: {}", temp_tile.state);
                 }
             }
         }
@@ -122,8 +107,8 @@ impl LevelManager {
                         let tile = LevelTile {
                             tile_type: ch,
                             texture_path: "assets/tile1.png".to_string(),
-                            is_colliding: false,
                             rect,
+                            state: 0,
                         };
                         row_vec.push(tile);
                     }
@@ -131,8 +116,8 @@ impl LevelManager {
                         let tile = LevelTile {
                             tile_type: ch,
                             texture_path: "assets/tile2.png".to_string(),
-                            is_colliding: false,
                             rect,
+                            state: 0,
                         };
                         row_vec.push(tile);
                     }
@@ -140,39 +125,26 @@ impl LevelManager {
                         let tile = LevelTile {
                             tile_type: ch,
                             texture_path: "assets/tile3.png".to_string(),
-                            is_colliding: false,
                             rect,
+                            state: 0,
+                        };
+                        row_vec.push(tile);
+                    }
+                    'F' => {
+                        let tile = LevelTile {
+                            tile_type: ch,
+                            texture_path: "assets/field0.png".to_string(),
+                            rect,
+                            state: 0,
                         };
                         row_vec.push(tile);
                     }
                     _ => {} // Handle other cases if needed
                 }
-
             }
-
             temp_vec.push(row_vec);
         }
-
         self.level_vec = temp_vec;
         Ok(())
-    }
-
-
-    pub fn check_collisions(player: &mut PlayerManager, level_tile: &mut LevelTile) -> bool {
-        player.rect.x() + player.rect.width() as i32 > level_tile.rect.x() &&
-        level_tile.rect.x() + level_tile.rect.width() as i32 > player.rect.x() &&
-        player.rect.y() + player.rect.height() as i32 > level_tile.rect.y() &&
-        level_tile.rect.y() + level_tile.rect.height() as i32 > player.rect.y()
-    }
-
-    pub fn check_all_collisions(&mut self, player: &mut PlayerManager) -> bool {
-        for (row_index, row) in self.level_vec.iter_mut().enumerate() {
-            for (col_index, temp_tile) in row.iter_mut().enumerate() {
-                if temp_tile.tile_type == '2' && Rect::has_intersection(&player.rect, temp_tile.rect) {
-                    return true
-                }
-            }
-        }
-        false
     }
 }

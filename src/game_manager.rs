@@ -1,6 +1,5 @@
 use sdl2::video::Window;
 use sdl2::render::Canvas;
-use sdl2::rect::Rect;
 use sdl2::pixels::Color;
 use sdl2::video::WindowContext;
 use sdl2::video::GLProfile;
@@ -14,8 +13,17 @@ use crate::texture_manager;
 const SCREEN_WIDTH: i32 = 1920;
 const SCREEN_HEIGHT: i32 = 1080;
 
+pub enum Movement {
+    Up,
+    Down,
+    Left,
+    Right,
+    None,
+}
+
 pub struct GameManager {
     pub quit: bool,
+    pub placing: bool,
     pub up: bool,
     pub down: bool,
     pub left: bool,
@@ -23,6 +31,9 @@ pub struct GameManager {
     pub cam_x: i32,
     pub cam_y: i32,
     pub canvas: Canvas<Window>,
+    pub mouse_point: sdl2::rect::Point,
+    pub mouse_button: sdl2::mouse::MouseButton,
+    pub movement: Movement,
 }
 
 impl GameManager {
@@ -55,20 +66,24 @@ impl GameManager {
         // ... and we're still using OpenGL 3.2
         assert_eq!(gl_attr.context_version(), (3, 2));
 
-        let mut canvas = window.into_canvas()
+        let canvas = window.into_canvas()
             .present_vsync()
             .build()
             .expect("Failed to initialize canvas");
 
         let game = GameManager {  
             quit: false,
+            placing: false,
             up: false,
             down: false,
             left: false,
             right: false,
-            cam_x: 0, //CHANGE TO CAM X & CAM Y
+            cam_x: 0,
             cam_y: 0,
             canvas,
+            mouse_point: sdl2::rect::Point::new(0, 0),
+            mouse_button: sdl2::mouse::MouseButton::Unknown,
+            movement: Movement::None,
         };
         game
     }
@@ -79,7 +94,7 @@ impl GameManager {
     }
 
     pub fn update_game(&mut self, player: &mut player_manager::PlayerManager, tex_man: &mut texture_manager::TextureManager<WindowContext>, level: &mut level_manager::LevelManager) {
-        player.update_player(self, tex_man, level);
+        player.update_player(self);
         self.update_camera(player);
         level.render_level(self, player, tex_man).unwrap();
         player.render_player(self, tex_man).unwrap();
