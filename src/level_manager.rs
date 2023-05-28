@@ -47,7 +47,7 @@ impl LevelManager {
 
                 row.push(LevelTile { 
                     tile_type: '0',
-                    texture_path: "assets/tile1.png".to_string(),
+                    texture_path: constants::TEXTURE_TILE_EMPTY.to_string(),
                     rect,
                     state: 0,
                     tile_data: TileData::None,
@@ -72,7 +72,7 @@ impl LevelManager {
                     '0' => {
                         let tile = LevelTile {
                             tile_type: ch,
-                            texture_path: "assets/tile1.png".to_string(),
+                            texture_path: constants::TEXTURE_TILE_EMPTY.to_string(),
                             rect,
                             state: 0,
                             tile_data: TileData::None,
@@ -82,7 +82,7 @@ impl LevelManager {
                     '2' => {
                         let tile = LevelTile {
                             tile_type: ch,
-                            texture_path: "assets/tile2.png".to_string(),
+                            texture_path: constants::TEXTURE_TILE_WALL.to_string(),
                             rect,
                             state: 0,
                             tile_data: TileData::None,
@@ -92,7 +92,7 @@ impl LevelManager {
                     '3' => {
                         let tile = LevelTile {
                             tile_type: ch,
-                            texture_path: "assets/tile3.png".to_string(),
+                            texture_path: constants::TEXTURE_TILE_FLOOR.to_string(),
                             rect,
                             state: 0,
                             tile_data: TileData::None,
@@ -102,7 +102,7 @@ impl LevelManager {
                     'F' => {
                         let tile = LevelTile {
                             tile_type: ch,
-                            texture_path: "assets/field0.png".to_string(),
+                            texture_path: constants::TEXTURE_FIELD_EMPTY.to_string(),
                             rect,
                             state: 0,
                             tile_data: TileData::None,
@@ -167,7 +167,7 @@ impl LevelManager {
                         0 => {
                             if game.build_mode && game.current_crop == 0 && game.mouse_button == MouseButton::Left && Rect::contains_point(&temp_tile.rect, game.mouse_point) {
                                 temp_tile.tile_type = 'F';
-                                temp_tile.texture_path = "assets/field0.png".to_string();
+                                temp_tile.texture_path = constants::TEXTURE_FIELD_EMPTY.to_string();
                                 temp_tile.tile_data = TileData::Carrots;
                             }
 
@@ -175,7 +175,7 @@ impl LevelManager {
                         1 => {
                             if game.build_mode && game.current_crop == 1 && game.mouse_button == MouseButton::Left && Rect::contains_point(&temp_tile.rect, game.mouse_point) {
                                 temp_tile.tile_type = 'F';
-                                temp_tile.texture_path = "assets/field0.png".to_string();
+                                temp_tile.texture_path = constants::TEXTURE_FIELD_EMPTY.to_string();
                                 temp_tile.tile_data = TileData::Tomatoes;
                             }
                         }
@@ -191,28 +191,28 @@ impl LevelManager {
         }
         if temp_tile.tile_type == 'F' && temp_tile.state == constants::CROP_TIME {
             temp_tile.tile_type = 'G';
-            temp_tile.texture_path = "assets/field1.png".to_string();
+            temp_tile.texture_path = constants::TEXTURE_FIELD_GROWING.to_string();
             temp_tile.state = 0;
         }
         match temp_tile.tile_data {
             TileData::Carrots => {
                 if temp_tile.tile_type == 'G' && temp_tile.state == constants::CROP_TIME {
                     temp_tile.tile_type = 'H';
-                    temp_tile.texture_path = "assets/carrots0.png".to_string();
+                    temp_tile.texture_path = constants::TEXTURE_FIELD_CARROT.to_string();
                     temp_tile.state = 0;
                 }
             }
             TileData::Tomatoes => {
                 if temp_tile.tile_type == 'G' && temp_tile.state == constants::CROP_TIME {
                     temp_tile.tile_type = 'H';
-                    temp_tile.texture_path = "assets/tomatoes0.png".to_string();
+                    temp_tile.texture_path = constants::TEXTURE_FIELD_TOMATO.to_string();
                     temp_tile.state = 0;
                 }
             }
             _ => {
                 if temp_tile.tile_type == 'G' && temp_tile.state == constants::CROP_TIME {
                     temp_tile.tile_type = 'H';
-                    temp_tile.texture_path = "assets/carrots0.png".to_string();
+                    temp_tile.texture_path = constants::TEXTURE_DEFAULT.to_string();
                     temp_tile.state = 0;
                 }
             }

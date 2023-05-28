@@ -46,9 +46,9 @@ impl ButtonManager {
             let temp_button = self::Button {
                 rect: Rect::new(player.x, player.y, constants::TILE_SIZE, constants::TILE_SIZE),
                 texture_path: match i {
-                    0 => "assets/carrot-button.png".to_string(),
-                    1 => "assets/tomato-button.png".to_string(),
-                    _ => {"assets/player1.png".to_string()},
+                    0 => constants::TEXTURE_BUTTON_CARROT.to_string(),
+                    1 => constants::TEXTURE_BUTTON_TOMATO.to_string(),
+                    _ => constants::TEXTURE_DEFAULT.to_string(),
                 },
                 clicked: true,
                 hovering_button: true,
@@ -61,8 +61,9 @@ impl ButtonManager {
             let temp_button = self::Button {
                 rect: Rect::new(player.x, player.y, constants::TILE_SIZE, constants::TILE_SIZE),
                 texture_path: match i {
-                    0 => "assets/field0.png".to_string(),
-                    _ => {"assets/carrot-button.png".to_string()},
+                    0 => constants::TEXTURE_FIELD_EMPTY.to_string(),
+                    1 => constants::TEXTURE_BUTTON_HO.to_string(),
+                    _ => constants::TEXTURE_DEFAULT.to_string(),
                 },
                 clicked: true,
                 hovering_button: true,
@@ -72,7 +73,7 @@ impl ButtonManager {
     }
 
     fn draw_rect_outline(game: &mut game_manager::GameManager, rect: Rect) {
-        let color: sdl2::pixels::Color = Color::RGBA(255, 0, 0, 255);
+        let color: sdl2::pixels::Color = Color::RGBA(66, 81, 245, 255);
         game.canvas.set_draw_color(color);
 
         game.canvas.draw_line(rect.top_left(), rect.top_right()).unwrap();
@@ -86,13 +87,13 @@ impl ButtonManager {
             match button_type {
                 ButtonType::Seed => {
                     if button.clicked && button_index != self.current_button_clicked_seed {
-                        println!("REMOVING FROM HIGHLIGHTED BUTTONS || INDEX: {} || REMOVING: {}", button_index, self.current_button_clicked_seed);
+                       /*  println!("REMOVING FROM HIGHLIGHTED BUTTONS || INDEX: {} || REMOVING: {}", button_index, self.current_button_clicked_seed); */
                         button.clicked = false;
                     }
                 }
                 ButtonType::Build => {
                     if button.clicked && button_index != self.current_button_clicked_build {
-                        println!("REMOVING FROM HIGHLIGHTED BUTTONS || INDEX: {} || REMOVING: {}", button_index, self.current_button_clicked_build);
+/*                         println!("REMOVING FROM HIGHLIGHTED BUTTONS || INDEX: {} || REMOVING: {}", button_index, self.current_button_clicked_build); */
                         button.clicked = false;
                     }
                 }
@@ -144,7 +145,7 @@ impl ButtonManager {
                 if game.seed_outline_visible && temp_button.clicked {
                     game.current_crop = button_index;
                     Self::draw_rect_outline(game, temp_button.rect);
-                    println!("CURRENT CROP: {}", game.current_crop);
+/*                     println!("CURRENT CROP: {}", game.current_crop); */
                 }
             }
         }
@@ -194,7 +195,7 @@ impl ButtonManager {
                 if game.build_outline_visible && temp_button.clicked {
                     game.current_build = button_index;
                     Self::draw_rect_outline(game, temp_button.rect);
-                    println!("CURRENT BUILD: {}", game.current_build);
+             /*        println!("CURRENT BUILD: {}", game.current_build); */
                 }
             }
         }

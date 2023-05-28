@@ -53,7 +53,7 @@ impl GameManager {
         gl_attr.set_multisample_samples(4);
 
         let window = video_subsystem
-            .window("Bedlam Asylum", constants::SCREEN_WIDTH.try_into().unwrap(), constants::SCREEN_HEIGHT.try_into().unwrap())
+            .window("Farm Defence", constants::SCREEN_WIDTH.try_into().unwrap(), constants::SCREEN_HEIGHT.try_into().unwrap())
             .opengl()
             .resizable()
             .fullscreen_desktop()
