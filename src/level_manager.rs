@@ -20,18 +20,21 @@ pub enum TileData {
     None,
 }
 
-pub struct Tower {
-    pub row_index: i32,
-    pub col_index: i32,
-    pub attack_speed: i8,
-    pub attack_damage: i8,
-    pub rect: sdl2::rect::Rect,
-    pub texture_path: String,
-}
+// pub struct Tower {
+//     pub row_index: i32,
+//     pub col_index: i32,
+//     pub attack_speed: i8,
+//     pub attack_damage: i8,
+//     pub rect: sdl2::rect::Rect,
+//     pub texture_path: String,
+// }
+//
+// pub struct TowerList {
+//     tower_vec: Vec<Tower>,
+// }
 
 pub struct LevelManager {
     level_vec: Vec<Vec<LevelTile>>,
-    tower_vec: Vec<Tower>,
 }
 
 pub struct LevelTile {
@@ -47,7 +50,6 @@ impl LevelManager {
     pub fn new() -> LevelManager {
         let level = LevelManager {
             level_vec: Vec::new(),
-            tower_vec: Vec::new(),
         };
         level
     }
@@ -164,13 +166,37 @@ impl LevelManager {
                         player.colliding = false;
                     }
                 }
-                Self::update_buildings(game, temp_tile, seed_buttons, build_buttons, towers, player);
+                Self::update_buildings(game, temp_tile, seed_buttons, build_buttons, towers, player, row_index, col_index);
+                // if temp_tile.tile_data == TileData::ArcherTower {
+                //     
+                match temp_tile.tile_data {
+                    self.level_vec.get(row_index.wrapping_sub(1));
+                    TileData::ArcherTower => {
+                        let rect = Rect::new(
+                            (constants::TILE_SIZE as i32 * col_index as i32) - game.cam_x,
+                            (constants::TILE_SIZE as i32 * row_index as i32) - game.cam_y,
+                            constants::TILE_SIZE,
+                            constants::TILE_SIZE,
+                        );  
+                        let texture = tex_man.load(constants::TEXTURE_TOWER_ARCHER_BOTTOM)?;
+                        game.canvas.copy_ex(
+                            &texture, // Texture object
+                            None,      // source rect
+                            rect,     // destination rect
+                            0.0,      // angle (degrees)
+                            None,   // center
+                            false,    // flip horizontal
+                            false,     // flip vertical
+                        )?;
+                    }
+                    _ => {},
+                    }
             }
         }
         Ok(())
     }
 
-    fn update_buildings(game: &mut GameManager, temp_tile: &mut LevelTile, seed_buttons: &mut ButtonManager, build_buttons: &mut ButtonManager, towers: &mut tower_manager::TowerManager, player: &mut PlayerManager) {
+    fn update_buildings(game: &mut GameManager, temp_tile: &mut LevelTile, seed_buttons: &mut ButtonManager, build_buttons: &mut ButtonManager, towers: &mut tower_manager::TowerManager, player: &mut PlayerManager, row_index: usize, col_index: usize) {
         //INCREASE ALL FARM STATE
         match temp_tile.tile_data {
             TileData::Carrots | TileData::Tomatoes => {
@@ -203,10 +229,10 @@ impl LevelManager {
                     }
                     //BUILD MODE ARCHER TOWER
                     build if build == constants::CURRENT_BUILD_ARCHER_TOWER as usize => {
-                        /*                         towers.place_tower(&temp_tile, player); */
+                        towers.place_tower(&temp_tile, player, row_index, col_index);
 
                         temp_tile.tile_type = constants::TILE_TYPE_ARCHER_BOTTOM;
-                        temp_tile.texture_path = constants::TEXTURE_TOWER_ARCHER_BOTTOM.to_string();
+                        /*                         temp_tile.texture_path = constants::TEXTURE_TOWER_ARCHER_BOTTOM.to_string();  */
                         temp_tile.tile_data = TileData::ArcherTower;
                     }
                     _ => {}

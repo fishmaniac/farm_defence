@@ -44,6 +44,7 @@ fn main() -> Result<(), String> {
     let mut player = player_manager::PlayerManager::new();
     let mut level = level_manager::LevelManager::new();
     let mut towers = tower_manager::TowerManager::new();
+/*     let mut towers = level_manager::TowerList::new(); */
     let mut seed_buttons = button_manager::ButtonManager::new(constants::SEED_BUTTON_AMT, ButtonType::Seed, &player);
     let mut build_buttons = button_manager::ButtonManager::new(constants::BUILD_BUTTON_AMT, ButtonType::Build, &player);
 
