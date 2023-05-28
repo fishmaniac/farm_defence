@@ -36,7 +36,6 @@ impl EventManager {
                 Event::MouseMotion { x, y, .. } => {
                     game.mouse_point.x = x;
                     game.mouse_point.y = y;
-                    /* println!("MOUSE MOVED: x={}, y={}", game.mouse_point.x(), game.mouse_point.y()); */
                 }
                 Event::MouseButtonDown { mouse_btn, .. } => {
                     game.mouse_button = mouse_btn;

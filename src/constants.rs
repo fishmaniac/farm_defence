@@ -29,13 +29,32 @@ pub static TEXTURE_FIELD_TOMATO: &str = "assets/tomatoes0.png";
 pub static TEXTURE_BUTTON_CARROT: &str = "assets/carrot-button.png";
 pub static TEXTURE_BUTTON_TOMATO: &str = "assets/tomato-button.png";
 pub static TEXTURE_BUTTON_HO: &str = "assets/ho-button.png";
+pub static TEXTURE_BUTTON_ARCHER: &str = "assets/archer-button.png";
 
-pub static TEXTURE_TILE_EMPTY: &str = "assets/tile1.png";
+pub static TEXTURE_TILE_EMPTY: &str = "assets/grass-1.png";
 pub static TEXTURE_TILE_WALL: &str = "assets/tile2.png";
 pub static TEXTURE_TILE_FLOOR: &str = "assets/tile3.png";
 
+pub static TEXTURE_TOWER_ARCHER_FRONT: &str = "assets/archer-tower-front-top.png";
+pub static TEXTURE_TOWER_ARCHER_BACK: &str = "assets/archer-tower-back-top.png";
+pub static TEXTURE_TOWER_ARCHER_LEFT: &str = "assets/archer-tower-left-top.png";
+pub static TEXTURE_TOWER_ARCHER_RIGHT: &str = "assets/archer-tower-right-top.png";
+pub static TEXTURE_TOWER_ARCHER_BOTTOM: &str = "assets/archer-tower-bottom.png";
+
 pub const CURRENT_BUILD_HO: u8 = 0;
-pub const CURRENT_BUILD_FIELD: u8 = 1;
+pub const CURRENT_BUILD_ARCHER_TOWER: u8 = 1;
 
 pub const CURRENT_SEED_CARROT: u8 = 0;
 pub const CURRENT_SEED_TOMATO: u8 = 1;
+
+pub const TILE_TYPE_GRASS: char = '0';
+pub const TILE_TYPE_WALL: char = '2';
+pub const TILE_TYPE_FLOOR: char = '3';
+
+pub const TILE_TYPE_FIELD_EMPTY: char = 'F';
+pub const TILE_TYPE_FIELD_GROWING: char = 'G';
+pub const TILE_TYPE_FIELD_HARVESTABLE: char = 'H';
+
+pub const TILE_TYPE_ARCHER_TOP: char = 'A';
+pub const TILE_TYPE_ARCHER_BOTTOM: char = 'a';
+

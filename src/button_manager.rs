@@ -62,7 +62,7 @@ impl ButtonManager {
                 rect: Rect::new(player.x, player.y, constants::TILE_SIZE, constants::TILE_SIZE),
                 texture_path: match i {
                     constants::CURRENT_BUILD_HO => constants::TEXTURE_BUTTON_HO.to_string(),
-                    constants::CURRENT_BUILD_FIELD => constants::TEXTURE_FIELD_EMPTY.to_string(),
+                    constants::CURRENT_BUILD_ARCHER_TOWER => constants::TEXTURE_BUTTON_ARCHER.to_string(),
                     _ => constants::TEXTURE_DEFAULT.to_string(),
                 },
                 clicked: true,
@@ -143,7 +143,6 @@ impl ButtonManager {
                 if game.seed_outline_visible && temp_button.clicked {
                     game.current_seed = button_index;
                     Self::draw_rect_outline(game, temp_button.rect);
-                    /*                     println!("CURRENT CROP: {}", game.current_crop); */
                 }
             }
         }
@@ -186,7 +185,7 @@ impl ButtonManager {
                     temp_button.hovering_button = false;
                 }
 
-                if temp_button.hovering_button && self.hovering_all_buttons && game.mouse_button == MouseButton::Left {
+                if temp_button.hovering_button /* && self.hovering_all_buttons */ && game.mouse_button == MouseButton::Left {
                     temp_button.clicked = true;
                     self.current_button_clicked_build = button_index;
                 }

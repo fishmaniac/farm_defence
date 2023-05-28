@@ -12,6 +12,7 @@ pub mod event_manager;
 pub mod player_manager;
 pub mod level_manager;
 pub mod button_manager;
+pub mod tower_manager;
 
 
 fn game_loop (
@@ -21,13 +22,14 @@ fn game_loop (
     player: &mut player_manager::PlayerManager,
     level: &mut level_manager::LevelManager,
     seed_buttons: &mut button_manager::ButtonManager,
-    build_buttons: &mut button_manager::ButtonManager
+    build_buttons: &mut button_manager::ButtonManager,
+    towers: &mut tower_manager::TowerManager,
 ) {
     while !game.quit {
         game.prepare_background();
         events.do_event(game, seed_buttons, build_buttons);
 
-        game.update_game(player, tex_man, level, seed_buttons, build_buttons);
+        game.update_game(player, tex_man, level, seed_buttons, build_buttons, towers);
         game.canvas.present();
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
@@ -41,6 +43,7 @@ fn main() -> Result<(), String> {
     let mut events = event_manager::EventManager::new(&sdl_context);
     let mut player = player_manager::PlayerManager::new();
     let mut level = level_manager::LevelManager::new();
+    let mut towers = tower_manager::TowerManager::new();
     let mut seed_buttons = button_manager::ButtonManager::new(constants::SEED_BUTTON_AMT, ButtonType::Seed, &player);
     let mut build_buttons = button_manager::ButtonManager::new(constants::BUILD_BUTTON_AMT, ButtonType::Build, &player);
 
@@ -56,7 +59,7 @@ fn main() -> Result<(), String> {
     font.set_style(sdl2::ttf::FontStyle::BOLD);
 
     //Add game loop error handling
-    game_loop(&mut game, &mut events, &mut tex_man, &mut player, &mut level, &mut seed_buttons, &mut build_buttons);
+    game_loop(&mut game, &mut events, &mut tex_man, &mut player, &mut level, &mut seed_buttons, &mut build_buttons, &mut towers);
 
     Ok(())
 }
