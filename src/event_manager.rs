@@ -3,6 +3,8 @@ use sdl2::event::Event;
 use sdl2::mouse::MouseButton;
 
 use crate::game_manager::GameManager;
+use crate::button_manager::ButtonManager;
+
 pub struct EventManager {
     event_pump: EventPump,
 }
@@ -16,7 +18,7 @@ impl EventManager {
         event
     }
 
-    pub fn do_event(&mut self, game: &mut GameManager) {
+    pub fn do_event(&mut self, game: &mut GameManager, seed_buttons: &mut ButtonManager, build_buttons: &mut ButtonManager) {
         for event in self.event_pump.poll_iter() {
             match event {
                 Event::Quit {..} => {
@@ -34,7 +36,7 @@ impl EventManager {
                 Event::MouseMotion { x, y, .. } => {
                     game.mouse_point.x = x;
                     game.mouse_point.y = y;
-                    println!("MOUSE MOVED: x={}, y={}", game.mouse_point.x(), game.mouse_point.y());
+                    /* println!("MOUSE MOVED: x={}, y={}", game.mouse_point.x(), game.mouse_point.y()); */
                 }
                 Event::MouseButtonDown { mouse_btn, .. } => {
                     game.mouse_button = mouse_btn;
@@ -46,9 +48,19 @@ impl EventManager {
                         MouseButton::X1 => "X1",
                         MouseButton::X2 => "X2",
                     };
-                    println!("MOUSE CLICKED: {}", mouse_btn_str);
+                    if seed_buttons.hovering_all_buttons && mouse_btn == MouseButton::Left {
+                        game.seed_outline_visible = !game.seed_outline_visible;
+                        println!("MOUSE CLICKED SEED: {}", mouse_btn_str);
+                    }
+                    if build_buttons.hovering_all_buttons && mouse_btn == MouseButton::Left {
+                        game.build_outline_visible = !game.build_outline_visible;
+                        println!("MOUSE CLICKED BUILD: {}", mouse_btn_str);
+                    }
+
                 }
-                Event::MouseButtonUp { .. } => game.mouse_button = MouseButton::Unknown,
+                Event::MouseButtonUp { .. } => {
+                    game.mouse_button = MouseButton::Unknown;
+                },
                 _ => {}
             }
         }
@@ -63,15 +75,28 @@ impl EventManager {
             sdl2::keyboard::Keycode::A => game.left = true,
             sdl2::keyboard::Keycode::D => game.right = true,
             sdl2::keyboard::Keycode::T => {
-                if game.placing {
-                    game.placing = false;
+                if game.build_mode {
+                    game.build_mode = false;
                 }
                 else {
-                    game.placing = true;
-                    println!("PLACING: {}", game.placing);
+                    game.build_mode = true;
+                    game.seed_mode = false;
+                    println!("BUILD MODE: {}", game.build_mode);
                     return
                 }
-                println!("PLACING: {}", game.placing);
+                println!("BUILD MODE: {}", game.build_mode);
+            }
+            sdl2::keyboard::Keycode::Y => {
+                if game.seed_mode {
+                    game.seed_mode = false;
+                }
+                else {
+                    game.seed_mode = true;
+                    game.build_mode = false;
+                    println!("SEED MODE: {}", game.seed_mode);
+                    return
+                }
+                println!("SEED MODE: {}", game.seed_mode);
             }
             _ => println!("INVALID INPUT"),
         }

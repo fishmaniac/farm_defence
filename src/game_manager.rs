@@ -1,17 +1,10 @@
 use sdl2::video::Window;
-use sdl2::render::Canvas;
+use sdl2::render::{Canvas, BlendMode};
 use sdl2::pixels::Color;
-use sdl2::video::WindowContext;
-use sdl2::video::GLProfile;
+use sdl2::video::{WindowContext, GLProfile};
 
-use crate::level_manager;
-use crate::player_manager;
-use crate::texture_manager;
-
-
-//~!~FIXME: REQUIRES MATCHING SCREEN_WIDTH & HEIGHT DEFINITION IN PLAYER_MANAGER~!~
-const SCREEN_WIDTH: i32 = 1920;
-const SCREEN_HEIGHT: i32 = 1080;
+use crate::button_manager::ButtonType;
+use crate::{level_manager, button_manager, player_manager, texture_manager, constants};
 
 pub enum Movement {
     Up,
@@ -23,11 +16,16 @@ pub enum Movement {
 
 pub struct GameManager {
     pub quit: bool,
-    pub placing: bool,
+    pub build_mode: bool,
+    pub seed_mode: bool,
+    pub seed_outline_visible: bool,
+    pub build_outline_visible: bool,
     pub up: bool,
     pub down: bool,
     pub left: bool,
     pub right: bool,
+    pub current_crop: usize,
+    pub current_build: usize,
     pub cam_x: i32,
     pub cam_y: i32,
     pub canvas: Canvas<Window>,
@@ -55,7 +53,7 @@ impl GameManager {
         gl_attr.set_multisample_samples(4);
 
         let window = video_subsystem
-            .window("Bedlam Asylum", SCREEN_WIDTH.try_into().unwrap(), SCREEN_HEIGHT.try_into().unwrap())
+            .window("Bedlam Asylum", constants::SCREEN_WIDTH.try_into().unwrap(), constants::SCREEN_HEIGHT.try_into().unwrap())
             .opengl()
             .resizable()
             .fullscreen_desktop()
@@ -66,18 +64,25 @@ impl GameManager {
         // ... and we're still using OpenGL 3.2
         assert_eq!(gl_attr.context_version(), (3, 2));
 
-        let canvas = window.into_canvas()
+        let mut canvas = window.into_canvas()
             .present_vsync()
+            .accelerated()
             .build()
             .expect("Failed to initialize canvas");
+        canvas.set_blend_mode(BlendMode::Blend);
 
         let game = GameManager {  
             quit: false,
-            placing: false,
+            seed_mode: false,
+            build_mode: false,
+            seed_outline_visible: true,
+            build_outline_visible: true,
             up: false,
             down: false,
             left: false,
             right: false,
+            current_crop: 0,
+            current_build: 0,
             cam_x: 0,
             cam_y: 0,
             canvas,
@@ -89,19 +94,27 @@ impl GameManager {
     }
 
     pub fn prepare_background(&mut self) {
-        self.canvas.set_draw_color(Color::RGBA(69, 69, 69, 255));
+        self.canvas.set_draw_color(Color::RGBA(69, 69, 69, 69));
         self.canvas.clear(); 
-    }
-
-    pub fn update_game(&mut self, player: &mut player_manager::PlayerManager, tex_man: &mut texture_manager::TextureManager<WindowContext>, level: &mut level_manager::LevelManager) {
-        player.update_player(self);
-        self.update_camera(player);
-        level.render_level(self, player, tex_man).unwrap();
-        player.render_player(self, tex_man).unwrap();
     }
 
     fn update_camera(&mut self, player: &mut player_manager::PlayerManager) {
         self.cam_x = player.x;
         self.cam_y = player.y;
+    }
+
+    pub fn update_game(&mut self, player: &mut player_manager::PlayerManager, tex_man: &mut texture_manager::TextureManager<WindowContext>, level: &mut level_manager::LevelManager, seed_buttons: &mut button_manager::ButtonManager, build_buttons: &mut button_manager::ButtonManager) {
+        player.update_player(self);
+        self.update_camera(player);
+        level.render_level(self, player, tex_man, seed_buttons, build_buttons).unwrap();
+        player.render_player(self, tex_man).unwrap();
+
+
+        if self.seed_outline_visible {
+            seed_buttons.check_for_clicked(ButtonType::Seed);
+            build_buttons.check_for_clicked(ButtonType::Build);
+        }
+        seed_buttons.render_seed_buttons(player, tex_man, self).unwrap();
+        build_buttons.render_build_buttons(player, tex_man, self).unwrap();  
     }
 }

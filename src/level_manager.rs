@@ -6,14 +6,18 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::env;
 
+use crate::constants;
 use crate::game_manager::GameManager;
 use crate::player_manager::PlayerManager;
 use crate::texture_manager::TextureManager;
+use crate::button_manager::ButtonManager;
 
-const TILE_SIZE: u32 = 32;
-const MAX_HEIGHT: u32 = 30;
-const MAX_WIDTH: u32 = 300;
-const CROP_TIME: u32 = 100;
+pub enum TileData {
+    Carrots,
+    Tomatoes,
+    ArcherTower,
+    None,
+}
 
 pub struct LevelManager {
     level_vec: Vec<Vec<LevelTile>>,
@@ -24,6 +28,7 @@ pub struct LevelTile {
     texture_path: String,
     pub rect: Rect,
     state: u32,
+    tile_data: TileData,
 }
 
 impl LevelManager {
@@ -35,9 +40,9 @@ impl LevelManager {
     }
 
     pub fn create_level(&mut self) {
-        for _ in 0..MAX_HEIGHT {
+        for _ in 0..constants::MAX_HEIGHT {
             let mut row = Vec::new();
-            for _ in 0..MAX_WIDTH {
+            for _ in 0..constants::MAX_WIDTH {
                 let rect = Rect::new(0, 0, 0, 0);
 
                 row.push(LevelTile { 
@@ -45,6 +50,7 @@ impl LevelManager {
                     texture_path: "assets/tile1.png".to_string(),
                     rect,
                     state: 0,
+                    tile_data: TileData::None,
                 });
             }
             self.level_vec.push(row);
@@ -69,6 +75,7 @@ impl LevelManager {
                             texture_path: "assets/tile1.png".to_string(),
                             rect,
                             state: 0,
+                            tile_data: TileData::None,
                         };
                         row_vec.push(tile);
                     }
@@ -78,6 +85,7 @@ impl LevelManager {
                             texture_path: "assets/tile2.png".to_string(),
                             rect,
                             state: 0,
+                            tile_data: TileData::None,
                         };
                         row_vec.push(tile);
                     }
@@ -87,6 +95,7 @@ impl LevelManager {
                             texture_path: "assets/tile3.png".to_string(),
                             rect,
                             state: 0,
+                            tile_data: TileData::None,
                         };
                         row_vec.push(tile);
                     }
@@ -96,6 +105,7 @@ impl LevelManager {
                             texture_path: "assets/field0.png".to_string(),
                             rect,
                             state: 0,
+                            tile_data: TileData::None,
                         };
                         row_vec.push(tile);
                     }
@@ -108,14 +118,14 @@ impl LevelManager {
         Ok(())
     }
 
-    pub fn render_level(&mut self, game: &mut GameManager, player: &mut PlayerManager, tex_man: &mut TextureManager<WindowContext>) -> Result<(), String> {
+    pub fn render_level(&mut self, game: &mut GameManager, player: &mut PlayerManager, tex_man: &mut TextureManager<WindowContext>, seed_buttons: &mut ButtonManager, build_buttons: &mut ButtonManager) -> Result<(), String> {
         for (row_index, row) in self.level_vec.iter_mut().enumerate() {
             for (col_index, mut temp_tile) in row.iter_mut().enumerate() {
                 temp_tile.rect = Rect::new(
-                    (TILE_SIZE as i32 * col_index as i32) - game.cam_x,
-                    (TILE_SIZE as i32 * row_index as i32) - game.cam_y,
-                    TILE_SIZE,
-                    TILE_SIZE,
+                    (constants::TILE_SIZE as i32 * col_index as i32) - game.cam_x,
+                    (constants::TILE_SIZE as i32 * row_index as i32) - game.cam_y,
+                    constants::TILE_SIZE,
+                    constants::TILE_SIZE,
                 );  
                 let texture = tex_man.load(&temp_tile.texture_path)?;
                 game.canvas.copy_ex(
@@ -137,32 +147,75 @@ impl LevelManager {
                     }
                 }
 
-                Self::update_farms(game, temp_tile);
-
+                Self::update_farms(game, temp_tile, seed_buttons, build_buttons);
             }
         }
         Ok(())
     }
 
-    fn update_farms(game: &mut GameManager, temp_tile: &mut LevelTile) {
+    fn update_farms(game: &mut GameManager, temp_tile: &mut LevelTile, seed_buttons: &mut ButtonManager,
+    build_buttons: &mut ButtonManager) {
         match temp_tile.tile_type {
             'F' | 'G' | 'H' => temp_tile.state += 1,
             _ => {},
         }
+        //THIS IF COULD LEAD TO A BUG, BUT SEEMS OKAY
+        if !seed_buttons.hovering_all_buttons && !build_buttons.hovering_all_buttons {
+            match game.current_build {
+                0 => {
+                    match game.current_crop {
+                        0 => {
+                            if game.build_mode && game.current_crop == 0 && game.mouse_button == MouseButton::Left && Rect::contains_point(&temp_tile.rect, game.mouse_point) {
+                                temp_tile.tile_type = 'F';
+                                temp_tile.texture_path = "assets/field0.png".to_string();
+                                temp_tile.tile_data = TileData::Carrots;
+                            }
 
-        if game.placing && game.mouse_button == MouseButton::Left && Rect::contains_point(&temp_tile.rect, game.mouse_point) {
-            temp_tile.tile_type = 'F';
-            temp_tile.texture_path = "assets/field0.png".to_string();
+                        }
+                        1 => {
+                            if game.build_mode && game.current_crop == 1 && game.mouse_button == MouseButton::Left && Rect::contains_point(&temp_tile.rect, game.mouse_point) {
+                                temp_tile.tile_type = 'F';
+                                temp_tile.texture_path = "assets/field0.png".to_string();
+                                temp_tile.tile_data = TileData::Tomatoes;
+                            }
+                        }
+                        _ => {}
+                    }
+
+                }
+                1 => {
+                    //this will be a ho or something
+                }
+                _ => {}
+            }
         }
-        if temp_tile.tile_type == 'F' && temp_tile.state == CROP_TIME {
+        if temp_tile.tile_type == 'F' && temp_tile.state == constants::CROP_TIME {
             temp_tile.tile_type = 'G';
             temp_tile.texture_path = "assets/field1.png".to_string();
             temp_tile.state = 0;
         }
-        if temp_tile.tile_type == 'G' && temp_tile.state == CROP_TIME {
-            temp_tile.tile_type = 'H';
-            temp_tile.texture_path = "assets/carrots0.png".to_string();
-            temp_tile.state = 0;
+        match temp_tile.tile_data {
+            TileData::Carrots => {
+                if temp_tile.tile_type == 'G' && temp_tile.state == constants::CROP_TIME {
+                    temp_tile.tile_type = 'H';
+                    temp_tile.texture_path = "assets/carrots0.png".to_string();
+                    temp_tile.state = 0;
+                }
+            }
+            TileData::Tomatoes => {
+                if temp_tile.tile_type == 'G' && temp_tile.state == constants::CROP_TIME {
+                    temp_tile.tile_type = 'H';
+                    temp_tile.texture_path = "assets/tomatoes0.png".to_string();
+                    temp_tile.state = 0;
+                }
+            }
+            _ => {
+                if temp_tile.tile_type == 'G' && temp_tile.state == constants::CROP_TIME {
+                    temp_tile.tile_type = 'H';
+                    temp_tile.texture_path = "assets/carrots0.png".to_string();
+                    temp_tile.state = 0;
+                }
+            }
         }
     }
 }
