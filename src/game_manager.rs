@@ -24,8 +24,10 @@ pub struct GameManager {
     pub down: bool,
     pub left: bool,
     pub right: bool,
-    pub current_crop: usize,
+    pub current_seed: usize,
     pub current_build: usize,
+    pub carrot_amount: i32,
+    pub tomato_amount: i32,
     pub cam_x: i32,
     pub cam_y: i32,
     pub canvas: Canvas<Window>,
@@ -39,16 +41,9 @@ impl GameManager {
         let video_subsystem = sdl_context.video().unwrap();
         let gl_attr = video_subsystem.gl_attr();
 
-        // Don't use deprecated OpenGL functions
         gl_attr.set_context_profile(GLProfile::Core);
-
-        // Set the context into debug mode
         gl_attr.set_context_flags().debug().set();
-
-        // Set the OpenGL context version (OpenGL 3.2)
         gl_attr.set_context_version(3, 2);
-
-        // Enable anti-aliasing
         gl_attr.set_multisample_buffers(1);
         gl_attr.set_multisample_samples(4);
 
@@ -60,8 +55,8 @@ impl GameManager {
             .position_centered()
             .build()
             .expect("Failed to initialize window");
+
         assert_eq!(gl_attr.context_profile(), GLProfile::Core);
-        // ... and we're still using OpenGL 3.2
         assert_eq!(gl_attr.context_version(), (3, 2));
 
         let mut canvas = window.into_canvas()
@@ -81,8 +76,10 @@ impl GameManager {
             down: false,
             left: false,
             right: false,
-            current_crop: 0,
+            current_seed: 0,
             current_build: 0,
+            carrot_amount: 0,
+            tomato_amount: 0,
             cam_x: 0,
             cam_y: 0,
             canvas,
@@ -106,14 +103,14 @@ impl GameManager {
     pub fn update_game(&mut self, player: &mut player_manager::PlayerManager, tex_man: &mut texture_manager::TextureManager<WindowContext>, level: &mut level_manager::LevelManager, seed_buttons: &mut button_manager::ButtonManager, build_buttons: &mut button_manager::ButtonManager) {
         player.update_player(self);
         self.update_camera(player);
-        level.render_level(self, player, tex_man, seed_buttons, build_buttons).unwrap();
-        player.render_player(self, tex_man).unwrap();
 
-
-        if self.seed_outline_visible {
+        if self.seed_outline_visible || self.build_outline_visible {
             seed_buttons.check_for_clicked(ButtonType::Seed);
             build_buttons.check_for_clicked(ButtonType::Build);
         }
+
+        level.render_level(self, player, tex_man, seed_buttons, build_buttons).unwrap();
+        player.render_player(self, tex_man).unwrap();
         seed_buttons.render_seed_buttons(player, tex_man, self).unwrap();
         build_buttons.render_build_buttons(player, tex_man, self).unwrap();  
     }

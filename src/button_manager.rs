@@ -46,8 +46,8 @@ impl ButtonManager {
             let temp_button = self::Button {
                 rect: Rect::new(player.x, player.y, constants::TILE_SIZE, constants::TILE_SIZE),
                 texture_path: match i {
-                    0 => constants::TEXTURE_BUTTON_CARROT.to_string(),
-                    1 => constants::TEXTURE_BUTTON_TOMATO.to_string(),
+                    constants::CURRENT_SEED_CARROT => constants::TEXTURE_BUTTON_CARROT.to_string(),
+                    constants::CURRENT_SEED_TOMATO => constants::TEXTURE_BUTTON_TOMATO.to_string(),
                     _ => constants::TEXTURE_DEFAULT.to_string(),
                 },
                 clicked: true,
@@ -61,8 +61,8 @@ impl ButtonManager {
             let temp_button = self::Button {
                 rect: Rect::new(player.x, player.y, constants::TILE_SIZE, constants::TILE_SIZE),
                 texture_path: match i {
-                    0 => constants::TEXTURE_FIELD_EMPTY.to_string(),
-                    1 => constants::TEXTURE_BUTTON_HO.to_string(),
+                    constants::CURRENT_BUILD_HO => constants::TEXTURE_BUTTON_HO.to_string(),
+                    constants::CURRENT_BUILD_FIELD => constants::TEXTURE_FIELD_EMPTY.to_string(),
                     _ => constants::TEXTURE_DEFAULT.to_string(),
                 },
                 clicked: true,
@@ -87,13 +87,11 @@ impl ButtonManager {
             match button_type {
                 ButtonType::Seed => {
                     if button.clicked && button_index != self.current_button_clicked_seed {
-                       /*  println!("REMOVING FROM HIGHLIGHTED BUTTONS || INDEX: {} || REMOVING: {}", button_index, self.current_button_clicked_seed); */
                         button.clicked = false;
                     }
                 }
                 ButtonType::Build => {
                     if button.clicked && button_index != self.current_button_clicked_build {
-/*                         println!("REMOVING FROM HIGHLIGHTED BUTTONS || INDEX: {} || REMOVING: {}", button_index, self.current_button_clicked_build); */
                         button.clicked = false;
                     }
                 }
@@ -143,9 +141,9 @@ impl ButtonManager {
                     self.current_button_clicked_seed = button_index;
                 }
                 if game.seed_outline_visible && temp_button.clicked {
-                    game.current_crop = button_index;
+                    game.current_seed = button_index;
                     Self::draw_rect_outline(game, temp_button.rect);
-/*                     println!("CURRENT CROP: {}", game.current_crop); */
+                    /*                     println!("CURRENT CROP: {}", game.current_crop); */
                 }
             }
         }
@@ -195,7 +193,6 @@ impl ButtonManager {
                 if game.build_outline_visible && temp_button.clicked {
                     game.current_build = button_index;
                     Self::draw_rect_outline(game, temp_button.rect);
-             /*        println!("CURRENT BUILD: {}", game.current_build); */
                 }
             }
         }

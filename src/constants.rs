@@ -20,7 +20,8 @@ pub const BUILD_BUTTON_AMT: u8 = 4;
 
 pub static TEXTURE_DEFAULT: &str = "assets/default-texture.png";
 
-pub static TEXTURE_FIELD_EMPTY: &str = "assets/field0.png";
+pub static TEXTURE_FIELD_EMPTY: &str = "assets/field-empty.png";
+pub static TEXTURE_FIELD_SEEDS: &str = "assets/field-seeds.png";
 pub static TEXTURE_FIELD_GROWING: &str = "assets/field1.png";
 pub static TEXTURE_FIELD_CARROT: &str = "assets/carrots0.png";
 pub static TEXTURE_FIELD_TOMATO: &str = "assets/tomatoes0.png";
@@ -32,3 +33,9 @@ pub static TEXTURE_BUTTON_HO: &str = "assets/ho-button.png";
 pub static TEXTURE_TILE_EMPTY: &str = "assets/tile1.png";
 pub static TEXTURE_TILE_WALL: &str = "assets/tile2.png";
 pub static TEXTURE_TILE_FLOOR: &str = "assets/tile3.png";
+
+pub const CURRENT_BUILD_HO: u8 = 0;
+pub const CURRENT_BUILD_FIELD: u8 = 1;
+
+pub const CURRENT_SEED_CARROT: u8 = 0;
+pub const CURRENT_SEED_TOMATO: u8 = 1;
