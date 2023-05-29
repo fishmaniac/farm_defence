@@ -1,7 +1,8 @@
 [package]
-name = "bedlam_asylum"
+name = "farm_defence"
 version = "0.1.0"
 edition = "2021"
+authors = ["Fishmaniac https://github.com/fishmaniac/farm_defence"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

@@ -283,7 +283,7 @@ impl LevelManager {
                                 }
                             }
                             build if build == constants::CURRENT_BUILD_GOBLIN_TEST as usize => {
-                                enemies.place_enemy(temp_tile, player, row_index, col_index, row_max, col_max);
+                                enemies.place_enemy(temp_tile, player, row_index, col_index, row_max, col_max, 0);
                                 temp_tile.tile_type = constants::TILE_TYPE_GOBLIN_TEST;
                                 temp_tile.tile_data = TileData::Goblin;
                             }
