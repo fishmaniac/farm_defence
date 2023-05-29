@@ -110,7 +110,7 @@ impl GameManager {
         }
 
         level.render_level(self, player, tex_man, seed_buttons, build_buttons, towers).unwrap();
-        println!("|| GAME || CAM_X: {}, CAM_Y: {} || PLAYER || X: {}, Y: {}, rectX: {}, rectY: {}", self.cam_x, self.cam_y, player.x, player.y, player.rect.x(), player.rect.y());
+        /* println!("|| GAME || CAM_X: {}, CAM_Y: {} || PLAYER || X: {}, Y: {}, rectX: {}, rectY: {}", self.cam_x, self.cam_y, player.x, player.y, player.rect.x(), player.rect.y()); */
        /*  towers.render_towers(self, tex_man, player).unwrap(); */
         player.render_player(self, tex_man).unwrap();
         seed_buttons.render_seed_buttons(player, tex_man, self).unwrap();

@@ -16,7 +16,8 @@ use crate::tower_manager;
 pub enum TileData {
     Carrots,
     Tomatoes,
-    ArcherTower,
+    ArcherTowerBottom,
+    ArcherTowerTop,
     None,
 }
 
@@ -139,58 +140,94 @@ impl LevelManager {
     }
 
     pub fn render_level(&mut self, game: &mut GameManager, player: &mut PlayerManager, tex_man: &mut TextureManager<WindowContext>, seed_buttons: &mut ButtonManager, build_buttons: &mut ButtonManager, towers: &mut tower_manager::TowerManager) -> Result<(), String> {
-        for (row_index, row) in self.level_vec.iter_mut().enumerate() {
-            for (col_index, mut temp_tile) in row.iter_mut().enumerate() {
-                temp_tile.rect = Rect::new(
-                    (constants::TILE_SIZE as i32 * col_index as i32) - game.cam_x,
-                    (constants::TILE_SIZE as i32 * row_index as i32) - game.cam_y,
-                    constants::TILE_SIZE,
-                    constants::TILE_SIZE,
-                );  
-                let texture = tex_man.load(&temp_tile.texture_path)?;
-                game.canvas.copy_ex(
-                    &texture, // Texture object
-                    None,      // source rect
-                    temp_tile.rect,     // destination rect
-                    0.0,      // angle (degrees)
-                    None,   // center
-                    false,    // flip horizontal
-                    false,     // flip vertical
-                )?;
+        // for _ in 0..constants::MAX_HEIGHT {
+        //     let mut row = Vec::new();
+        //     for _ in 0..constants::MAX_WIDTH {
 
-                if Rect::has_intersection(&player.rect, temp_tile.rect){
-                    if temp_tile.tile_type == constants::TILE_TYPE_WALL {
-                        player.colliding = true;
+        for col_index in 0..self.level_vec.len() {
+            for row_index in 0..self.level_vec[col_index].len() {
+                let mut temp_tile = &mut self.level_vec[col_index][row_index];
+
+/*             for (col_index, mut temp_tile) in row.iter_mut().enumerate() { */
+                /*                 for (tower_index, mut temp_tower) in towers.tower_vec.iter_mut().enumerate()  */{
+                    temp_tile.rect = Rect::new(
+                        (constants::TILE_SIZE as i32 * col_index as i32) - game.cam_x,
+                        (constants::TILE_SIZE as i32 * row_index as i32) - game.cam_y,
+                        constants::TILE_SIZE,
+                        constants::TILE_SIZE,
+                    );  
+                    let texture = tex_man.load(&temp_tile.texture_path)?;
+                    game.canvas.copy_ex(
+                        &texture, // Texture object
+                        None,      // source rect
+                        temp_tile.rect,     // destination rect
+                        0.0,      // angle (degrees)
+                        None,   // center
+                        false,    // flip horizontal
+                        false,     // flip vertical
+                    )?;
+
+                    if Rect::has_intersection(&player.rect, temp_tile.rect){
+                        if temp_tile.tile_type == constants::TILE_TYPE_WALL {
+                            player.colliding = true;
+                        }
+                        else {
+                            player.colliding = false;
+                        }
                     }
-                    else {
-                        player.colliding = false;
+                    Self::update_buildings(game, temp_tile, seed_buttons, build_buttons, towers, player, row_index, col_index);
+                    /*                 towers.render_towers(game, tex_man, player).unwrap(); */
+
+                    match temp_tile.tile_data {
+                        TileData::ArcherTowerBottom => {
+                            let rect = Rect::new(
+                                (constants::TILE_SIZE as i32 * col_index as i32) - game.cam_x,
+                                (constants::TILE_SIZE as i32 * row_index as i32) - game.cam_y,
+                                constants::TILE_SIZE,
+                                constants::TILE_SIZE,
+                            );  
+                            let texture = tex_man.load(constants::TEXTURE_TOWER_ARCHER_BOTTOM)?;
+                            game.canvas.copy_ex(
+                                &texture, // Texture object
+                                None,      // source rect
+                                rect,     // destination rect
+                                0.0,      // angle (degrees)
+                                None,   // center
+                                false,    // flip horizontal
+                                false,     // flip vertical
+                            )?;
+                            // PREVENT FROM PLACING BELOW TOWER
+                            self.level_vec[col_index][row_index + 1].prev_type = constants::TILE_TYPE_ARCHER_BOTTOM;
+                            //PREVENT FROM PLACING ON TOP OF TOWER
+                            self.level_vec[col_index][row_index - 1].prev_type = constants::TILE_TYPE_ARCHER_BOTTOM;
+                            //PREVENT FORM PLACING ON THIS TOWER
+                            self.level_vec[col_index][row_index].prev_type = constants::TILE_TYPE_ARCHER_BOTTOM;
+                            //CREATE TOP OF TOWER
+                            self.level_vec[col_index][row_index - 1].tile_type = constants::TILE_TYPE_ARCHER_TOP;
+                            self.level_vec[col_index][row_index - 1].tile_data = TileData::ArcherTowerTop;     
+                        }
+                        TileData::ArcherTowerTop => {
+                            println!("archer tower top");
+                            let rect = Rect::new(
+                                (constants::TILE_SIZE as i32 * col_index as i32) - game.cam_x,
+                                (constants::TILE_SIZE as i32 * row_index as i32) - game.cam_y,
+                                constants::TILE_SIZE,
+                                constants::TILE_SIZE,
+                            );
+                            let texture = tex_man.load(constants::TEXTURE_TOWER_ARCHER_FRONT)?;
+                            game.canvas.copy_ex(
+                                &texture, // Texture object
+                                None,      // source rect
+                                rect,     // destination rect
+                                0.0,      // angle (degrees)
+                                None,   // center
+                                false,    // flip horizontal
+                                false,     // flip vertical
+                            )?;
+                        }
+                        _ => {},
                     }
                 }
-                Self::update_buildings(game, temp_tile, seed_buttons, build_buttons, towers, player, row_index, col_index);
-                // if temp_tile.tile_data == TileData::ArcherTower {
-                //     
-                match temp_tile.tile_data {
-                    self.level_vec.get(row_index.wrapping_sub(1));
-                    TileData::ArcherTower => {
-                        let rect = Rect::new(
-                            (constants::TILE_SIZE as i32 * col_index as i32) - game.cam_x,
-                            (constants::TILE_SIZE as i32 * row_index as i32) - game.cam_y,
-                            constants::TILE_SIZE,
-                            constants::TILE_SIZE,
-                        );  
-                        let texture = tex_man.load(constants::TEXTURE_TOWER_ARCHER_BOTTOM)?;
-                        game.canvas.copy_ex(
-                            &texture, // Texture object
-                            None,      // source rect
-                            rect,     // destination rect
-                            0.0,      // angle (degrees)
-                            None,   // center
-                            false,    // flip horizontal
-                            false,     // flip vertical
-                        )?;
-                    }
-                    _ => {},
-                    }
             }
         }
         Ok(())
@@ -229,11 +266,12 @@ impl LevelManager {
                     }
                     //BUILD MODE ARCHER TOWER
                     build if build == constants::CURRENT_BUILD_ARCHER_TOWER as usize => {
-                        towers.place_tower(&temp_tile, player, row_index, col_index);
+                        if temp_tile.prev_type == constants::TILE_TYPE_GRASS {
+                            towers.place_tower(&temp_tile, player, row_index, col_index);
 
-                        temp_tile.tile_type = constants::TILE_TYPE_ARCHER_BOTTOM;
-                        /*                         temp_tile.texture_path = constants::TEXTURE_TOWER_ARCHER_BOTTOM.to_string();  */
-                        temp_tile.tile_data = TileData::ArcherTower;
+                            temp_tile.tile_type = constants::TILE_TYPE_ARCHER_BOTTOM;
+                            temp_tile.tile_data = TileData::ArcherTowerBottom;
+                        }
                     }
                     _ => {}
                 }
