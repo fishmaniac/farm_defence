@@ -13,6 +13,7 @@ pub mod player_manager;
 pub mod level_manager;
 pub mod button_manager;
 pub mod tower_manager;
+pub mod enemy_manager;
 
 
 fn game_loop (
@@ -31,6 +32,11 @@ fn game_loop (
 
         game.update_game(player, tex_man, level, seed_buttons, build_buttons, towers);
         game.canvas.present();
+
+        if towers.tower_vec.len() > 0 {
+            println!("|| GAME || CAM_X: {}, CAM_Y: {} || PLAYER || X: {}, Y: {}, rectX: {}, rectY: {} || TOWER VEC POS || COL: {} ROW: {}", game.cam_x, game.cam_y, player.x, player.y, player.rect.x(), player.rect.y(), towers.tower_vec[0].col_index, towers.tower_vec[0].row_index);
+        }
+
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
 }
@@ -44,7 +50,7 @@ fn main() -> Result<(), String> {
     let mut player = player_manager::PlayerManager::new();
     let mut level = level_manager::LevelManager::new();
     let mut towers = tower_manager::TowerManager::new();
-/*     let mut towers = level_manager::TowerList::new(); */
+    /*     let mut towers = level_manager::TowerList::new(); */
     let mut seed_buttons = button_manager::ButtonManager::new(constants::SEED_BUTTON_AMT, ButtonType::Seed, &player);
     let mut build_buttons = button_manager::ButtonManager::new(constants::BUILD_BUTTON_AMT, ButtonType::Build, &player);
 

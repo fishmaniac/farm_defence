@@ -18,6 +18,7 @@ pub enum TileData {
     Tomatoes,
     ArcherTowerBottom,
     ArcherTowerTop,
+    Goblin,
     None,
 }
 

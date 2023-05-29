@@ -1,5 +1,3 @@
-use sdl2::video::WindowContext;
-
 use crate::constants;
 use crate::level_manager;
 use crate::level_manager::TileData;
