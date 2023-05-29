@@ -25,12 +25,13 @@ fn game_loop (
     seed_buttons: &mut button_manager::ButtonManager,
     build_buttons: &mut button_manager::ButtonManager,
     towers: &mut tower_manager::TowerManager,
+    enemies: &mut enemy_manager::EnemyManager,
 ) {
     while !game.quit {
         game.prepare_background();
         events.do_event(game, seed_buttons, build_buttons);
 
-        game.update_game(player, tex_man, level, seed_buttons, build_buttons, towers);
+        game.update_game(player, tex_man, level, seed_buttons, build_buttons, towers, enemies);
         game.canvas.present();
 
         if towers.tower_vec.len() > 0 {
@@ -50,7 +51,8 @@ fn main() -> Result<(), String> {
     let mut player = player_manager::PlayerManager::new();
     let mut level = level_manager::LevelManager::new();
     let mut towers = tower_manager::TowerManager::new();
-    /*     let mut towers = level_manager::TowerList::new(); */
+    let mut enemies = enemy_manager::EnemyManager::new();
+
     let mut seed_buttons = button_manager::ButtonManager::new(constants::SEED_BUTTON_AMT, ButtonType::Seed, &player);
     let mut build_buttons = button_manager::ButtonManager::new(constants::BUILD_BUTTON_AMT, ButtonType::Build, &player);
 
@@ -66,7 +68,7 @@ fn main() -> Result<(), String> {
     font.set_style(sdl2::ttf::FontStyle::BOLD);
 
     //Add game loop error handling
-    game_loop(&mut game, &mut events, &mut tex_man, &mut player, &mut level, &mut seed_buttons, &mut build_buttons, &mut towers);
+    game_loop(&mut game, &mut events, &mut tex_man, &mut player, &mut level, &mut seed_buttons, &mut build_buttons, &mut towers, &mut enemies);
 
     Ok(())
 }

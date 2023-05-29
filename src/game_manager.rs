@@ -4,7 +4,7 @@ use sdl2::pixels::Color;
 use sdl2::video::{WindowContext, GLProfile};
 
 use crate::button_manager::ButtonType;
-use crate::{level_manager, button_manager, player_manager, texture_manager, constants, tower_manager};
+use crate::{level_manager, button_manager, player_manager, texture_manager, constants, tower_manager, enemy_manager};
 
 pub enum Movement {
     Up,
@@ -100,7 +100,7 @@ impl GameManager {
         self.cam_y = player.y;
     }
 
-    pub fn update_game(&mut self, player: &mut player_manager::PlayerManager, tex_man: &mut texture_manager::TextureManager<WindowContext>, level: &mut level_manager::LevelManager, seed_buttons: &mut button_manager::ButtonManager, build_buttons: &mut button_manager::ButtonManager, towers: &mut tower_manager::TowerManager) {
+    pub fn update_game(&mut self, player: &mut player_manager::PlayerManager, tex_man: &mut texture_manager::TextureManager<WindowContext>, level: &mut level_manager::LevelManager, seed_buttons: &mut button_manager::ButtonManager, build_buttons: &mut button_manager::ButtonManager, towers: &mut tower_manager::TowerManager, enemies: &mut enemy_manager::EnemyManager) {
         player.update_player(self);
         self.update_camera(player);
 
@@ -109,10 +109,11 @@ impl GameManager {
             build_buttons.check_for_clicked(ButtonType::Build);
         }
 
-        level.render_level(self, player, tex_man, seed_buttons, build_buttons, towers).unwrap();
+        level.render_level(self, player, tex_man, seed_buttons, build_buttons, towers, enemies).unwrap();
         /* println!("|| GAME || CAM_X: {}, CAM_Y: {} || PLAYER || X: {}, Y: {}, rectX: {}, rectY: {}", self.cam_x, self.cam_y, player.x, player.y, player.rect.x(), player.rect.y()); */
        /*  towers.render_towers(self, tex_man, player).unwrap(); */
         player.render_player(self, tex_man).unwrap();
+       /*  enemies.enemy_pathfinding(player, level); */
         seed_buttons.render_seed_buttons(player, tex_man, self).unwrap();
         build_buttons.render_build_buttons(player, tex_man, self).unwrap();  
     }

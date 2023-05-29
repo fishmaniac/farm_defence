@@ -41,8 +41,11 @@ pub static TEXTURE_TOWER_ARCHER_LEFT: &str = "assets/archer-tower-left-top.png";
 pub static TEXTURE_TOWER_ARCHER_RIGHT: &str = "assets/archer-tower-right-top.png";
 pub static TEXTURE_TOWER_ARCHER_BOTTOM: &str = "assets/archer-tower-bottom.png";
 
+pub static TEXTURE_GOBLIN_ENEMY_FRONT: &str = "assets/goblin-enemy-front.png";
+
 pub const CURRENT_BUILD_HO: u8 = 0;
 pub const CURRENT_BUILD_ARCHER_TOWER: u8 = 1;
+pub const CURRENT_BUILD_GOBLIN_TEST: u8 = 2;
 
 pub const CURRENT_SEED_CARROT: u8 = 0;
 pub const CURRENT_SEED_TOMATO: u8 = 1;
@@ -58,3 +61,4 @@ pub const TILE_TYPE_FIELD_HARVESTABLE: char = 'H';
 pub const TILE_TYPE_ARCHER_TOP: char = 'A';
 pub const TILE_TYPE_ARCHER_BOTTOM: char = 'a';
 
+pub const TILE_TYPE_GOBLIN_TEST: char = 'G';

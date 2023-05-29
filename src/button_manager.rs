@@ -63,6 +63,7 @@ impl ButtonManager {
                 texture_path: match i {
                     constants::CURRENT_BUILD_HO => constants::TEXTURE_BUTTON_HO.to_string(),
                     constants::CURRENT_BUILD_ARCHER_TOWER => constants::TEXTURE_BUTTON_ARCHER.to_string(),
+                    constants::CURRENT_BUILD_GOBLIN_TEST => constants::TEXTURE_GOBLIN_ENEMY_FRONT.to_string(),
                     _ => constants::TEXTURE_DEFAULT.to_string(),
                 },
                 clicked: true,
