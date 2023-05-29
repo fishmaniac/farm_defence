@@ -11,7 +11,7 @@ pub const OUTPUT_HEIGHT: u32 = IMAGE_HEIGHT * IMAGE_SCALING;
 pub const PLAYER_SPEED: i32 = 16;
 
 pub const TILE_SIZE: u32 = 32;
-pub const MAX_HEIGHT: u32 = 30;
+pub const MAX_HEIGHT: u32 = 150;
 pub const MAX_WIDTH: u32 = 300;
 pub const CROP_TIME: u32 = 100;
 

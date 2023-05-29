@@ -13,6 +13,7 @@ use crate::player_manager;
 pub struct Enemy {
     pub visited: Vec<Vec<bool>>,
     pub queue: VecDeque<(usize, usize)>,
+    pub neighbors: Vec<(usize, usize)>,
     pub row_index: usize,
     pub col_index: usize,
     pub attack_speed: i8,
@@ -42,6 +43,7 @@ impl EnemyManager {
                 let mut enemy_tile = self::Enemy {
                     visited: vec![vec![false; col_max]; row_max],
                     queue: VecDeque::new(),
+                    neighbors: Vec::new(),
                     attack_speed: 5,
                     attack_damage: 5,
                     row_index,
@@ -59,6 +61,7 @@ impl EnemyManager {
                 let mut enemy_tile = self::Enemy {
                     visited: vec![vec![false; col_max]; row_max],
                     queue: VecDeque::new(),
+                    neighbors: Vec::new(),
                     attack_speed: 5,
                     attack_damage: 5,
                     row_index,
@@ -78,32 +81,30 @@ impl EnemyManager {
     }
 
     pub fn bfs(&mut self, graph: &mut [Vec<LevelTile>], current: (usize, usize), target: (usize, usize), i: usize) -> bool {
-        // self.enemy_vec[i].visited = vec![vec![false; graph[0].len()]; graph.len()];
-        // self.enemy_vec[i].queue = VecDeque::new();
-
-/*         self.enemy_vec[i].visited[current.0][current.1] = true; */
-        // graph[current.0][current.1].tile_data = TileData::None;
-        // graph[current.0][current.1].texture_path = constants::TEXTURE_TILE_EMPTY.to_string();
-
-/*         self.enemy_vec[i].queue.push_back(current); */
 
         if let Some(current) = self.enemy_vec[i].queue.pop_front() {
-            graph[current.0][current.1].tile_data = TileData::Goblin;
-            println!("||MOVING GOBLIN|| X: {} Y: {}", current.0, current.1);
             if current == target {
                 println!("Target node {:?} found!", target);
+                self.enemy_vec[i].row_index = current.0;
+                self.enemy_vec[i].col_index = current.1;
+                graph[self.enemy_vec[i].row_index][self.enemy_vec[i].col_index].tile_data = TileData::Goblin;
                 return true;  
             }
 
-            let neighbors = Self::get_neighbors(&graph, current.0, current.1);
+            self.enemy_vec[i].row_index = current.0;
+            self.enemy_vec[i].col_index = current.1;
 
-            for neighbor_coords in neighbors {
-                if !self.enemy_vec[i].visited[neighbor_coords.0][neighbor_coords.1] {
-                    self.enemy_vec[i].visited[neighbor_coords.0][neighbor_coords.1] = true;
-                    self.enemy_vec[i].queue.push_back(neighbor_coords);
+            self.enemy_vec[i].neighbors = Self::get_neighbors(&graph, current.0, current.1);
+
+            let enemy = &mut self.enemy_vec[i];
+            for &neighbor_coords in &enemy.neighbors {
+                if !enemy.visited[neighbor_coords.0][neighbor_coords.1] {
+                    enemy.visited[neighbor_coords.0][neighbor_coords.1] = true;
+                    enemy.queue.push_back(neighbor_coords);
                 }
             }
-            graph[current.0][current.1].tile_data = TileData::None;
+
+            graph[current.0][current.1].tile_data = TileData::Goblin;
         }
 
         false
@@ -114,22 +115,34 @@ impl EnemyManager {
         let num_rows = graph.len();
         let num_cols = graph[0].len();
 
+        // Define a helper function to check if a tile is walkable
+
+        fn is_walkable(graph: &[Vec<LevelTile>], row: usize, col: usize) -> bool {
+            match graph[row][col].tile_data {
+                TileData::None => graph[row][col].tile_type == constants::TILE_TYPE_GRASS,
+                _ => false,
+            }
+
+        }
+
         // Upper neighbor
-        if row > 0 {
+        if row > 0 && is_walkable(graph, row - 1, col) {
             neighbors.push((row - 1, col));
         }
         // Lower neighbor
-        if row < num_rows - 1 {
+        if row < num_rows - 1 && is_walkable(graph, row + 1, col) {
             neighbors.push((row + 1, col));
         }
         // Left neighbor
-        if col > 0 {
+        if col > 0 && is_walkable(graph, row, col - 1) {
             neighbors.push((row, col - 1));
         }
         // Right neighbor
-        if col < num_cols - 1 {
+        if col < num_cols - 1 && is_walkable(graph, row, col + 1) {
             neighbors.push((row, col + 1));
         }
+
         neighbors
     }
 }
+
