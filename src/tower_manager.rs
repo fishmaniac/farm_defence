@@ -1,3 +1,5 @@
+use sdl2::video::WindowContext;
+
 use crate::constants;
 use crate::level_manager;
 use crate::level_manager::TileData;
@@ -54,21 +56,28 @@ impl TowerManager {
             }
         }
     }
-//     
-    // pub fn render_towers(&mut self, game: &mut game_manager::GameManager, tex_man: &mut texture_manager::TextureManager<WindowContext>, player: &mut player_manager::PlayerManager) -> Result<(), String> {
-    //     for (tower_index, tower) in self.tower_vec.iter_mut().enumerate() {
-    //         tower.rect = sdl2::rect::Rect::new(tower.rect.x(), tower.rect.y(), tower.rect.width(), tower.rect.height());
-    //         let texture = tex_man.load(&tower.texture_path)?;
-    //         game.canvas.copy_ex(
-    //             &texture, // Texture object
-    //             None,      // source rect
-    //             tower.rect,     // destination rect
-    //             0.0,      // angle (degrees)
-    //             None,   // center
-    //             false,    // flip horizontal
-    //             false,     // flip vertical
-    //         )?;
-    //         /* println!("||TOWER RECT|| X: {}, Y{}", tower.rect.x(), tower.rect.y()) */
+    //     
+    // pub fn render_towers(&mut self, level: &mut level_manager::LevelManager, game: &mut game_manager::GameManager, tex_man: &mut texture_manager::TextureManager<WindowContext>, player: &mut player_manager::PlayerManager) -> Result<(), String> {
+    //     for (col_index, col) in level.level_vec.iter_mut().enumerate() {
+    //         for (col_index, row) in col.iter_mut().enumerate()  {
+    //
+    //             for (tower_index, tower) in self.tower_vec.iter_mut().enumerate() {
+    //                 tower.rect = sdl2::rect::Rect::new(tower.rect.x(), tower.rect.y(), tower.rect.width(), tower.rect.height());
+    //                 let texture = tex_man.load(&tower.texture_path)?;
+    //                 game.canvas.copy_ex(
+    //                     &texture, // Texture object
+    //                     None,      // source rect
+    //                     tower.rect,     // destination rect
+    //                     0.0,      // angle (degrees)
+    //                     None,   // center
+    //                     false,    // flip horizontal
+    //                     false,     // flip vertical
+    //                 )?;
+    //                 level.level_vec[0][3].tile_data = TileData::ArcherTowerBottom;
+    //                 /* println!("||TOWER RECT|| X: {}, Y{}", tower.rect.x(), tower.rect.y()) */
+    //             }
+    //
+    //         }
     //     }
     //     Ok(())
     // }

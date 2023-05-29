@@ -68,25 +68,25 @@ impl EnemyManager {
         }
     }
 
-    pub fn bfs(&mut self, graph: &mut [Vec<LevelTile>], start: (usize, usize), target: (usize, usize), i: usize) -> bool {
+    pub fn bfs(&mut self, graph: &mut [Vec<LevelTile>], current: (usize, usize), target: (usize, usize), i: usize) -> bool {
         self.enemy_vec[i].visited = vec![vec![false; graph[0].len()]; graph.len()];
         self.enemy_vec[i].queue = VecDeque::new();
 
-        self.enemy_vec[i].visited[start.0][start.1] = true;
-        // graph[start.0][start.1].tile_data = TileData::None;
-        // graph[start.0][start.1].texture_path = constants::TEXTURE_TILE_EMPTY.to_string();
+        self.enemy_vec[i].visited[current.0][current.1] = true;
+        // graph[current.0][current.1].tile_data = TileData::None;
+        // graph[current.0][current.1].texture_path = constants::TEXTURE_TILE_EMPTY.to_string();
 
-        self.enemy_vec[i].queue.push_back(start);
+        self.enemy_vec[i].queue.push_back(current);
 
-        while let Some(node) = self.enemy_vec[i].queue.pop_front() {
-            graph[node.0][node.1].tile_data = TileData::Goblin;
-            println!("||MOVING GOBLIN|| X: {} Y: {}", node.0, node.1);
-            if node == target {
+        while let Some(current) = self.enemy_vec[i].queue.pop_front() {
+            graph[current.0][current.1].tile_data = TileData::Goblin;
+            println!("||MOVING GOBLIN|| X: {} Y: {}", current.0, current.1);
+            if current == target {
                 println!("Target node {:?} found!", target);
-                return true // Terminate the search if target is found
+                return true;  
             }
 
-            let neighbors = Self::get_neighbors(&graph, node.0, node.1);
+            let neighbors = Self::get_neighbors(&graph, current.0, current.1);
 
             for neighbor_coords in neighbors {
                 if !self.enemy_vec[i].visited[neighbor_coords.0][neighbor_coords.1] {
@@ -94,10 +94,10 @@ impl EnemyManager {
                     self.enemy_vec[i].queue.push_back(neighbor_coords);
                 }
             }
-            graph[node.0][node.1].tile_data = TileData::None;
-
+            graph[current.0][current.1].tile_data = TileData::None;
         }
-        return false
+
+        false
     }
 
     fn get_neighbors(graph: &[Vec<LevelTile>], row: usize, col: usize) -> Vec<(usize, usize)> {
@@ -105,29 +105,22 @@ impl EnemyManager {
         let num_rows = graph.len();
         let num_cols = graph[0].len();
 
-        // Add neighboring coordinates based on your adjacency rules
-        // Example: Add coordinates of all four adjacent tiles
-
         // Upper neighbor
         if row > 0 {
             neighbors.push((row - 1, col));
         }
-
         // Lower neighbor
         if row < num_rows - 1 {
             neighbors.push((row + 1, col));
         }
-
         // Left neighbor
         if col > 0 {
             neighbors.push((row, col - 1));
         }
-
         // Right neighbor
         if col < num_cols - 1 {
             neighbors.push((row, col + 1));
         }
-
         neighbors
     }
 }
