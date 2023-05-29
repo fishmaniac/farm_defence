@@ -108,12 +108,15 @@ impl GameManager {
             seed_buttons.check_for_clicked(ButtonType::Seed);
             build_buttons.check_for_clicked(ButtonType::Build);
         }
+        let col_max = constants::MAX_WIDTH as usize;
+        let row_max = constants::MAX_HEIGHT as usize;
+        level.update_buildings(self, towers, player, enemies, row_max, col_max);
 
         level.render_level(self, player, tex_man, seed_buttons, build_buttons, towers, enemies).unwrap();
         /* println!("|| GAME || CAM_X: {}, CAM_Y: {} || PLAYER || X: {}, Y: {}, rectX: {}, rectY: {}", self.cam_x, self.cam_y, player.x, player.y, player.rect.x(), player.rect.y()); */
-/*         towers.render_towers(level, self, tex_man, player).unwrap();  */
+        /*         towers.render_towers(level, self, tex_man, player).unwrap();  */
         player.render_player(self, tex_man).unwrap();
-       /*  enemies.enemy_pathfinding(player, level); */
+        /*  enemies.enemy_pathfinding(player, level); */
         seed_buttons.render_seed_buttons(player, tex_man, self).unwrap();
         build_buttons.render_build_buttons(player, tex_man, self).unwrap();  
     }
