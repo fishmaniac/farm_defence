@@ -18,7 +18,12 @@ impl EventManager {
         event
     }
 
-    pub fn do_event(&mut self, game: &mut GameManager, seed_buttons: &mut ButtonManager, build_buttons: &mut ButtonManager) {
+    pub fn do_event(
+        &mut self, 
+        game: &mut GameManager, 
+        seed_buttons: &mut ButtonManager, 
+        build_buttons: &mut ButtonManager
+    ) {
         for event in self.event_pump.poll_iter() {
             match event {
                 Event::Quit {..} => {
@@ -65,7 +70,10 @@ impl EventManager {
         }
     }
 
-    fn do_key_down(&mut self, game: &mut GameManager, keycode: sdl2::keyboard::Keycode) {
+    fn do_key_down(&mut self, 
+        game: &mut GameManager, 
+        keycode: sdl2::keyboard::Keycode
+    ) {
         match keycode {
             sdl2::keyboard::Keycode::Escape => game.quit = true,
             sdl2::keyboard::Keycode::Q => game.quit = true,
@@ -101,7 +109,10 @@ impl EventManager {
         }
     }
 
-    fn do_key_up(&mut self, game : &mut GameManager, keycode: sdl2::keyboard::Keycode) {
+    fn do_key_up(&mut self, 
+        game: &mut GameManager, 
+        keycode: sdl2::keyboard::Keycode
+    ) {
         match keycode {
             sdl2::keyboard::Keycode::W => game.up = false,
             sdl2::keyboard::Keycode::S => game.down = false,

@@ -114,8 +114,8 @@ impl ButtonManager {
 
             for (button_index, mut temp_button) in self.button_vec.iter_mut().enumerate() {
                 temp_button.rect = Rect::new(
-                    player.rect.x() + constants::TILE_SIZE as i32 * button_index as i32 - constants::SCREEN_WIDTH / 2 + constants::TILE_SIZE as i32,
-                    constants::TILE_SIZE as i32 + player.rect.y() - constants::SCREEN_HEIGHT / 2 + constants::TILE_SIZE as i32,
+                    player.rect.x() + constants::TILE_SIZE as i32 * button_index as i32 - constants::SCREEN_WIDTH as i32 / 2 + constants::TILE_SIZE as i32,
+                    constants::TILE_SIZE as i32 + player.rect.y() - constants::SCREEN_HEIGHT as i32 / 2 + constants::TILE_SIZE as i32,
                     constants::TILE_SIZE,
                     constants::TILE_SIZE,
                 );
@@ -163,8 +163,8 @@ impl ButtonManager {
 
             for (button_index, mut temp_button) in self.button_vec.iter_mut().enumerate() {
                 temp_button.rect = Rect::new(
-                    player.rect.x() + constants::TILE_SIZE as i32 * button_index as i32 - constants::SCREEN_WIDTH / 2 + constants::TILE_SIZE as i32,
-                    constants::TILE_SIZE as i32 + player.rect.y() - constants::SCREEN_HEIGHT / 2 + constants::TILE_SIZE as i32,
+                    player.rect.x() + constants::TILE_SIZE as i32 * button_index as i32 - constants::SCREEN_WIDTH as i32 / 2 + constants::TILE_SIZE as i32,
+                    constants::TILE_SIZE as i32 + player.rect.y() - constants::SCREEN_HEIGHT as i32 / 2 + constants::TILE_SIZE as i32,
                     constants::TILE_SIZE,
                     constants::TILE_SIZE,
                 );
@@ -186,7 +186,7 @@ impl ButtonManager {
                     temp_button.hovering_button = false;
                 }
 
-                if temp_button.hovering_button /* && self.hovering_all_buttons */ && game.mouse_button == MouseButton::Left {
+                if temp_button.hovering_button && game.mouse_button == MouseButton::Left {
                     temp_button.clicked = true;
                     self.current_button_clicked_build = button_index;
                 }

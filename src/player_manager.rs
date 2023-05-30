@@ -49,7 +49,9 @@ impl PlayerManager {
         player
     }
 
-    pub fn update_player(&mut self, game: &mut game_manager::GameManager) {
+    pub fn update_player(&mut self, 
+        game: &mut game_manager::GameManager
+    ) {
         let original_x: i32 = self.x;
         let original_y: i32 = self.y;
         let mut new_x: i32 = self.x;
@@ -57,7 +59,7 @@ impl PlayerManager {
 
         if !self.colliding {
             if game.up {
-                new_y -= constants::PLAYER_SPEED;
+                new_y -= constants::PLAYER_SPEED as i32;
                 if game.left && !game.right {
                     self.direction = Direction::UpLeft;
                 }
@@ -69,7 +71,7 @@ impl PlayerManager {
                 }
             } 
             if game.down {
-                new_y += constants::PLAYER_SPEED;
+                new_y += constants::PLAYER_SPEED as i32;
                 if game.left && !game.right {
                     self.direction = Direction::DownLeft;
                 }
@@ -81,7 +83,7 @@ impl PlayerManager {
                 }
             }
             if game.left {
-                new_x -= constants::PLAYER_SPEED;
+                new_x -= constants::PLAYER_SPEED as i32;
                 if game.up && !game.down {
                     self.direction = Direction::UpLeft;
                 }
@@ -93,7 +95,7 @@ impl PlayerManager {
                 }
             }
             if game.right {
-                new_x += constants::PLAYER_SPEED;
+                new_x += constants::PLAYER_SPEED as i32;
                 if game.up && !game.down {
                     self.direction = Direction::UpRight;
                 }
@@ -109,46 +111,46 @@ impl PlayerManager {
         if self.colliding {
             match self.direction {
                 Direction::Up => {
-                    self.y += original_y - new_y + constants::PLAYER_SPEED;
+                    self.y += original_y - new_y + constants::PLAYER_SPEED as i32;
                     self.colliding = false;
                     println!("Up");
                 }
                 Direction::Down => {
-                    self.y += original_y - new_y - constants::PLAYER_SPEED;
+                    self.y += original_y - new_y - constants::PLAYER_SPEED as i32;
                     self.colliding = false;
                     println!("Down");
                 }
                 Direction::Left => {
-                    self.x += original_x - new_x + constants::PLAYER_SPEED;
+                    self.x += original_x - new_x + constants::PLAYER_SPEED as i32;
                     self.colliding = false;
                     println!("Left");
                 }
                 Direction::Right => {
-                    self.x += original_x - new_x - constants::PLAYER_SPEED;
+                    self.x += original_x - new_x - constants::PLAYER_SPEED as i32;
                     self.colliding = false;
                     println!("Right");
                 }
                 Direction::UpLeft => {
-                    self.y += original_y - new_y + constants::PLAYER_SPEED;
-                    self.x += original_y - new_y + constants::PLAYER_SPEED;
+                    self.y += original_y - new_y + constants::PLAYER_SPEED as i32;
+                    self.x += original_y - new_y + constants::PLAYER_SPEED as i32;
                     self.colliding = false;
                     println!("UpLeft");
                 }
                 Direction::UpRight => {
-                    self.y += original_y - new_y + constants::PLAYER_SPEED;
-                    self.x += original_y - new_y - constants::PLAYER_SPEED;
+                    self.y += original_y - new_y + constants::PLAYER_SPEED as i32;
+                    self.x += original_y - new_y - constants::PLAYER_SPEED as i32;
                     self.colliding = false;
                     println!("UpRight");
                 }
                 Direction::DownLeft => {
-                    self.y += original_y - new_y - constants::PLAYER_SPEED;
-                    self.x += original_x - new_x + constants::PLAYER_SPEED;
+                    self.y += original_y - new_y - constants::PLAYER_SPEED as i32;
+                    self.x += original_x - new_x + constants::PLAYER_SPEED as i32;
                     self.colliding = false;
                     println!("DownLeft");
                 }
                 Direction::DownRight => {
-                    self.y += original_y - new_y - constants::PLAYER_SPEED;
-                    self.x += original_x - new_x - constants::PLAYER_SPEED;
+                    self.y += original_y - new_y - constants::PLAYER_SPEED as i32;
+                    self.x += original_x - new_x - constants::PLAYER_SPEED as i32;
                     self.colliding = false;
                     println!("DownRight");
                 }
@@ -162,12 +164,15 @@ impl PlayerManager {
             self.y = new_y;
         }
     }
-    pub fn render_player(&mut self, game: &mut game_manager::GameManager, tex_man: &mut texture_manager::TextureManager<WindowContext>) -> Result<(), String> {
-        let snapped_x = ((constants::SCREEN_WIDTH / 2) - (self.x - game.cam_x)) / 32 * 32;
-        let snapped_y = ((constants::SCREEN_HEIGHT / 2) - (self.y - game.cam_y)) / 32 * 32;
 
-        self.rect = Rect::new(snapped_x, snapped_y, constants::OUTPUT_WIDTH, constants::OUTPUT_HEIGHT);   
-
+    pub fn render_player(
+        &mut self, 
+        game: &mut game_manager::GameManager, 
+        tex_man: &mut texture_manager::TextureManager<WindowContext>
+    ) -> Result<(), String> {
+        let snapped_x = ((constants::SCREEN_WIDTH as i32 / 2) - (self.x - game.cam_x)) / 32 * 32;
+        let snapped_y = ((constants::SCREEN_HEIGHT as i32/ 2) - (self.y - game.cam_y)) / 32 * 32;
+        self.rect = Rect::new(snapped_x, snapped_y, constants::OUTPUT_WIDTH as u32, constants::OUTPUT_HEIGHT as u32);   
         match self.direction {
             Direction::Up => self.texture_path = "assets/player0-back.png".to_string(),
             Direction::Down => self.texture_path = "assets/player0-front.png".to_string(),
@@ -178,9 +183,7 @@ impl PlayerManager {
                 self.texture_path = "assets/player0-front.png".to_string();
             }
         }
-
         let texture = tex_man.load(&self.texture_path)?;
-
         game.canvas.copy_ex(
             &texture, // Texture object
             None,      // source rect
@@ -190,8 +193,6 @@ impl PlayerManager {
             false,    // flip horizontal
             false     // flip vertical
         )?;
-
         Ok(())
     }
-
 }

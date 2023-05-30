@@ -26,8 +26,8 @@ pub struct GameManager {
     pub right: bool,
     pub current_seed: usize,
     pub current_build: usize,
-    pub carrot_amount: i32,
-    pub tomato_amount: i32,
+    pub carrot_amount: u32,
+    pub tomato_amount: u32,
     pub cam_x: i32,
     pub cam_y: i32,
     pub canvas: Canvas<Window>,
@@ -39,13 +39,13 @@ pub struct GameManager {
 impl GameManager {
     pub fn new(sdl_context: &sdl2::Sdl) -> GameManager {
         let video_subsystem = sdl_context.video().unwrap();
-        let gl_attr = video_subsystem.gl_attr();
-
-        gl_attr.set_context_profile(GLProfile::Core);
-        gl_attr.set_context_flags().debug().set();
-        gl_attr.set_context_version(3, 2);
-        gl_attr.set_multisample_buffers(1);
-        gl_attr.set_multisample_samples(4);
+        // let gl_attr = video_subsystem.gl_attr();
+        //
+        // gl_attr.set_context_profile(GLProfile::Core);
+        // gl_attr.set_context_flags().debug().set();
+        // gl_attr.set_context_version(3, 2);
+        // gl_attr.set_multisample_buffers(1);
+        // gl_attr.set_multisample_samples(4);
 
         let window = video_subsystem
             .window("Farm Defence", constants::SCREEN_WIDTH.try_into().unwrap(), constants::SCREEN_HEIGHT.try_into().unwrap())
@@ -55,9 +55,9 @@ impl GameManager {
             .position_centered()
             .build()
             .expect("Failed to initialize window");
-
-        assert_eq!(gl_attr.context_profile(), GLProfile::Core);
-        assert_eq!(gl_attr.context_version(), (3, 2));
+        //
+        // assert_eq!(gl_attr.context_profile(), GLProfile::Core);
+        // assert_eq!(gl_attr.context_version(), (3, 2));
 
         let mut canvas = window.into_canvas()
             .present_vsync()
@@ -100,7 +100,17 @@ impl GameManager {
         self.cam_y = player.y;
     }
 
-    pub fn update_game(&mut self, player: &mut player_manager::PlayerManager, tex_man: &mut texture_manager::TextureManager<WindowContext>, level: &mut level_manager::LevelManager, seed_buttons: &mut button_manager::ButtonManager, build_buttons: &mut button_manager::ButtonManager, towers: &mut tower_manager::TowerManager, enemies: &mut enemy_manager::EnemyManager) {
+    pub fn update_game(
+        &mut self, 
+        tex_man: &mut texture_manager::TextureManager<WindowContext>, 
+        player: &mut player_manager::PlayerManager, 
+        level: &mut level_manager::LevelManager, 
+        towers: &mut tower_manager::TowerManager, 
+        enemies: &mut enemy_manager::EnemyManager, 
+        seed_buttons: &mut button_manager::ButtonManager, 
+        build_buttons: &mut button_manager::ButtonManager,
+    ) {
+
         player.update_player(self);
         self.update_camera(player);
 
@@ -108,12 +118,10 @@ impl GameManager {
             seed_buttons.check_for_clicked(ButtonType::Seed);
             build_buttons.check_for_clicked(ButtonType::Build);
         }
-        let col_max = constants::MAX_WIDTH as usize;
-        let row_max = constants::MAX_HEIGHT as usize;
-        level.update_buildings(self, towers, player, enemies, row_max, col_max);
+        level.update_buildings(self, player, towers, enemies);
 
-        level.render_level(self, player, tex_man, seed_buttons, build_buttons, towers, enemies).unwrap();
-        level.render_towers(self, towers, player, enemies, tex_man).unwrap();
+        level.render_level(self, player, tex_man).unwrap();
+        towers.render_towers(self, tex_man, level).unwrap();
         /* println!("|| GAME || CAM_X: {}, CAM_Y: {} || PLAYER || X: {}, Y: {}, rectX: {}, rectY: {}", self.cam_x, self.cam_y, player.x, player.y, player.rect.x(), player.rect.y()); */
         /*         towers.render_towers(level, self, tex_man, player).unwrap();  */
         player.render_player(self, tex_man).unwrap();

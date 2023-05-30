@@ -1,14 +1,10 @@
 use std::collections::VecDeque;
-use sdl2::video::WindowContext;
 
 use crate::constants;
-use crate::constants::MAX_WIDTH;
+use crate::player_manager;
 use crate::level_manager;
 use crate::level_manager::LevelTile;
 use crate::level_manager::TileData;
-use crate::game_manager;
-use crate::texture_manager;
-use crate::player_manager;
 
 pub struct Enemy {
     pub visited: Vec<Vec<bool>>,
