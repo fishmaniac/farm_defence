@@ -227,9 +227,8 @@ impl LevelManager {
                             false,     // flip vertical
                         )?;
                         if (col_index, row_index) != (10, 30) {
-                            self.level_vec[col_index][row_index].tile_data = TileData::None;
-                            enemies.bfs(&mut self.level_vec, (col_index, row_index), (10, 30), 0);
                             self.level_vec[col_index][row_index].tile_data = TileData::None; 
+                            enemies.bfs(&mut self.level_vec, (col_index, row_index), (10, 30), 0);
                         }
                     }
                     _ => {},
