@@ -72,10 +72,6 @@ impl EnemyManager {
                 enemy_tile.visited[row_index][col_index] = true;
                 enemy_tile.queue.push_back((row_index, col_index));
                 self.enemy_vec.push(enemy_tile);
-
-
-                // self.enemy_vec[i].visited = vec![vec![false; constants::MAX_HEIGHT as usize]; constants::MAX_WIDTH as usize];
-                // self.enemy_vec[i].queue = VecDeque::new();
             }
         }
     }
