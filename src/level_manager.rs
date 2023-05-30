@@ -129,6 +129,17 @@ impl LevelManager {
     }
 
     pub fn render_level(&mut self, game: &mut GameManager, player: &mut PlayerManager, tex_man: &mut TextureManager<WindowContext>, seed_buttons: &mut ButtonManager, build_buttons: &mut ButtonManager, towers: &mut tower_manager::TowerManager, enemies: &mut EnemyManager) -> Result<(), String> {
+        fn check_collisions(player: &mut PlayerManager, temp_tile: &mut LevelTile) {
+            if Rect::has_intersection(&player.rect, temp_tile.rect){
+                if temp_tile.tile_type == constants::TILE_TYPE_WALL {
+                    player.colliding = true;
+                }
+                else {
+                    player.colliding = false;
+                }
+            }
+        }
+
         for col_index in 0..self.level_vec.len() {
             for row_index in 0..self.level_vec[col_index].len() {
                 let mut temp_tile = &mut self.level_vec[col_index][row_index];
@@ -149,19 +160,17 @@ impl LevelManager {
                     false,     // flip vertical
                 )?;
 
-                if Rect::has_intersection(&player.rect, temp_tile.rect){
-                    if temp_tile.tile_type == constants::TILE_TYPE_WALL {
-                        player.colliding = true;
-                    }
-                    else {
-                        player.colliding = false;
-                    }
-                }
-                //~~FIXME BORROW CHECKER WONT LET ME DO IT
+                check_collisions(player, temp_tile);
 
-               /*  Self::update_buildings(game, temp_tile, towers, player, enemies, row_index, col_index, row_max, col_max); */
-                /*                 towers.render_towers(game, tex_man, player).unwrap(); */
+            }
+        }
+        Ok(())
+    }
 
+    pub fn render_towers(&mut self, game: &mut GameManager, towers: &mut tower_manager::TowerManager, player: &mut PlayerManager, enemies: &mut EnemyManager, tex_man: &mut TextureManager<WindowContext>) -> Result<(), String> {
+        for col_index in 0..self.level_vec.len() {
+            for row_index in 0..self.level_vec[col_index].len() {
+                let mut temp_tile = &mut self.level_vec[col_index][row_index];
                 match temp_tile.tile_data {
                     TileData::ArcherTowerBottom => {
                         let rect = Rect::new(
@@ -226,10 +235,11 @@ impl LevelManager {
                             false,    // flip horizontal
                             false,     // flip vertical
                         )?;
-                        if (col_index, row_index) != (10, 30) {
-                            self.level_vec[col_index][row_index].tile_data = TileData::None; 
-                            enemies.bfs(&mut self.level_vec, (col_index, row_index), (10, 30), 0);
-                        }
+                        // if (col_index, row_index) != (10, 30) {
+                        //     self.level_vec[col_index][row_index].tile_data = TileData::None;   
+                        //     /*  enemies.bfs(&mut self.level_vec, (col_index, row_index), (10, 30), 0); */
+                        //     self.level_vec[col_index][row_index].tile_data = TileData::None;
+                        // }
                     }
                     _ => {},
                 }
@@ -239,6 +249,98 @@ impl LevelManager {
     }
 
     pub fn update_buildings(&mut self, game: &mut GameManager, towers: &mut tower_manager::TowerManager, player: &mut PlayerManager, enemies: &mut EnemyManager, row_max: usize, col_max: usize) {
+        fn build_mode (game: &mut GameManager, towers: &mut tower_manager::TowerManager, player: &mut PlayerManager, enemies: &mut EnemyManager, row_max: usize, col_max: usize, temp_tile: &mut LevelTile, row_index: usize, col_index: usize) {
+            match game.current_build {
+                //BUILD MODE HO
+                build if build == constants::CURRENT_BUILD_HO as usize => {
+                    if temp_tile.prev_type == constants::TILE_TYPE_GRASS {
+                        if temp_tile.tile_type == constants::TILE_TYPE_FIELD_HARVESTABLE {
+                            match temp_tile.tile_data {
+                                TileData::Carrots => game.carrot_amount += 1,
+                                TileData::Tomatoes => game.tomato_amount += 1,
+                                _ => {},
+                            }
+                        }
+                        temp_tile.tile_type = constants::TILE_TYPE_FIELD_EMPTY;
+                        temp_tile.texture_path = constants::TEXTURE_FIELD_EMPTY.to_string();
+                        temp_tile.tile_data = TileData::None;
+                        println!("CARROTS: {}, TOMATOS: {}", game.carrot_amount, game.tomato_amount);
+                    }
+                }
+                //BUILD MODE ARCHER TOWER
+                build if build == constants::CURRENT_BUILD_ARCHER_TOWER as usize => {
+                    if temp_tile.prev_type == constants::TILE_TYPE_GRASS {
+                        towers.place_tower(&temp_tile, player, row_index, col_index);
+
+                        temp_tile.tile_type = constants::TILE_TYPE_ARCHER_BOTTOM;
+                        temp_tile.tile_data = TileData::ArcherTowerBottom;
+                    }
+                }
+                build if build == constants::CURRENT_BUILD_GOBLIN_TEST as usize => {
+                    enemies.place_enemy(temp_tile, player, row_index, col_index, row_max, col_max, 0);
+                    temp_tile.tile_type = constants::TILE_TYPE_GOBLIN_TEST;
+                    temp_tile.tile_data = TileData::Goblin;
+                }
+                _ => {}
+            }
+
+        }
+
+        fn seed_mode (game: &mut GameManager, towers: &mut tower_manager::TowerManager, player: &mut PlayerManager, enemies: &mut EnemyManager, row_max: usize, col_max: usize, temp_tile: &mut LevelTile, row_index: usize, col_index: usize) {
+            match game.current_seed {
+                seed if seed == constants::CURRENT_SEED_CARROT as usize => {
+                    temp_tile.tile_type = constants::TILE_TYPE_FIELD_EMPTY;
+                    temp_tile.texture_path = constants::TEXTURE_FIELD_SEEDS.to_string();
+                    temp_tile.tile_data = TileData::Carrots;
+                }
+                seed if seed == constants::CURRENT_SEED_TOMATO as usize => {
+                    temp_tile.tile_type = constants::TILE_TYPE_FIELD_EMPTY;
+                    temp_tile.texture_path = constants::TEXTURE_FIELD_SEEDS.to_string();
+                    temp_tile.tile_data = TileData::Tomatoes;
+                }
+                _ => {}
+            }
+        }
+
+        fn update_farms (game: &mut GameManager, towers: &mut tower_manager::TowerManager, player: &mut PlayerManager, enemies: &mut EnemyManager, row_max: usize, col_max: usize, temp_tile: &mut LevelTile, row_index: usize, col_index: usize) {
+            if temp_tile.tile_type == constants::TILE_TYPE_FIELD_EMPTY && temp_tile.state == constants::CROP_TIME {
+                match temp_tile.tile_data {
+                    TileData::Carrots | TileData::Tomatoes => {
+                        temp_tile.tile_type = constants::TILE_TYPE_FIELD_GROWING;
+                        temp_tile.texture_path = constants::TEXTURE_FIELD_GROWING.to_string();
+                        temp_tile.state = 0;
+                    }
+                    _ => {
+                        temp_tile.tile_type = constants::TILE_TYPE_FIELD_EMPTY;
+                        temp_tile.texture_path = constants::TEXTURE_DEFAULT.to_string();
+                        temp_tile.state = 0;
+                    }
+                }
+            }
+
+            //CHANGE TO HARVEST FARM STATE
+            if temp_tile.tile_type == constants::TILE_TYPE_FIELD_GROWING && temp_tile.state == constants::CROP_TIME {
+                match temp_tile.tile_data {
+                    TileData::Carrots => {
+                        temp_tile.tile_type = constants::TILE_TYPE_FIELD_HARVESTABLE;
+                        temp_tile.texture_path = constants::TEXTURE_FIELD_CARROT.to_string();
+                        temp_tile.state = 0;
+                    }
+                    TileData::Tomatoes => {
+                        temp_tile.tile_type = constants::TILE_TYPE_FIELD_HARVESTABLE;
+                        temp_tile.texture_path = constants::TEXTURE_FIELD_TOMATO.to_string();
+                        temp_tile.state = 0;
+                    }
+                    _ => {
+                        temp_tile.tile_type = constants::TILE_TYPE_GRASS;
+                        temp_tile.texture_path = constants::TEXTURE_DEFAULT.to_string();
+                        temp_tile.state = 0;
+                    }
+                }
+            }
+
+        }
+
         for col_index in 0..self.level_vec.len() {
             for row_index in 0..self.level_vec[col_index].len() {
                 let mut temp_tile = &mut self.level_vec[col_index][row_index];
@@ -256,93 +358,15 @@ impl LevelManager {
                 //PRETTY SURE HOVERING ALL BUTTONS = BUG
                 if/*  !seed_buttons.hovering_all_buttons && !build_buttons.hovering_all_buttons &&  */Rect::contains_point(&temp_tile.rect, game.mouse_point) && game.mouse_button == MouseButton::Left {
                     if game.build_mode {
-                        match game.current_build {
-                            //BUILD MODE HO
-                            build if build == constants::CURRENT_BUILD_HO as usize => {
-                                if temp_tile.prev_type == constants::TILE_TYPE_GRASS {
-                                    if temp_tile.tile_type == constants::TILE_TYPE_FIELD_HARVESTABLE {
-                                        match temp_tile.tile_data {
-                                            TileData::Carrots => game.carrot_amount += 1,
-                                            TileData::Tomatoes => game.tomato_amount += 1,
-                                            _ => {},
-                                        }
-                                    }
-                                    temp_tile.tile_type = constants::TILE_TYPE_FIELD_EMPTY;
-                                    temp_tile.texture_path = constants::TEXTURE_FIELD_EMPTY.to_string();
-                                    temp_tile.tile_data = TileData::None;
-                                    println!("CARROTS: {}, TOMATOS: {}", game.carrot_amount, game.tomato_amount);
-                                }
-                            }
-                            //BUILD MODE ARCHER TOWER
-                            build if build == constants::CURRENT_BUILD_ARCHER_TOWER as usize => {
-                                if temp_tile.prev_type == constants::TILE_TYPE_GRASS {
-                                    towers.place_tower(&temp_tile, player, row_index, col_index);
-
-                                    temp_tile.tile_type = constants::TILE_TYPE_ARCHER_BOTTOM;
-                                    temp_tile.tile_data = TileData::ArcherTowerBottom;
-                                }
-                            }
-                            build if build == constants::CURRENT_BUILD_GOBLIN_TEST as usize => {
-                                enemies.place_enemy(temp_tile, player, row_index, col_index, row_max, col_max, 0);
-                                temp_tile.tile_type = constants::TILE_TYPE_GOBLIN_TEST;
-                                temp_tile.tile_data = TileData::Goblin;
-                            }
-                            _ => {}
-                        }
+                        build_mode(game, towers, player, enemies, row_max, col_max, temp_tile, row_index, col_index);
                     }
                     if game.seed_mode && temp_tile.tile_type == constants::TILE_TYPE_FIELD_EMPTY {
-                        match game.current_seed {
-                            seed if seed == constants::CURRENT_SEED_CARROT as usize => {
-                                temp_tile.tile_type = constants::TILE_TYPE_FIELD_EMPTY;
-                                temp_tile.texture_path = constants::TEXTURE_FIELD_SEEDS.to_string();
-                                temp_tile.tile_data = TileData::Carrots;
-                            }
-                            seed if seed == constants::CURRENT_SEED_TOMATO as usize => {
-                                temp_tile.tile_type = constants::TILE_TYPE_FIELD_EMPTY;
-                                temp_tile.texture_path = constants::TEXTURE_FIELD_SEEDS.to_string();
-                                temp_tile.tile_data = TileData::Tomatoes;
-                            }
-                            _ => {}
-                        }
+                        seed_mode(game, towers, player, enemies, row_max, col_max, temp_tile, row_index, col_index);
                     }
                 }
 
                 //CHANGE TO GROWING FARM STATE
-                if temp_tile.tile_type == constants::TILE_TYPE_FIELD_EMPTY && temp_tile.state == constants::CROP_TIME {
-                    match temp_tile.tile_data {
-                        TileData::Carrots | TileData::Tomatoes => {
-                            temp_tile.tile_type = constants::TILE_TYPE_FIELD_GROWING;
-                            temp_tile.texture_path = constants::TEXTURE_FIELD_GROWING.to_string();
-                            temp_tile.state = 0;
-                        }
-                        _ => {
-                            temp_tile.tile_type = constants::TILE_TYPE_FIELD_EMPTY;
-                            temp_tile.texture_path = constants::TEXTURE_DEFAULT.to_string();
-                            temp_tile.state = 0;
-                        }
-                    }
-                }
-
-                //CHANGE TO HARVEST FARM STATE
-                if temp_tile.tile_type == constants::TILE_TYPE_FIELD_GROWING && temp_tile.state == constants::CROP_TIME {
-                    match temp_tile.tile_data {
-                        TileData::Carrots => {
-                            temp_tile.tile_type = constants::TILE_TYPE_FIELD_HARVESTABLE;
-                            temp_tile.texture_path = constants::TEXTURE_FIELD_CARROT.to_string();
-                            temp_tile.state = 0;
-                        }
-                        TileData::Tomatoes => {
-                            temp_tile.tile_type = constants::TILE_TYPE_FIELD_HARVESTABLE;
-                            temp_tile.texture_path = constants::TEXTURE_FIELD_TOMATO.to_string();
-                            temp_tile.state = 0;
-                        }
-                        _ => {
-                            temp_tile.tile_type = constants::TILE_TYPE_GRASS;
-                            temp_tile.texture_path = constants::TEXTURE_DEFAULT.to_string();
-                            temp_tile.state = 0;
-                        }
-                    }
-                }
+                update_farms(game, towers, player, enemies, row_max, col_max, temp_tile, row_index, col_index);
             }
         }
     }

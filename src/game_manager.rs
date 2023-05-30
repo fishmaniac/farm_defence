@@ -113,6 +113,7 @@ impl GameManager {
         level.update_buildings(self, towers, player, enemies, row_max, col_max);
 
         level.render_level(self, player, tex_man, seed_buttons, build_buttons, towers, enemies).unwrap();
+        level.render_towers(self, towers, player, enemies, tex_man).unwrap();
         /* println!("|| GAME || CAM_X: {}, CAM_Y: {} || PLAYER || X: {}, Y: {}, rectX: {}, rectY: {}", self.cam_x, self.cam_y, player.x, player.y, player.rect.x(), player.rect.y()); */
         /*         towers.render_towers(level, self, tex_man, player).unwrap();  */
         player.render_player(self, tex_man).unwrap();

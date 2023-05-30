@@ -13,7 +13,7 @@ use crate::player_manager;
 pub struct Enemy {
     pub visited: Vec<Vec<bool>>,
     pub queue: VecDeque<(usize, usize)>,
-    pub neighbors: Vec<(usize, usize)>,
+    pub neighbors: Vec<(isize, isize)>,
     pub row_index: usize,
     pub col_index: usize,
     pub attack_speed: i8,
@@ -24,14 +24,12 @@ pub struct Enemy {
 
 pub struct EnemyManager {
     pub enemy_vec: Vec<Enemy>,
-    pub path_open_list: Vec<Vec<LevelTile>>,
 }
 
 impl EnemyManager {
     pub fn new () -> EnemyManager {
         let enemies = EnemyManager {
             enemy_vec: Vec::new(),
-            path_open_list: Vec::new(),
         };
         enemies
     }
@@ -76,34 +74,49 @@ impl EnemyManager {
         }
     }
 
-    pub fn bfs(&mut self, graph: &mut [Vec<LevelTile>], current: (usize, usize), target: (usize, usize), i: usize) -> bool {
 
-        if let Some(current) = self.enemy_vec[i].queue.pop_front() {
-            if current == target {
-                println!("Target node {:?} found!", target);
-                self.enemy_vec[i].row_index = current.0;
-                self.enemy_vec[i].col_index = current.1;
-                graph[self.enemy_vec[i].row_index][self.enemy_vec[i].col_index].tile_data = TileData::Goblin;
-                return true;  
+    
+    pub fn perform_a_star_iteration(enemy: &mut Enemy, target_row: usize, target_col: usize, map: &[Vec<bool>]) {
+        let rows = map.len();
+        let cols = map[0].len();
+
+        // Initialize the visited and queue data structures
+        enemy.visited = vec![vec![false; cols]; rows];
+        enemy.queue.clear();
+
+        // Define the neighbors' offsets (up, down, left, right)
+        enemy.neighbors = vec![(-1, 0), (1, 0), (0, -1), (0, 1)];
+
+        // Mark the current position as visited and enqueue it
+        enemy.visited[enemy.row_index][enemy.col_index] = true;
+        enemy.queue.push_back((enemy.row_index, enemy.col_index));
+
+        while let Some((current_row, current_col)) = enemy.queue.pop_front() {
+            // Check if the current position is the target
+            if current_row == target_row && current_col == target_col {
+                // Target reached, perform the movement or attack logic here
+                // ...
+                return; // Exit the A* algorithm
             }
 
-            self.enemy_vec[i].row_index = current.0;
-            self.enemy_vec[i].col_index = current.1;
+            // Process the neighbors of the current position
+            for &(delta_row, delta_col) in &enemy.neighbors {
+                let new_row = current_row as isize + delta_row;
+                let new_col = current_col as isize + delta_col;
 
-            self.enemy_vec[i].neighbors = Self::get_neighbors(&graph, current.0, current.1);
-
-            let enemy = &mut self.enemy_vec[i];
-            for &neighbor_coords in &enemy.neighbors {
-                if !enemy.visited[neighbor_coords.0][neighbor_coords.1] {
-                    enemy.visited[neighbor_coords.0][neighbor_coords.1] = true;
-                    enemy.queue.push_back(neighbor_coords);
+                // Check if the new position is within the map boundaries and not visited
+                if new_row >= 0 && new_row < rows as isize && new_col >= 0 && new_col < cols as isize &&
+                !enemy.visited[new_row as usize][new_col as usize] && map[new_row as usize][new_col as usize] {
+                    // Mark the new position as visited and enqueue it
+                    enemy.visited[new_row as usize][new_col as usize] = true;
+                    enemy.queue.push_back((new_row as usize, new_col as usize));
                 }
             }
-
-            graph[current.0][current.1].tile_data = TileData::Goblin;
         }
 
-        false
+        // No valid path found
+        // Perform alternative action or return an error
+        // ...
     }
 
     fn get_neighbors(graph: &[Vec<LevelTile>], row: usize, col: usize) -> Vec<(usize, usize)> {
@@ -111,14 +124,11 @@ impl EnemyManager {
         let num_rows = graph.len();
         let num_cols = graph[0].len();
 
-        // Define a helper function to check if a tile is walkable
-
         fn is_walkable(graph: &[Vec<LevelTile>], row: usize, col: usize) -> bool {
             match graph[row][col].tile_data {
                 TileData::None => graph[row][col].tile_type == constants::TILE_TYPE_GRASS,
                 _ => false,
             }
-
         }
 
         // Upper neighbor
@@ -140,5 +150,6 @@ impl EnemyManager {
 
         neighbors
     }
+
 }
 
