@@ -78,19 +78,13 @@ impl TowerManager {
         game: &mut game_manager::GameManager, 
         tex_man: &mut texture_manager::TextureManager<WindowContext>, 
     ) -> Result<(), String> {
+        //render bottom of tower
         for tower_index in 0..self.tower_vec.len() {
-            // match temp_tile.tile_data {
-            //     TileData::ArcherTowerBottom => {
             let bottom_col = self.tower_vec[tower_index].bottom_col_index as i32;
             let bottom_row = self.tower_vec[tower_index].bottom_row_index as i32;
-            let top_col = self.tower_vec[tower_index].top_col_index as i32;
-            let top_row = self.tower_vec[tower_index].top_row_index as i32;
-
-
             self.tower_vec[tower_index].bottom_rect.set_x((constants::TILE_SIZE as i32 * bottom_col as i32) - game.cam_x);
             self.tower_vec[tower_index].bottom_rect.set_y((constants::TILE_SIZE as i32 * bottom_row as i32) - game.cam_y);
-            self.tower_vec[tower_index].top_rect.set_x((constants::TILE_SIZE as i32 * top_col as i32) - game.cam_x);
-            self.tower_vec[tower_index].top_rect.set_y((constants::TILE_SIZE as i32 * top_row as i32) - game.cam_y);
+
 
             let bottom_texture = tex_man.load(&self.tower_vec[tower_index].bottom_texture_path)?;
             game.canvas.copy_ex(
@@ -102,6 +96,14 @@ impl TowerManager {
                 false,    // flip horizontal
                 false,     // flip vertical
             )?;
+        }
+        //render top of tower
+        for tower_index in 0..self.tower_vec.len() {
+            let top_col = self.tower_vec[tower_index].top_col_index as i32;
+            let top_row = self.tower_vec[tower_index].top_row_index as i32;
+
+            self.tower_vec[tower_index].top_rect.set_x((constants::TILE_SIZE as i32 * top_col as i32) - game.cam_x);
+            self.tower_vec[tower_index].top_rect.set_y((constants::TILE_SIZE as i32 * top_row as i32) - game.cam_y);
             let top_texture = tex_man.load(&self.tower_vec[tower_index].top_texture_path)?;
             game.canvas.copy_ex(
                 &top_texture, // Texture object
@@ -113,25 +115,16 @@ impl TowerManager {
                 false,     // flip vertical
             )?;
 
-
-            // PREVENT FROM PLACING BELOW TOWER
-            // level.level_vec[col_index][row_index + 1].prev_type = constants::TILE_TYPE_ARCHER_BOTTOM;
-            // //PREVENT FROM PLACING ON TOP OF TOWER
-            // level.level_vec[col_index][row_index - 1].prev_type = constants::TILE_TYPE_ARCHER_BOTTOM;
-            // //PREVENT FORM PLACING ON THIS TOWER
-            // level.level_vec[col_index][row_index].prev_type = constants::TILE_TYPE_ARCHER_BOTTOM;
-            // //CREATE TOP OF TOWER
-            // level.level_vec[col_index][row_index - 1].tile_type = constants::TILE_TYPE_ARCHER_TOP;
-            // level.level_vec[col_index][row_index - 1].tile_data = TileData::ArcherTowerTop;     
         }
-
-        //     if (col_index, row_index) != (10, 30) {
-        //         println!("PATH: {:?}", enemies.astar((col_index, row_index), (10, 30), &mut level.level_vec)); 
-        //         level.level_vec[col_index][row_index].tile_data = TileData::None;    
-        //
-        //         /* enemies.bfs(&mut self.level_vec, (col_index, row_index), (10, 30), 0); */
-        //         level.level_vec[col_index][row_index].tile_data = TileData::None;
-        //      }
+        // PREVENT FROM PLACING BELOW TOWER
+        // level.level_vec[col_index][row_index + 1].prev_type = constants::TILE_TYPE_ARCHER_BOTTOM;
+        // //PREVENT FROM PLACING ON TOP OF TOWER
+        // level.level_vec[col_index][row_index - 1].prev_type = constants::TILE_TYPE_ARCHER_BOTTOM;
+        // //PREVENT FORM PLACING ON THIS TOWER
+        // level.level_vec[col_index][row_index].prev_type = constants::TILE_TYPE_ARCHER_BOTTOM;
+        // //CREATE TOP OF TOWER
+        // level.level_vec[col_index][row_index - 1].tile_type = constants::TILE_TYPE_ARCHER_TOP;
+        // level.level_vec[col_index][row_index - 1].tile_data = TileData::ArcherTowerTop;     
         Ok(())
     }
 }

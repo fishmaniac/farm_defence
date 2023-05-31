@@ -102,97 +102,72 @@ impl ButtonManager {
 
     pub fn render_seed_buttons (&mut self, player: &mut player_manager::PlayerManager, tex_man: &mut texture_manager::TextureManager<WindowContext>, game: &mut game_manager::GameManager) -> Result<(), String> {
         if game.seed_mode {
-            for (_, temp_button) in self.button_vec.iter_mut().enumerate() {
-                if Rect::contains_point(&temp_button.rect, game.mouse_point) {
-                    self.hovering_all_buttons = true;
-                    break
-                }
-                else {
-                    self.hovering_all_buttons = false;
-                }
-            }
+            self.hovering_all_buttons = true;
 
-            for (button_index, mut temp_button) in self.button_vec.iter_mut().enumerate() {
-                temp_button.rect = Rect::new(
-                    player.rect.x() + constants::TILE_SIZE as i32 * button_index as i32 - constants::SCREEN_WIDTH as i32 / 2 + constants::TILE_SIZE as i32,
-                    constants::TILE_SIZE as i32 + player.rect.y() - constants::SCREEN_HEIGHT as i32 / 2 + constants::TILE_SIZE as i32,
-                    constants::TILE_SIZE,
-                    constants::TILE_SIZE,
-                );
-                let texture = tex_man.load(&temp_button.texture_path)?;
+            for button_index in 0..self.button_vec.len() {
+                self.button_vec[button_index].rect.set_x(player.rect.x() + constants::TILE_SIZE as i32 * button_index as i32 - constants::SCREEN_WIDTH as i32 / 2 + constants::TILE_SIZE as i32);
+                self.button_vec[button_index].rect.set_y(constants::TILE_SIZE as i32 + player.rect.y() - constants::SCREEN_HEIGHT as i32 / 2 + constants::TILE_SIZE as i32);
+
+                let texture = tex_man.load(&self.button_vec[button_index].texture_path)?;
                 game.canvas.copy_ex(
                     &texture, // Texture object
                     None,      // source rect
-                    temp_button.rect,     // destination rect
+                    self.button_vec[button_index].rect,     // destination rect
                     0.0,      // angle (degrees)
                     None,   // center
                     false,    // flip horizontal
                     false,     // flip vertical
                 )?;
-
-                if Rect::contains_point(&temp_button.rect, game.mouse_point) {
-                    temp_button.hovering_button = true;
+                if Rect::contains_point(&self.button_vec[button_index].rect, game.mouse_point) {
+                    self.button_vec[button_index].hovering_button = true;
                 }
                 else {
-                    temp_button.hovering_button = false;
+                    self.button_vec[button_index].hovering_button = false;
                 }
 
-                if temp_button.hovering_button && self.hovering_all_buttons && game.mouse_button == MouseButton::Left {
-                    temp_button.clicked = true;
+                if self.button_vec[button_index].hovering_button && self.hovering_all_buttons && game.mouse_button == MouseButton::Left {
+                    self.button_vec[button_index].clicked = true;
                     self.current_button_clicked_seed = button_index;
                 }
-                if game.seed_outline_visible && temp_button.clicked {
+                if game.seed_outline_visible && self.button_vec[button_index].clicked {
                     game.current_seed = button_index;
-                    Self::draw_rect_outline(game, temp_button.rect);
+                    Self::draw_rect_outline(game, self.button_vec[button_index].rect);
                 }
             }
         }
         Ok(())
     }
+
     pub fn render_build_buttons (&mut self, player: &mut player_manager::PlayerManager, tex_man: &mut texture_manager::TextureManager<WindowContext>, game: &mut game_manager::GameManager) -> Result<(), String> {
         if game.build_mode {
-            for (_, temp_button) in self.button_vec.iter_mut().enumerate() {
-                if Rect::contains_point(&temp_button.rect, game.mouse_point) {
-                    self.hovering_all_buttons = true;
-                    break
-                }
-                else {
-                    self.hovering_all_buttons = false;
-                }
-            }
+            self.hovering_all_buttons = true;
+            for button_index in 0..self.button_vec.len() {
+                self.button_vec[button_index].rect.set_x(player.rect.x() + constants::TILE_SIZE as i32 * button_index as i32 - constants::SCREEN_WIDTH as i32 / 2 + constants::TILE_SIZE as i32);
+                self.button_vec[button_index].rect.set_y(constants::TILE_SIZE as i32 + player.rect.y() - constants::SCREEN_HEIGHT as i32 / 2 + constants::TILE_SIZE as i32);
 
-            for (button_index, mut temp_button) in self.button_vec.iter_mut().enumerate() {
-                temp_button.rect = Rect::new(
-                    player.rect.x() + constants::TILE_SIZE as i32 * button_index as i32 - constants::SCREEN_WIDTH as i32 / 2 + constants::TILE_SIZE as i32,
-                    constants::TILE_SIZE as i32 + player.rect.y() - constants::SCREEN_HEIGHT as i32 / 2 + constants::TILE_SIZE as i32,
-                    constants::TILE_SIZE,
-                    constants::TILE_SIZE,
-                );
-                let texture = tex_man.load(&temp_button.texture_path)?;
+                let texture = tex_man.load(&self.button_vec[button_index].texture_path)?;
                 game.canvas.copy_ex(
                     &texture, // Texture object
                     None,      // source rect
-                    temp_button.rect,     // destination rect
+                    self.button_vec[button_index].rect,     // destination rect
                     0.0,      // angle (degrees)
                     None,   // center
                     false,    // flip horizontal
                     false,     // flip vertical
                 )?;
-
-                if Rect::contains_point(&temp_button.rect, game.mouse_point) {
-                    temp_button.hovering_button = true;
+                if Rect::contains_point(&self.button_vec[button_index].rect, game.mouse_point) {
+                    self.button_vec[button_index].hovering_button = true;
                 }
                 else {
-                    temp_button.hovering_button = false;
+                    self.button_vec[button_index].hovering_button = false;
                 }
-
-                if temp_button.hovering_button && game.mouse_button == MouseButton::Left {
-                    temp_button.clicked = true;
+                if self.button_vec[button_index].hovering_button && self.hovering_all_buttons && game.mouse_button == MouseButton::Left {
+                    self.button_vec[button_index].clicked = true;
                     self.current_button_clicked_build = button_index;
                 }
-                if game.build_outline_visible && temp_button.clicked {
+                if game.build_outline_visible && self.button_vec[button_index].clicked {
                     game.current_build = button_index;
-                    Self::draw_rect_outline(game, temp_button.rect);
+                    Self::draw_rect_outline(game, self.button_vec[button_index].rect);
                 }
             }
         }

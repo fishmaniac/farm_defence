@@ -12,6 +12,7 @@ use crate::texture_manager::TextureManager;
 use crate::player_manager::PlayerManager;
 use crate::tower_manager;
 use crate::enemy_manager::EnemyManager;
+use crate::button_manager;
 
 pub enum TileData {
     Carrots,
@@ -138,16 +139,7 @@ impl LevelManager {
         col_index: usize,
         row_index: usize,
     ) -> Result<(), String> {
-        fn check_collisions(player: &mut PlayerManager, temp_tile: &mut LevelTile) {
-            if Rect::has_intersection(&player.rect, temp_tile.rect){
-                if temp_tile.tile_type == constants::TILE_TYPE_WALL {
-                    player.colliding = true;
-                }
-                else {
-                    player.colliding = false;
-                }
-            }
-        }
+
         temp_tile.rect.set_x((constants::TILE_SIZE as i32 * col_index as i32) - game.cam_x);
         temp_tile.rect.set_y((constants::TILE_SIZE as i32 * row_index as i32) - game.cam_y);
         let texture = tex_man.load(&temp_tile.texture_path)?;
@@ -161,6 +153,17 @@ impl LevelManager {
             false,     // flip vertical
         )?;
         check_collisions(player, temp_tile);
+
+        fn check_collisions(player: &mut PlayerManager, temp_tile: &mut LevelTile) {
+            if Rect::has_intersection(&player.rect, temp_tile.rect){
+                if temp_tile.tile_type == constants::TILE_TYPE_WALL {
+                    player.colliding = true;
+                }
+                else {
+                    player.colliding = false;
+                }
+            }
+        }
         Ok(())
     }
 
@@ -168,6 +171,9 @@ impl LevelManager {
         game: &mut GameManager, 
         towers: &mut tower_manager::TowerManager, 
         enemies: &mut EnemyManager, 
+        seed_buttons: &mut button_manager::ButtonManager, 
+        build_buttons: &mut button_manager::ButtonManager,
+
     ) {
         for col_index in 0..self.level_vec.len() {
             for row_index in 0..self.level_vec[col_index].len() {
@@ -182,6 +188,7 @@ impl LevelManager {
                     }
                     _ => {}
                 }
+
                 //PRETTY SURE HOVERING ALL BUTTONS = BUG
                 //CHECK FOR CLICK ON BUTTON
                 if/*  !seed_buttons.hovering_all_buttons && !build_buttons.hovering_all_buttons &&  */Rect::contains_point(&temp_tile.rect, game.mouse_point) && game.mouse_button == MouseButton::Left {
@@ -224,7 +231,7 @@ impl LevelManager {
                 }
                 //BUILD MODE ARCHER TOWER
                 build if build == constants::CURRENT_BUILD_ARCHER_TOWER as usize => {
-                    if temp_tile.prev_type == constants::TILE_TYPE_GRASS {
+                    if temp_tile.prev_type == constants::TILE_TYPE_GRASS && temp_tile.tile_type != constants::TILE_TYPE_ARCHER_BOTTOM {
                         temp_tile.tile_type = constants::TILE_TYPE_ARCHER_BOTTOM;
                         temp_tile.tile_data = TileData::ArcherTowerBottom;
                         towers.place_tower(&temp_tile, col_index, row_index);
@@ -232,10 +239,10 @@ impl LevelManager {
                     }
                 }
                 build if build == constants::CURRENT_BUILD_GOBLIN_TEST as usize => {
-                    if temp_tile.prev_type == constants::TILE_TYPE_GRASS {
+                    if temp_tile.prev_type == constants::TILE_TYPE_GRASS && temp_tile.tile_type != constants::TILE_TYPE_GOBLIN_TEST {
+                        temp_tile.tile_type = constants::TILE_TYPE_GOBLIN_TEST;
+                        temp_tile.tile_data = TileData::Goblin;
                         enemies.place_enemy(temp_tile, col_index, row_index);
-                        // temp_tile.tile_type = constants::TILE_TYPE_GOBLIN_TEST;
-                        // temp_tile.tile_data = TileData::Goblin;
                     }
                 }
                 _ => {}

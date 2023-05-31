@@ -19,8 +19,8 @@ pub struct Enemy {
     pub came_from: Vec<Vec<(usize, usize)>>,
     pub g_score: Vec<Vec<usize>>,
     pub f_score: Vec<Vec<usize>>,
-    pub row_index: usize,
     pub col_index: usize,
+    pub row_index: usize,
     pub attack_speed: i8,
     pub attack_damage: i8,
     pub rect: sdl2::rect::Rect,
@@ -104,7 +104,7 @@ impl EnemyManager {
                 self.enemy_vec[enemy_index].rect.set_x((constants::TILE_SIZE as i32 * col as i32) - game.cam_x);
                 self.enemy_vec[enemy_index].rect.set_y((constants::TILE_SIZE as i32 * row as i32) - game.cam_y);
 
-                let texture = tex_man.load(constants::TEXTURE_GOBLIN_ENEMY_FRONT)?;
+                let texture = tex_man.load(&self.enemy_vec[enemy_index].texture_path)?;
 
                 game.canvas.copy_ex(
                     &texture, // Texture object

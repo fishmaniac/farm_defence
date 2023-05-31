@@ -119,25 +119,23 @@ impl GameManager {
             build_buttons.check_for_clicked(ButtonType::Build);
         }
 
-        level.update_buildings(self, towers, enemies);
+        level.update_buildings(self, towers, enemies, seed_buttons, build_buttons);
 
         for col_index in 0..level.level_vec.len() {
             for row_index in 0..level.level_vec[col_index].len() {
                 let temp_tile = &mut level.level_vec[col_index][row_index];
                 level_manager::LevelManager::render_level(self, player, tex_man, temp_tile, col_index, row_index).unwrap();
-                //
-                // if level.level_vec[col_index][row_index].tile_type == constants::TILE_TYPE_ARCHER_BOTTOM {
-                //     level.level_vec[col_index][row_index - 1].tile_type = constants::TILE_TYPE_ARCHER_TOP;
-                //     level.level_vec[col_index][row_index - 1].tile_data = level_manager::TileData::ArcherTowerTop;     
-                //     level.level_vec[col_index][row_index - 1].texture_path = constants::TEXTURE_TOWER_ARCHER_FRONT.to_string();     
+
+                // if level.level_vec[col_index - 1][row_index].tile_type == constants::TILE_TYPE_ARCHER_BOTTOM {
+                //     temp_tile.tile_type = constants::TILE_TYPE_ARCHER_TOP;
                 // }
             }
         }
-        //TODO: REFACTOR TO LOOP
         //dont do too much more than o(n^2)
         tower_manager::TowerManager::render_towers(towers, self, tex_man).unwrap();
         enemy_manager::EnemyManager::render_enemies(enemies, self, tex_man/* , temp_tile, col_index, row_index */).unwrap();
 
+        //TODO: REFACTOR TO LOOP
         player.render_player(self, tex_man).unwrap();
 
 
