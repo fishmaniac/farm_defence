@@ -1,4 +1,5 @@
-use std::collections::VecDeque;
+use std::collections::{BinaryHeap, HashSet};
+use std::cmp::Ordering;
 
 use crate::constants;
 use crate::player_manager;
@@ -6,10 +7,13 @@ use crate::level_manager;
 use crate::level_manager::LevelTile;
 use crate::level_manager::TileData;
 
+/* #[derive(Debug, PartialEq, Eq, Hash, Clone)] */
 pub struct Enemy {
-    pub visited: Vec<Vec<bool>>,
-    pub queue: VecDeque<(usize, usize)>,
-    pub neighbors: Vec<(isize, isize)>,
+    pub open_set: BinaryHeap<(usize, (usize, usize))>,
+    pub open_set_set: HashSet<(usize, usize)>,
+    pub came_from: Vec<Vec<(usize, usize)>>,
+    pub g_score: Vec<Vec<usize>>,
+    pub f_score: Vec<Vec<usize>>,
     pub row_index: usize,
     pub col_index: usize,
     pub attack_speed: i8,
@@ -30,14 +34,30 @@ impl EnemyManager {
         enemies
     }
 
-    pub fn place_enemy(&mut self, temp_tile: &level_manager::LevelTile, player: &mut player_manager::PlayerManager, row_index: usize, col_index: usize, row_max: usize, col_max: usize, i: usize) {
+    pub fn place_enemy(
+        &mut self, 
+        temp_tile: &level_manager::LevelTile, 
+        row_index: usize, 
+        col_index: usize, 
+        row_max: usize, 
+        col_max: usize, 
+        i: usize
+    ) {
         println!("PLACING ENEMY~ X: {}, Y: {}", col_index, row_index);
         match temp_tile.tile_data {
             TileData::Goblin => {
+                let mut open_set = BinaryHeap::new();
+                let mut open_set_set = HashSet::new();
+                let mut came_from = vec![vec![(usize::MAX, usize::MAX); constants::MAX_WIDTH as usize]; constants::MAX_HEIGHT as usize];
+                let mut g_score = vec![vec![usize::MAX; constants::MAX_WIDTH as usize]; constants::MAX_HEIGHT as usize as usize];
+                let mut f_score = vec![vec![usize::MAX; constants::MAX_WIDTH as usize]; constants::MAX_HEIGHT as usize as usize];
+
                 let mut enemy_tile = self::Enemy {
-                    visited: vec![vec![false; col_max]; row_max],
-                    queue: VecDeque::new(),
-                    neighbors: Vec::new(),
+                    open_set,
+                    open_set_set,
+                    came_from,
+                    g_score,
+                    f_score,
                     attack_speed: 5,
                     attack_damage: 5,
                     row_index,
@@ -46,16 +66,25 @@ impl EnemyManager {
                     texture_path: constants::TEXTURE_GOBLIN_ENEMY_FRONT.to_string(),
                     //CHANGE TEXTURE
                 };
-                enemy_tile.visited[row_index][col_index] = true;
-                enemy_tile.queue.push_back((row_index, col_index));
+/*                 println!("PATH: {:?}", self.astar((col_index, row_index), (10, 30), &mut level.level_vec));   */
+
                 self.enemy_vec.push(enemy_tile);
+
                 /*                 println!("GOBLIN PUSHED"); */
             },
             _=> {
+                let mut open_set = BinaryHeap::new();
+                let mut open_set_set = HashSet::new();
+                let mut came_from = vec![vec![(usize::MAX, usize::MAX); constants::MAX_WIDTH as usize]; constants::MAX_HEIGHT as usize];
+                let mut g_score = vec![vec![usize::MAX; constants::MAX_WIDTH as usize]; constants::MAX_HEIGHT as usize];
+                let mut f_score = vec![vec![usize::MAX; constants::MAX_WIDTH as usize]; constants::MAX_HEIGHT as usize];
+
                 let mut enemy_tile = self::Enemy {
-                    visited: vec![vec![false; col_max]; row_max],
-                    queue: VecDeque::new(),
-                    neighbors: Vec::new(),
+                    open_set,
+                    open_set_set,
+                    came_from,
+                    g_score,
+                    f_score,
                     attack_speed: 5,
                     attack_damage: 5,
                     row_index,
@@ -63,87 +92,92 @@ impl EnemyManager {
                     rect: sdl2::rect::Rect::new(temp_tile.rect.x(), temp_tile.rect.y(), constants::TILE_SIZE, constants::TILE_SIZE),
                     texture_path: constants::TEXTURE_DEFAULT.to_string(),
                 };
-                enemy_tile.visited[row_index][col_index] = true;
-                enemy_tile.queue.push_back((row_index, col_index));
                 self.enemy_vec.push(enemy_tile);
             }
         }
     }
 
 
-    
-    pub fn perform_a_star_iteration(enemy: &mut Enemy, target_row: usize, target_col: usize, map: &[Vec<bool>]) {
-        let rows = map.len();
-        let cols = map[0].len();
+    pub fn astar(&mut self, start: (usize, usize), goal: (usize, usize), level_vec: &mut [Vec<LevelTile>]) -> Option<Vec<(usize, usize)>> {
+        let height = level_vec.len();
+        let width = level_vec[0].len();
 
-        // Initialize the visited and queue data structures
-        enemy.visited = vec![vec![false; cols]; rows];
-        enemy.queue.clear();
+        let (start_x, start_y) = start;
+        let (goal_x, goal_y) = goal;
 
-        // Define the neighbors' offsets (up, down, left, right)
-        enemy.neighbors = vec![(-1, 0), (1, 0), (0, -1), (0, 1)];
+        let temp_enemy = &mut self.enemy_vec[0];
 
-        // Mark the current position as visited and enqueue it
-        enemy.visited[enemy.row_index][enemy.col_index] = true;
-        enemy.queue.push_back((enemy.row_index, enemy.col_index));
+        temp_enemy.g_score[start_y][start_x] = 0;
+        temp_enemy.f_score[start_y][start_x] = Self::heuristic((start_x, start_y), (goal_x, goal_y));
+        temp_enemy.open_set.push((temp_enemy.f_score[start_y][start_x], (start_x, start_y)));
+        temp_enemy.open_set_set.insert((start_x, start_y));
 
-        while let Some((current_row, current_col)) = enemy.queue.pop_front() {
-            // Check if the current position is the target
-            if current_row == target_row && current_col == target_col {
-                // Target reached, perform the movement or attack logic here
-                // ...
-                return; // Exit the A* algorithm
+        while let Some((_, current)) = temp_enemy.open_set.pop() {
+            /* println!("ASTAR: X: {}, Y: {}", current.0, current1); */
+            let (current_x, current_y) = current;
+/*             level_vec[current_x][current_y].tile_data = TileData::Goblin; */
+            if (current_x, current_y) == (goal_x, goal_y) {
+                /*                 println!("GOAL FOUND: X: {} Y: {}", current_x, current_y); */
+                // Reconstruct the path from the goal to the start
+                let mut path = vec![(goal_x, goal_y)];
+                let mut pos = (goal_x, goal_y);
+
+                while pos != (start_x, start_y) {
+                    pos = temp_enemy.came_from[pos.1][pos.0];
+                    path.push(pos);
+                }
+
+                path.reverse();
+                return Some(path);
             }
 
-            // Process the neighbors of the current position
-            for &(delta_row, delta_col) in &enemy.neighbors {
-                let new_row = current_row as isize + delta_row;
-                let new_col = current_col as isize + delta_col;
 
-                // Check if the new position is within the map boundaries and not visited
-                if new_row >= 0 && new_row < rows as isize && new_col >= 0 && new_col < cols as isize &&
-                !enemy.visited[new_row as usize][new_col as usize] && map[new_row as usize][new_col as usize] {
-                    // Mark the new position as visited and enqueue it
-                    enemy.visited[new_row as usize][new_col as usize] = true;
-                    enemy.queue.push_back((new_row as usize, new_col as usize));
+            for neighbor in Self::get_neighbors(current, width, height) {
+                let (neighbor_x, neighbor_y) = neighbor;
+
+                let tentative_g_score = temp_enemy.g_score[current_y][current_x] + 1; // Assuming a uniform cost of 1 for adjacent tiles
+
+                if tentative_g_score < temp_enemy.g_score[neighbor_y][neighbor_x] {
+                    temp_enemy.came_from[neighbor_y][neighbor_x] = (current_x, current_y);
+                    temp_enemy.g_score[neighbor_y][neighbor_x] = tentative_g_score;
+                    temp_enemy.f_score[neighbor_y][neighbor_x] = tentative_g_score + Self::heuristic(neighbor, (goal_x, goal_y));
+
+                    if !temp_enemy.open_set_set.contains(&neighbor) {
+                        temp_enemy.open_set.push((temp_enemy.f_score[neighbor_y][neighbor_x], neighbor));
+                        temp_enemy.open_set_set.insert(neighbor);
+                    }
                 }
             }
         }
+        None
+    }    
+    fn heuristic(start: (usize, usize), goal: (usize, usize)) -> usize {
+        let (start_x, start_y) = start;
+        let (goal_x, goal_y) = goal;
 
-        // No valid path found
-        // Perform alternative action or return an error
-        // ...
+        // Manhattan distance
+        let dx = (goal_x as isize - start_x as isize).abs() as usize;
+        let dy = (goal_y as isize - start_y as isize).abs() as usize;
+
+        dx + dy
     }
 
-    fn get_neighbors(graph: &[Vec<LevelTile>], row: usize, col: usize) -> Vec<(usize, usize)> {
+    fn get_neighbors(pos: (usize, usize), width: usize, height: usize) -> Vec<(usize, usize)> {
+        let (x, y) = pos;
         let mut neighbors = Vec::new();
-        let num_rows = graph.len();
-        let num_cols = graph[0].len();
 
-        fn is_walkable(graph: &[Vec<LevelTile>], row: usize, col: usize) -> bool {
-            match graph[row][col].tile_data {
-                TileData::None => graph[row][col].tile_type == constants::TILE_TYPE_GRASS,
-                _ => false,
-            }
+        if y > 0 {
+            neighbors.push((x, y - 1)); // Up
         }
-
-        // Upper neighbor
-        if row > 0 && is_walkable(graph, row - 1, col) {
-            neighbors.push((row - 1, col));
+        if y < height - 1 {
+            neighbors.push((x, y + 1)); // Down
         }
-        // Lower neighbor
-        if row < num_rows - 1 && is_walkable(graph, row + 1, col) {
-            neighbors.push((row + 1, col));
+        if x > 0 {
+            neighbors.push((x - 1, y)); // Left
         }
-        // Left neighbor
-        if col > 0 && is_walkable(graph, row, col - 1) {
-            neighbors.push((row, col - 1));
+        if x < width - 1 {
+            neighbors.push((x + 1, y)); // Right
         }
-        // Right neighbor
-        if col < num_cols - 1 && is_walkable(graph, row, col + 1) {
-            neighbors.push((row, col + 1));
-        }
-
         neighbors
     }
 

@@ -6,6 +6,7 @@ use crate::game_manager;
 use crate::level_manager;
 use crate::level_manager::TileData;
 use crate::texture_manager;
+use crate::enemy_manager;
 
 pub struct Tower {
     pub row_index: usize,
@@ -62,7 +63,8 @@ impl TowerManager {
     pub fn render_towers(&mut self, 
         game: &mut game_manager::GameManager, 
         tex_man: &mut texture_manager::TextureManager<WindowContext>, 
-        level: &mut level_manager::LevelManager
+        level: &mut level_manager::LevelManager,
+        enemies: &mut enemy_manager::EnemyManager, 
     ) -> Result<(), String> {
         for col_index in 0..level.level_vec.len() {
             for row_index in 0..level.level_vec[col_index].len() {
@@ -96,7 +98,7 @@ impl TowerManager {
                         level.level_vec[col_index][row_index - 1].tile_data = TileData::ArcherTowerTop;     
                     }
                     TileData::ArcherTowerTop => {
-                        println!("archer tower top");
+/*                         println!("archer tower top"); */
                         let rect = Rect::new(
                             (constants::TILE_SIZE as i32 * col_index as i32) - game.cam_x,
                             (constants::TILE_SIZE as i32 * row_index as i32) - game.cam_y,
@@ -131,11 +133,14 @@ impl TowerManager {
                             false,    // flip horizontal
                             false,     // flip vertical
                         )?;
-                        // if (col_index, row_index) != (10, 30) {
-                        //     self.level_vec[col_index][row_index].tile_data = TileData::None;   
-                        //     /*  enemies.bfs(&mut self.level_vec, (col_index, row_index), (10, 30), 0); */
-                        //     self.level_vec[col_index][row_index].tile_data = TileData::None;
-                        // }
+                        
+                        if (col_index, row_index) != (10, 30) {
+                            println!("PATH: {:?}", enemies.astar((col_index, row_index), (10, 30), &mut level.level_vec)); 
+/*                             level.level_vec[col_index][row_index].tile_data = TileData::None;    */
+
+                            /*  enemies.bfs(&mut self.level_vec, (col_index, row_index), (10, 30), 0); */
+                            /* level.level_vec[col_index][row_index].tile_data = TileData::None; */
+                        }
                     }
                     _ => {},
                 }

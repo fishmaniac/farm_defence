@@ -118,10 +118,10 @@ impl GameManager {
             seed_buttons.check_for_clicked(ButtonType::Seed);
             build_buttons.check_for_clicked(ButtonType::Build);
         }
-        level.update_buildings(self, player, towers, enemies);
+        level.update_buildings(self, towers, enemies);
 
         level.render_level(self, player, tex_man).unwrap();
-        towers.render_towers(self, tex_man, level).unwrap();
+        towers.render_towers(self, tex_man, level, enemies).unwrap();
         /* println!("|| GAME || CAM_X: {}, CAM_Y: {} || PLAYER || X: {}, Y: {}, rectX: {}, rectY: {}", self.cam_x, self.cam_y, player.x, player.y, player.rect.x(), player.rect.y()); */
         /*         towers.render_towers(level, self, tex_man, player).unwrap();  */
         player.render_player(self, tex_man).unwrap();

@@ -133,7 +133,7 @@ impl LevelManager {
     pub fn render_level(&mut self, 
         game: &mut GameManager, 
         player: &mut PlayerManager, 
-        tex_man: &mut TextureManager<WindowContext>
+        tex_man: &mut TextureManager<WindowContext>,
     ) -> Result<(), String> {
         fn check_collisions(player: &mut PlayerManager, temp_tile: &mut LevelTile) {
             if Rect::has_intersection(&player.rect, temp_tile.rect){
@@ -165,31 +165,14 @@ impl LevelManager {
                     false,    // flip horizontal
                     false,     // flip vertical
                 )?;
-
                 check_collisions(player, temp_tile);
             }
         }
         Ok(())
     }
 
-    //     pub fn render_towers(&mut self, 
-    //         game: &mut GameManager, 
-    //         tex_man: &mut TextureManager<WindowContext>
-    //     ) -> Result<(), String> {
-    //         for col_index in 0..self.level_vec.len() {
-    //             for row_index in 0..self.level_vec[col_index].len() {
-    //                 let mut temp_tile = &mut self.level_vec[col_index][row_index];
-    //
-    //                 
-    //             }
-    //         }
-    //     }
-    //     Ok(())
-    // }
-
     pub fn update_buildings(&mut self, 
         game: &mut GameManager, 
-        player: &mut PlayerManager, 
         towers: &mut tower_manager::TowerManager, 
         enemies: &mut EnemyManager, 
     ) {
@@ -211,7 +194,7 @@ impl LevelManager {
                 //CHECK FOR CLICK ON BUTTON
                 if/*  !seed_buttons.hovering_all_buttons && !build_buttons.hovering_all_buttons &&  */Rect::contains_point(&temp_tile.rect, game.mouse_point) && game.mouse_button == MouseButton::Left {
                     if game.build_mode {
-                        build_mode(game, player, towers, enemies, temp_tile, row_index, col_index);
+                        build_mode(game, towers, enemies, temp_tile, row_index, col_index);
                     }
                     if game.seed_mode && temp_tile.tile_type == constants::TILE_TYPE_FIELD_EMPTY {
                         seed_mode(game,temp_tile);
@@ -225,7 +208,6 @@ impl LevelManager {
 
         fn build_mode (
             game: &mut GameManager, 
-            player: &mut PlayerManager, 
             towers: &mut tower_manager::TowerManager, 
             enemies: &mut EnemyManager,
             temp_tile: &mut LevelTile,
@@ -258,7 +240,7 @@ impl LevelManager {
                     }
                 }
                 build if build == constants::CURRENT_BUILD_GOBLIN_TEST as usize => {
-                    enemies.place_enemy(temp_tile, player, row_index, col_index, constants::MAX_WIDTH as usize, constants::MAX_HEIGHT as usize, 0);
+                    enemies.place_enemy(temp_tile, row_index, col_index, constants::MAX_WIDTH as usize, constants::MAX_HEIGHT as usize, 0);
                     temp_tile.tile_type = constants::TILE_TYPE_GOBLIN_TEST;
                     temp_tile.tile_data = TileData::Goblin;
                 }
@@ -319,9 +301,7 @@ impl LevelManager {
                     }
                 }
             }
-
         }
-
     }
 }
 
