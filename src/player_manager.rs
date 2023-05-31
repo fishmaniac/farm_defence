@@ -42,7 +42,7 @@ impl PlayerManager {
             x: 0,
             y: 0,
             texture_path: "".to_string(),
-            rect: Rect::new(0, 0, 0, 0),
+            rect: Rect::new(0, 0, constants::OUTPUT_WIDTH as u32, constants::OUTPUT_HEIGHT as u32),
             direction: Direction::Up,
             menu_selection: 0,
         };
@@ -130,6 +130,7 @@ impl PlayerManager {
                     self.colliding = false;
                     println!("Right");
                 }
+                //MAYBE CHANGE TO PLAYER_SPEED / 2 FOR DIAGONALS
                 Direction::UpLeft => {
                     self.y += original_y - new_y + constants::PLAYER_SPEED as i32;
                     self.x += original_y - new_y + constants::PLAYER_SPEED as i32;
@@ -172,15 +173,16 @@ impl PlayerManager {
     ) -> Result<(), String> {
         let snapped_x = ((constants::SCREEN_WIDTH as i32 / 2) - (self.x - game.cam_x)) / 32 * 32;
         let snapped_y = ((constants::SCREEN_HEIGHT as i32/ 2) - (self.y - game.cam_y)) / 32 * 32;
-        self.rect = Rect::new(snapped_x, snapped_y, constants::OUTPUT_WIDTH as u32, constants::OUTPUT_HEIGHT as u32);   
+        self.rect.set_x(snapped_x);
+        self.rect.set_y(snapped_y);
         match self.direction {
-            Direction::Up => self.texture_path = "assets/player0-back.png".to_string(),
-            Direction::Down => self.texture_path = "assets/player0-front.png".to_string(),
-            Direction::Left => self.texture_path = "assets/player0-left.png".to_string(),
-            Direction::Right => self.texture_path = "assets/player0-right.png".to_string(),
+            Direction::Up => self.texture_path = constants::TEXTURE_PLAYER_BACK.to_string(),
+            Direction::Down => self.texture_path = constants::TEXTURE_PLAYER_FRONT.to_string(),
+            Direction::Left => self.texture_path = constants::TEXTURE_PLAYER_LEFT.to_string(),
+            Direction::Right => self.texture_path = constants::TEXTURE_PLAYER_RIGHT.to_string(),
             _ => {
                 println!("NO PLAYER TEXTURE");
-                self.texture_path = "assets/player0-front.png".to_string();
+                self.texture_path = constants::TEXTURE_PLAYER_FRONT.to_string();
             }
         }
         let texture = tex_man.load(&self.texture_path)?;

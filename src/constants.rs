@@ -20,6 +20,11 @@ pub const BUILD_BUTTON_AMT: u8 = 4;
 
 pub static TEXTURE_DEFAULT: &str = "assets/default-texture.png";
 
+pub static TEXTURE_PLAYER_FRONT: &str = "assets/player0-front.png";
+pub static TEXTURE_PLAYER_BACK: &str = "assets/player0-back.png";
+pub static TEXTURE_PLAYER_LEFT: &str = "assets/player0-left.png";
+pub static TEXTURE_PLAYER_RIGHT: &str = "assets/player0-right.png";
+
 pub static TEXTURE_FIELD_EMPTY: &str = "assets/field-empty.png";
 pub static TEXTURE_FIELD_SEEDS: &str = "assets/field-seeds.png";
 pub static TEXTURE_FIELD_GROWING: &str = "assets/field1.png";

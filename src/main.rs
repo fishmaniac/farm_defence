@@ -25,10 +25,26 @@ fn game_loop (
     seed_buttons: &mut button_manager::ButtonManager,
     build_buttons: &mut button_manager::ButtonManager,
 ) {
+    let mut fps: u32 = 0;
+    let mut frame_count: u32 = 0;
+    let mut last_frame_time = std::time::Instant::now();
+
     while !game.quit {
+        frame_count += 1;
+        let elapsed_time = last_frame_time.elapsed();
+
+        if elapsed_time >= std::time::Duration::from_secs(1) {
+            // Calculate FPS every second
+            fps = frame_count;
+            frame_count = 0;
+            last_frame_time = std::time::Instant::now();
+        }
+        if frame_count % 16 == 0 {
+            println!("FPS: {} FRAME COUNT: {} ELAPSED: {:?}", fps, frame_count, elapsed_time);
+        }
+
         game.prepare_background();
         events.do_event(game, seed_buttons, build_buttons);
-
         game.update_game(tex_man, player, level, towers, enemies, seed_buttons, build_buttons);
         game.canvas.present();
 
@@ -36,7 +52,7 @@ fn game_loop (
         //     println!("|| GAME || CAM_X: {}, CAM_Y: {} || PLAYER || X: {}, Y: {}, rectX: {}, rectY: {} || TOWER VEC POS || COL: {} ROW: {}", game.cam_x, game.cam_y, player.x, player.y, player.rect.x(), player.rect.y(), towers.tower_vec[0].col_index, towers.tower_vec[0].row_index);
         // }
 
-        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
+/*         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60)); */
     }
 }
 

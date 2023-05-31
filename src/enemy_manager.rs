@@ -1,11 +1,16 @@
+use sdl2::video::WindowContext;
+
 use std::collections::{BinaryHeap, HashSet};
 use std::cmp::Ordering;
 
 use crate::constants;
 use crate::player_manager;
+use crate::game_manager;
 use crate::level_manager;
 use crate::level_manager::LevelTile;
 use crate::level_manager::TileData;
+use crate::texture_manager;
+use crate::enemy_manager;
 
 /* #[derive(Debug, PartialEq, Eq, Hash, Clone)] */
 pub struct Enemy {
@@ -37,54 +42,35 @@ impl EnemyManager {
     pub fn place_enemy(
         &mut self, 
         temp_tile: &level_manager::LevelTile, 
-        row_index: usize, 
-        col_index: usize, 
-        row_max: usize, 
-        col_max: usize, 
-        i: usize
+        col_index: usize,
+        row_index: usize,
     ) {
         println!("PLACING ENEMY~ X: {}, Y: {}", col_index, row_index);
         match temp_tile.tile_data {
             TileData::Goblin => {
-                let mut open_set = BinaryHeap::new();
-                let mut open_set_set = HashSet::new();
-                let mut came_from = vec![vec![(usize::MAX, usize::MAX); constants::MAX_WIDTH as usize]; constants::MAX_HEIGHT as usize];
-                let mut g_score = vec![vec![usize::MAX; constants::MAX_WIDTH as usize]; constants::MAX_HEIGHT as usize as usize];
-                let mut f_score = vec![vec![usize::MAX; constants::MAX_WIDTH as usize]; constants::MAX_HEIGHT as usize as usize];
-
-                let mut enemy_tile = self::Enemy {
-                    open_set,
-                    open_set_set,
-                    came_from,
-                    g_score,
-                    f_score,
+                let enemy_tile = self::Enemy {
+                    open_set: BinaryHeap::new(),
+                    open_set_set: HashSet::new(),
+                    came_from: vec![vec![(usize::MAX, usize::MAX); constants::MAX_WIDTH as usize]; constants::MAX_HEIGHT as usize],
+                    g_score: vec![vec![usize::MAX; constants::MAX_WIDTH as usize]; constants::MAX_HEIGHT as usize as usize],
+                    f_score: vec![vec![usize::MAX; constants::MAX_WIDTH as usize]; constants::MAX_HEIGHT as usize as usize],
                     attack_speed: 5,
                     attack_damage: 5,
                     row_index,
                     col_index,
                     rect: sdl2::rect::Rect::new(temp_tile.rect.x(), temp_tile.rect.y(), constants::TILE_SIZE, constants::TILE_SIZE),
                     texture_path: constants::TEXTURE_GOBLIN_ENEMY_FRONT.to_string(),
-                    //CHANGE TEXTURE
                 };
-/*                 println!("PATH: {:?}", self.astar((col_index, row_index), (10, 30), &mut level.level_vec));   */
-
+                /*                 println!("PATH: {:?}", self.astar((col_index, row_index), (10, 30), &mut level.level_vec));   */
                 self.enemy_vec.push(enemy_tile);
-
-                /*                 println!("GOBLIN PUSHED"); */
             },
             _=> {
-                let mut open_set = BinaryHeap::new();
-                let mut open_set_set = HashSet::new();
-                let mut came_from = vec![vec![(usize::MAX, usize::MAX); constants::MAX_WIDTH as usize]; constants::MAX_HEIGHT as usize];
-                let mut g_score = vec![vec![usize::MAX; constants::MAX_WIDTH as usize]; constants::MAX_HEIGHT as usize];
-                let mut f_score = vec![vec![usize::MAX; constants::MAX_WIDTH as usize]; constants::MAX_HEIGHT as usize];
-
-                let mut enemy_tile = self::Enemy {
-                    open_set,
-                    open_set_set,
-                    came_from,
-                    g_score,
-                    f_score,
+                let enemy_tile = self::Enemy {
+                    open_set: BinaryHeap::new(),
+                    open_set_set: HashSet::new(),
+                    came_from: vec![vec![(usize::MAX, usize::MAX); constants::MAX_WIDTH as usize]; constants::MAX_HEIGHT as usize],
+                    g_score: vec![vec![usize::MAX; constants::MAX_WIDTH as usize]; constants::MAX_HEIGHT as usize as usize],
+                    f_score: vec![vec![usize::MAX; constants::MAX_WIDTH as usize]; constants::MAX_HEIGHT as usize as usize],
                     attack_speed: 5,
                     attack_damage: 5,
                     row_index,
@@ -95,6 +81,54 @@ impl EnemyManager {
                 self.enemy_vec.push(enemy_tile);
             }
         }
+    }
+
+    pub fn render_enemies(
+        &mut self,
+        game: &mut game_manager::GameManager, 
+        tex_man: &mut texture_manager::TextureManager<WindowContext>, 
+        // temp_tile: &mut self::LevelTile, 
+        // col_index: usize,
+        // row_index: usize,
+    ) -> Result<(), String> {
+/*         println!("VEC LEN: {}", self.enemy_vec.len()); */
+        for enemy_index in 0..self.enemy_vec.len() {
+            /*                     match temp_tile.tile_data { */
+            // level.level_vec[self.enemy_vec[enemy_index].row_index][self.enemy_vec[enemy_index].col_index].tile_data = TileData::Goblin;
+            // level.level_vec[self.enemy_vec[enemy_index].row_index][self.enemy_vec[enemy_index].col_index].texture_path = constants::TEXTURE_GOBLIN_ENEMY_FRONT.to_string();
+            let col = self.enemy_vec[enemy_index].col_index as i32;
+            let row = self.enemy_vec[enemy_index].row_index as i32;
+
+            /*                         TileData::Goblin =>  { */
+           /*  if (col_index, row_index) == (self.enemy_vec[enemy_index].row_index, self.enemy_vec[enemy_index].col_index) { */
+                self.enemy_vec[enemy_index].rect.set_x((constants::TILE_SIZE as i32 * col as i32) - game.cam_x);
+                self.enemy_vec[enemy_index].rect.set_y((constants::TILE_SIZE as i32 * row as i32) - game.cam_y);
+
+                let texture = tex_man.load(constants::TEXTURE_GOBLIN_ENEMY_FRONT)?;
+
+                game.canvas.copy_ex(
+                    &texture, // Texture object
+                    None,      // source rect
+                    self.enemy_vec[enemy_index].rect,     // destination rect
+                    0.0,      // angle (degrees)
+                    None,   // center
+                    false,    // flip horizontal
+                    false,     // flip vertical
+                )?;
+/*             } */
+
+            // if (col_index, row_index) != (10, 30) {
+            //     println!("PATH: {:?}", enemies.astar((col_index, row_index), (10, 30), &mut level.level_vec)); 
+            //     level.level_vec[col_index][row_index].tile_data = TileData::None;    
+            //
+            //     /* enemies.bfs(&mut self.level_vec, (col_index, row_index), (10, 30), 0); */
+            //     level.level_vec[col_index][row_index].tile_data = TileData::None;
+            // }
+            //     }
+            //     _ => {}
+            // }
+        }
+        Ok(())
     }
 
 
@@ -115,7 +149,7 @@ impl EnemyManager {
         while let Some((_, current)) = temp_enemy.open_set.pop() {
             /* println!("ASTAR: X: {}, Y: {}", current.0, current1); */
             let (current_x, current_y) = current;
-/*             level_vec[current_x][current_y].tile_data = TileData::Goblin; */
+            /*             level_vec[current_x][current_y].tile_data = TileData::Goblin; */
             if (current_x, current_y) == (goal_x, goal_y) {
                 /*                 println!("GOAL FOUND: X: {} Y: {}", current_x, current_y); */
                 // Reconstruct the path from the goal to the start
