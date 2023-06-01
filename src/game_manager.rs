@@ -60,7 +60,7 @@ impl GameManager {
         // assert_eq!(gl_attr.context_version(), (3, 2));
 
         let mut canvas = window.into_canvas()
-            .present_vsync()
+/*             .present_vsync() */
             .accelerated()
             .build()
             .expect("Failed to initialize canvas");
@@ -118,17 +118,12 @@ impl GameManager {
             seed_buttons.check_for_clicked(ButtonType::Seed);
             build_buttons.check_for_clicked(ButtonType::Build);
         }
-
-        level.update_buildings(self, towers, enemies, seed_buttons, build_buttons);
-
         for col_index in 0..level.level_vec.len() {
             for row_index in 0..level.level_vec[col_index].len() {
                 let temp_tile = &mut level.level_vec[col_index][row_index];
-                level_manager::LevelManager::render_level(self, player, tex_man, temp_tile, col_index, row_index).unwrap();
 
-                // if level.level_vec[col_index - 1][row_index].tile_type == constants::TILE_TYPE_ARCHER_BOTTOM {
-                //     temp_tile.tile_type = constants::TILE_TYPE_ARCHER_TOP;
-                // }
+                level_manager::LevelManager::render_level(self, player, tex_man, temp_tile, col_index, row_index).unwrap();
+                level_manager::LevelManager::update_buildings(self, towers, enemies, seed_buttons, build_buttons, temp_tile, col_index, row_index);
             }
         }
         //dont do too much more than o(n^2)

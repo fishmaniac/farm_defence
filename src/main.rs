@@ -51,8 +51,8 @@ fn game_loop (
         // if towers.tower_vec.len() > 0 {
         //     println!("|| GAME || CAM_X: {}, CAM_Y: {} || PLAYER || X: {}, Y: {}, rectX: {}, rectY: {} || TOWER VEC POS || COL: {} ROW: {}", game.cam_x, game.cam_y, player.x, player.y, player.rect.x(), player.rect.y(), towers.tower_vec[0].col_index, towers.tower_vec[0].row_index);
         // }
-
-/*         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60)); */
+        //
+        // ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
 }
 
