@@ -8,6 +8,9 @@ pub const IMAGE_SCALING:u8 = 1;
 pub const OUTPUT_WIDTH: u8 = IMAGE_WIDTH * IMAGE_SCALING;
 pub const OUTPUT_HEIGHT: u8 = IMAGE_HEIGHT * IMAGE_SCALING;
 
+pub const COLOR_BACKGROUND: sdl2::pixels::Color = sdl2::pixels::Color::RGBA(69, 69, 69, 255);
+pub const COLOR_OUTLINE: sdl2::pixels::Color = sdl2::pixels::Color::RGBA(252, 186, 3, 255);
+
 pub const TILE_SIZE: u32 = 32;
 pub const MAX_HEIGHT: u16 = 150;
 pub const MAX_WIDTH: u16 = 300;

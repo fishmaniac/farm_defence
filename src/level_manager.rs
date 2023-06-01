@@ -139,7 +139,6 @@ impl LevelManager {
         col_index: usize,
         row_index: usize,
     ) -> Result<(), String> {
-
         temp_tile.rect.set_x((constants::TILE_SIZE as i32 * col_index as i32) - game.cam_x);
         temp_tile.rect.set_y((constants::TILE_SIZE as i32 * row_index as i32) - game.cam_y);
         let texture = tex_man.load(&temp_tile.texture_path)?;
@@ -190,11 +189,11 @@ impl LevelManager {
 
         //PRETTY SURE HOVERING ALL BUTTONS = BUG
         //CHECK FOR CLICK ON BUTTON
-        if/*  !seed_buttons.hovering_all_buttons && !build_buttons.hovering_all_buttons &&  */Rect::contains_point(&temp_tile.rect, game.mouse_point) && game.mouse_button == MouseButton::Left {
-            if game.build_mode {
+        if Rect::contains_point(&temp_tile.rect, game.mouse_point) && game.mouse_button == MouseButton::Left {
+            if game.build_mode && !button_manager::ButtonManager::check_clicked(build_buttons) {
                 Self::build_mode(game, towers, enemies, temp_tile, row_index, col_index);
             }
-            if game.seed_mode && temp_tile.tile_type == constants::TILE_TYPE_FIELD_EMPTY {
+            if game.seed_mode && !button_manager::ButtonManager::check_clicked(seed_buttons) && temp_tile.tile_type == constants::TILE_TYPE_FIELD_EMPTY {
                 Self::seed_mode(game,temp_tile);
             }
         }

@@ -23,7 +23,6 @@ pub struct ButtonManager {
     pub button_vec: Vec<Button>,
     pub current_button_clicked_seed: usize,
     pub current_button_clicked_build: usize,
-    pub hovering_all_buttons: bool,
 }
 
 impl ButtonManager {
@@ -33,7 +32,6 @@ impl ButtonManager {
             button_vec: Vec::new(),
             current_button_clicked_seed: 0,
             current_button_clicked_build: 0,
-            hovering_all_buttons: false,
         };
         match button_type {
             ButtonType::Seed => buttons.create_seed_buttons(&player),
@@ -74,9 +72,7 @@ impl ButtonManager {
     }
 
     fn draw_rect_outline(game: &mut game_manager::GameManager, rect: Rect) {
-        let color: sdl2::pixels::Color = Color::RGBA(66, 81, 245, 255);
-        game.canvas.set_draw_color(color);
-
+        game.canvas.set_draw_color(constants::COLOR_OUTLINE);
         game.canvas.draw_line(rect.top_left(), rect.top_right()).unwrap();
         game.canvas.draw_line(rect.bottom_left(), rect.bottom_right()).unwrap();
         game.canvas.draw_line(rect.top_left(), rect.bottom_left()).unwrap();
@@ -102,8 +98,6 @@ impl ButtonManager {
 
     pub fn render_seed_buttons (&mut self, player: &mut player_manager::PlayerManager, tex_man: &mut texture_manager::TextureManager<WindowContext>, game: &mut game_manager::GameManager) -> Result<(), String> {
         if game.seed_mode {
-            self.hovering_all_buttons = true;
-
             for button_index in 0..self.button_vec.len() {
                 self.button_vec[button_index].rect.set_x(player.rect.x() + constants::TILE_SIZE as i32 * button_index as i32 - constants::SCREEN_WIDTH as i32 / 2 + constants::TILE_SIZE as i32);
                 self.button_vec[button_index].rect.set_y(constants::TILE_SIZE as i32 + player.rect.y() - constants::SCREEN_HEIGHT as i32 / 2 + constants::TILE_SIZE as i32);
@@ -125,7 +119,7 @@ impl ButtonManager {
                     self.button_vec[button_index].hovering_button = false;
                 }
 
-                if self.button_vec[button_index].hovering_button && self.hovering_all_buttons && game.mouse_button == MouseButton::Left {
+                if self.button_vec[button_index].hovering_button && game.mouse_button == MouseButton::Left {
                     self.button_vec[button_index].clicked = true;
                     self.current_button_clicked_seed = button_index;
                 }
@@ -140,7 +134,6 @@ impl ButtonManager {
 
     pub fn render_build_buttons (&mut self, player: &mut player_manager::PlayerManager, tex_man: &mut texture_manager::TextureManager<WindowContext>, game: &mut game_manager::GameManager) -> Result<(), String> {
         if game.build_mode {
-            self.hovering_all_buttons = true;
             for button_index in 0..self.button_vec.len() {
                 self.button_vec[button_index].rect.set_x(player.rect.x() + constants::TILE_SIZE as i32 * button_index as i32 - constants::SCREEN_WIDTH as i32 / 2 + constants::TILE_SIZE as i32);
                 self.button_vec[button_index].rect.set_y(constants::TILE_SIZE as i32 + player.rect.y() - constants::SCREEN_HEIGHT as i32 / 2 + constants::TILE_SIZE as i32);
@@ -161,7 +154,7 @@ impl ButtonManager {
                 else {
                     self.button_vec[button_index].hovering_button = false;
                 }
-                if self.button_vec[button_index].hovering_button && self.hovering_all_buttons && game.mouse_button == MouseButton::Left {
+                if self.button_vec[button_index].hovering_button && game.mouse_button == MouseButton::Left {
                     self.button_vec[button_index].clicked = true;
                     self.current_button_clicked_build = button_index;
                 }
@@ -172,6 +165,14 @@ impl ButtonManager {
             }
         }
         Ok(())
+    }
+    pub fn check_clicked (&mut self) -> bool {
+        for button_index in 0..self.button_vec.len() { 
+            if self.button_vec[button_index].hovering_button == true {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

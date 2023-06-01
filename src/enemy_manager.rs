@@ -1,7 +1,11 @@
 use sdl2::video::WindowContext;
 
-use std::collections::{BinaryHeap, HashSet};
+use std::collections::{BinaryHeap, HashMap};
+use std::vec;
+
 use std::cmp::Ordering;
+
+
 
 use crate::constants;
 use crate::player_manager;
@@ -13,12 +17,31 @@ use crate::texture_manager;
 use crate::enemy_manager;
 
 /* #[derive(Debug, PartialEq, Eq, Hash, Clone)] */
+#[derive(Copy, Clone, Eq, PartialEq)]
+struct State {
+    position: (usize, usize),
+    priority: usize,
+}
+
+// Implement Ord trait for State to define the ordering in the BinaryHeap
+impl Ord for State {
+    fn cmp(&self, other: &Self) -> Ordering {
+        // Reverse the ordering to create a min-heap
+        other.priority.cmp(&self.priority)
+    }
+}
+
+// Implement PartialOrd trait for State to enable comparison
+impl PartialOrd for State {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+#[derive(Debug)]
 pub struct Enemy {
-    pub open_set: BinaryHeap<(usize, (usize, usize))>,
-    pub open_set_set: HashSet<(usize, usize)>,
-    pub came_from: Vec<Vec<(usize, usize)>>,
-    pub g_score: Vec<Vec<usize>>,
-    pub f_score: Vec<Vec<usize>>,
+    pub cost_total: f32,
+    pub final_path: Option<Vec<(usize, usize)>>,
     pub col_index: usize,
     pub row_index: usize,
     pub attack_speed: i8,
@@ -49,11 +72,8 @@ impl EnemyManager {
         match temp_tile.tile_data {
             TileData::Goblin => {
                 let enemy_tile = self::Enemy {
-                    open_set: BinaryHeap::new(),
-                    open_set_set: HashSet::new(),
-                    came_from: vec![vec![(usize::MAX, usize::MAX); constants::MAX_WIDTH as usize]; constants::MAX_HEIGHT as usize],
-                    g_score: vec![vec![usize::MAX; constants::MAX_WIDTH as usize]; constants::MAX_HEIGHT as usize as usize],
-                    f_score: vec![vec![usize::MAX; constants::MAX_WIDTH as usize]; constants::MAX_HEIGHT as usize as usize],
+                    cost_total: 0.0,
+                    final_path: None,
                     attack_speed: 5,
                     attack_damage: 5,
                     row_index,
@@ -61,16 +81,12 @@ impl EnemyManager {
                     rect: sdl2::rect::Rect::new(temp_tile.rect.x(), temp_tile.rect.y(), constants::TILE_SIZE, constants::TILE_SIZE),
                     texture_path: constants::TEXTURE_GOBLIN_ENEMY_FRONT.to_string(),
                 };
-                /*                 println!("PATH: {:?}", self.astar((col_index, row_index), (10, 30), &mut level.level_vec));   */
                 self.enemy_vec.push(enemy_tile);
             },
             _=> {
                 let enemy_tile = self::Enemy {
-                    open_set: BinaryHeap::new(),
-                    open_set_set: HashSet::new(),
-                    came_from: vec![vec![(usize::MAX, usize::MAX); constants::MAX_WIDTH as usize]; constants::MAX_HEIGHT as usize],
-                    g_score: vec![vec![usize::MAX; constants::MAX_WIDTH as usize]; constants::MAX_HEIGHT as usize as usize],
-                    f_score: vec![vec![usize::MAX; constants::MAX_WIDTH as usize]; constants::MAX_HEIGHT as usize as usize],
+                    cost_total: 0.0,
+                    final_path: None,
                     attack_speed: 5,
                     attack_damage: 5,
                     row_index,
@@ -87,133 +103,123 @@ impl EnemyManager {
         &mut self,
         game: &mut game_manager::GameManager, 
         tex_man: &mut texture_manager::TextureManager<WindowContext>, 
-        // temp_tile: &mut self::LevelTile, 
-        // col_index: usize,
-        // row_index: usize,
+        level: &mut level_manager::LevelManager, 
     ) -> Result<(), String> {
-/*         println!("VEC LEN: {}", self.enemy_vec.len()); */
         for enemy_index in 0..self.enemy_vec.len() {
-            /*                     match temp_tile.tile_data { */
-            // level.level_vec[self.enemy_vec[enemy_index].row_index][self.enemy_vec[enemy_index].col_index].tile_data = TileData::Goblin;
-            // level.level_vec[self.enemy_vec[enemy_index].row_index][self.enemy_vec[enemy_index].col_index].texture_path = constants::TEXTURE_GOBLIN_ENEMY_FRONT.to_string();
             let col = self.enemy_vec[enemy_index].col_index as i32;
             let row = self.enemy_vec[enemy_index].row_index as i32;
 
-            /*                         TileData::Goblin =>  { */
-           /*  if (col_index, row_index) == (self.enemy_vec[enemy_index].row_index, self.enemy_vec[enemy_index].col_index) { */
-                self.enemy_vec[enemy_index].rect.set_x((constants::TILE_SIZE as i32 * col as i32) - game.cam_x);
-                self.enemy_vec[enemy_index].rect.set_y((constants::TILE_SIZE as i32 * row as i32) - game.cam_y);
+            self.enemy_vec[enemy_index].rect.set_x((constants::TILE_SIZE as i32 * col as i32) - game.cam_x);
+            self.enemy_vec[enemy_index].rect.set_y((constants::TILE_SIZE as i32 * row as i32) - game.cam_y);
 
-                let texture = tex_man.load(&self.enemy_vec[enemy_index].texture_path)?;
+            let texture = tex_man.load(&self.enemy_vec[enemy_index].texture_path)?;
 
-                game.canvas.copy_ex(
-                    &texture, // Texture object
-                    None,      // source rect
-                    self.enemy_vec[enemy_index].rect,     // destination rect
-                    0.0,      // angle (degrees)
-                    None,   // center
-                    false,    // flip horizontal
-                    false,     // flip vertical
-                )?;
-/*             } */
-
-            // if (col_index, row_index) != (10, 30) {
-            //     println!("PATH: {:?}", enemies.astar((col_index, row_index), (10, 30), &mut level.level_vec)); 
-            //     level.level_vec[col_index][row_index].tile_data = TileData::None;    
-            //
-            //     /* enemies.bfs(&mut self.level_vec, (col_index, row_index), (10, 30), 0); */
-            //     level.level_vec[col_index][row_index].tile_data = TileData::None;
-            // }
-            //     }
-            //     _ => {}
-            // }
-        }
-        Ok(())
-    }
-
-
-    pub fn astar(&mut self, start: (usize, usize), goal: (usize, usize), level_vec: &mut [Vec<LevelTile>]) -> Option<Vec<(usize, usize)>> {
-        let height = level_vec.len();
-        let width = level_vec[0].len();
-
-        let (start_x, start_y) = start;
-        let (goal_x, goal_y) = goal;
-
-        let temp_enemy = &mut self.enemy_vec[0];
-
-        temp_enemy.g_score[start_y][start_x] = 0;
-        temp_enemy.f_score[start_y][start_x] = Self::heuristic((start_x, start_y), (goal_x, goal_y));
-        temp_enemy.open_set.push((temp_enemy.f_score[start_y][start_x], (start_x, start_y)));
-        temp_enemy.open_set_set.insert((start_x, start_y));
-
-        while let Some((_, current)) = temp_enemy.open_set.pop() {
-            /* println!("ASTAR: X: {}, Y: {}", current.0, current1); */
-            let (current_x, current_y) = current;
-            /*             level_vec[current_x][current_y].tile_data = TileData::Goblin; */
-            if (current_x, current_y) == (goal_x, goal_y) {
-                /*                 println!("GOAL FOUND: X: {} Y: {}", current_x, current_y); */
-                // Reconstruct the path from the goal to the start
-                let mut path = vec![(goal_x, goal_y)];
-                let mut pos = (goal_x, goal_y);
-
-                while pos != (start_x, start_y) {
-                    pos = temp_enemy.came_from[pos.1][pos.0];
-                    path.push(pos);
-                }
-
-                path.reverse();
-                return Some(path);
+            game.canvas.copy_ex(
+                &texture, // Texture object
+                None,      // source rect
+                self.enemy_vec[enemy_index].rect,     // destination rect
+                0.0,      // angle (degrees)
+                None,   // center
+                false,    // flip horizontal
+                false,     // flip vertical
+            )?;
+            if self.enemy_vec[enemy_index].final_path == None {
+                self.astar((self.enemy_vec[enemy_index].col_index, self.enemy_vec[enemy_index].row_index), (10, 30), &mut level.level_vec);
+                println!("PATH: {:?}", self.enemy_vec[enemy_index].final_path);
             }
-
-
-            for neighbor in Self::get_neighbors(current, width, height) {
-                let (neighbor_x, neighbor_y) = neighbor;
-
-                let tentative_g_score = temp_enemy.g_score[current_y][current_x] + 1; // Assuming a uniform cost of 1 for adjacent tiles
-
-                if tentative_g_score < temp_enemy.g_score[neighbor_y][neighbor_x] {
-                    temp_enemy.came_from[neighbor_y][neighbor_x] = (current_x, current_y);
-                    temp_enemy.g_score[neighbor_y][neighbor_x] = tentative_g_score;
-                    temp_enemy.f_score[neighbor_y][neighbor_x] = tentative_g_score + Self::heuristic(neighbor, (goal_x, goal_y));
-
-                    if !temp_enemy.open_set_set.contains(&neighbor) {
-                        temp_enemy.open_set.push((temp_enemy.f_score[neighbor_y][neighbor_x], neighbor));
-                        temp_enemy.open_set_set.insert(neighbor);
+            else {
+                //step through path
+                //TODO: add counter to game tick for movement speed
+                //FIXME: remove last element after moving
+                if let Some(mut path) = self.enemy_vec[enemy_index].final_path.take() {
+                    if let Some((col, row)) = path.first().cloned() {
+                        self.enemy_vec[enemy_index].col_index = col;
+                        self.enemy_vec[enemy_index].row_index = row;
+                        path.remove(0);
+                        self.enemy_vec[enemy_index].final_path = Some(path);
                     }
                 }
             }
         }
-        None
-    }    
-    fn heuristic(start: (usize, usize), goal: (usize, usize)) -> usize {
-        let (start_x, start_y) = start;
-        let (goal_x, goal_y) = goal;
-
-        // Manhattan distance
-        let dx = (goal_x as isize - start_x as isize).abs() as usize;
-        let dy = (goal_y as isize - start_y as isize).abs() as usize;
-
-        dx + dy
+        Ok(())
     }
 
-    fn get_neighbors(pos: (usize, usize), width: usize, height: usize) -> Vec<(usize, usize)> {
-        let (x, y) = pos;
-        let mut neighbors = Vec::new();
+    pub fn astar(&mut self, start: (usize, usize), goal: (usize, usize), tiles: &[Vec<LevelTile>]) {
+        let mut frontier: BinaryHeap<State> = BinaryHeap::new();
+        let mut priorities: HashMap<(usize, usize), usize> = HashMap::new();
+        let mut came_from: HashMap<(usize, usize), (usize, usize)> = HashMap::new();
 
-        if y > 0 {
-            neighbors.push((x, y - 1)); // Up
+        let initial_state = State {
+            position: start,
+            priority: heuristic(start, goal),
+        };
+
+        for enemy_index in 0..self.enemy_vec.len() {
+            frontier.push(initial_state);
+            priorities.insert(start, initial_state.priority);
+
+            while let Some(current_state) = frontier.pop() {
+                let current = current_state.position;
+
+                if current == goal {
+                    let mut path = vec![current];
+                    let mut current = current;
+                    while let Some(&prev) = came_from.get(&current) {
+                        path.push(prev);
+                        current = prev;
+                    }
+                    path.reverse();
+                    self.enemy_vec[enemy_index].final_path = Some(path);
+                }
+
+                let neighbors = get_neighbors(current, tiles);
+
+                for next in neighbors {
+                    //1 FOR 4 WAY OR IMPLEMENT COST
+                    let new_cost = 1;
+                    let priority = new_cost + heuristic(next, goal);
+
+                    if !priorities.contains_key(&next) || priority < priorities[&next] {
+                        priorities.insert(next, priority);
+                        frontier.push(State {
+                            position: next,
+                            priority,
+                        });
+                        came_from.insert(next, current);
+                    }
+                }
+            }
         }
-        if y < height - 1 {
-            neighbors.push((x, y + 1)); // Down
+
+        fn heuristic(position: (usize, usize), goal: (usize, usize)) -> usize {
+            let (x1, y1) = position;
+            let (x2, y2) = goal;
+
+            let dx = (x1 as isize - x2 as isize).abs() as usize;
+            let dy = (y1 as isize - y2 as isize).abs() as usize;
+
+            dx + dy
         }
-        if x > 0 {
-            neighbors.push((x - 1, y)); // Left
+        fn get_neighbors(position: (usize, usize), tiles: &[Vec<LevelTile>]) -> Vec<(usize, usize)> {
+            let (x, y) = position;
+            let width = tiles[0].len();
+            let height = tiles.len();
+            let mut neighbors = Vec::new();
+
+            if y > 0 && tiles[x][y - 1].tile_type != constants::TILE_TYPE_WALL {
+                neighbors.push((x, y - 1));
+            }
+            if y < height - 1 && tiles[x][y + 1].tile_type != constants::TILE_TYPE_WALL {
+                neighbors.push((x, y + 1));
+            }
+            if x > 0 && tiles[x - 1][y].tile_type != constants::TILE_TYPE_WALL {
+                neighbors.push((x - 1, y));
+            }
+            if x < width - 1 && tiles[x + 1][y].tile_type != constants::TILE_TYPE_WALL {
+                neighbors.push((x + 1, y));
+            }
+            neighbors
         }
-        if x < width - 1 {
-            neighbors.push((x + 1, y)); // Right
-        }
-        neighbors
     }
-
 }
 

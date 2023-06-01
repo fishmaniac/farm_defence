@@ -1,9 +1,3 @@
-use sdl2::video::WindowContext;
-
-use std::time::Duration;
-
-use button_manager::ButtonType;
-
 pub mod constants;
 pub mod game_manager;
 pub mod texture_manager;
@@ -16,7 +10,7 @@ pub mod button_manager;
 
 fn game_loop (
     game: &mut game_manager::GameManager, 
-    tex_man: &mut texture_manager::TextureManager<WindowContext>, 
+    tex_man: &mut texture_manager::TextureManager<sdl2::video::WindowContext>, 
     events: &mut event_manager::EventManager, 
     player: &mut player_manager::PlayerManager,
     level: &mut level_manager::LevelManager,
@@ -52,7 +46,7 @@ fn game_loop (
         //     println!("|| GAME || CAM_X: {}, CAM_Y: {} || PLAYER || X: {}, Y: {}, rectX: {}, rectY: {} || TOWER VEC POS || COL: {} ROW: {}", game.cam_x, game.cam_y, player.x, player.y, player.rect.x(), player.rect.y(), towers.tower_vec[0].col_index, towers.tower_vec[0].row_index);
         // }
         //
-        // ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
+        /* ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60)); */
     }
 }
 
@@ -67,8 +61,8 @@ fn main() -> Result<(), String> {
     let mut towers = tower_manager::TowerManager::new();
     let mut enemies = enemy_manager::EnemyManager::new();
 
-    let mut seed_buttons = button_manager::ButtonManager::new(constants::SEED_BUTTON_AMT, ButtonType::Seed, &player);
-    let mut build_buttons = button_manager::ButtonManager::new(constants::BUILD_BUTTON_AMT, ButtonType::Build, &player);
+    let mut seed_buttons = button_manager::ButtonManager::new(constants::SEED_BUTTON_AMT, button_manager::ButtonType::Seed, &player);
+    let mut build_buttons = button_manager::ButtonManager::new(constants::BUILD_BUTTON_AMT, button_manager::ButtonType::Build, &player);
 
     level.create_level(); 
     level.read_file("dungeon.txt").unwrap();
@@ -78,11 +72,24 @@ fn main() -> Result<(), String> {
 
     /*     Prepare fonts */
     // let ttf_context = sdl2::ttf::init().map_err(|e| e.to_string())?; 
-    // let font_path: &Path = Path::new(&"assets/font/slkscr.ttf");
+    // let font_path: &std::path::Path = std::path::Path::new(&"assets/font/slkscr.ttf");
     // let mut font = ttf_context.load_font(font_path, 128)?;
+    // let surface = font.render("FPS: ").unwrap();
+    // let texture_creator = sdl_context.video()?.texture_creator();
+    // let texture = texture_creator.create_texture_from_surface(&surface)?;
+
     // font.set_style(sdl2::ttf::FontStyle::BOLD);
+    //
 
     //Add game loop error handling
+    //
+    // std::thread::spawn(|| {
+    //     for i in 1..10 {
+    //         println!("hi number {} from the spawned thread!", i);
+    //         std::thread::sleep(Duration::from_millis(1));
+    //     }
+    // });
+
     game_loop(&mut game, &mut tex_man, &mut events, &mut player, &mut level, &mut towers, &mut enemies, &mut seed_buttons, &mut build_buttons);
 
     Ok(())

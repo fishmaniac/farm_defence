@@ -52,11 +52,12 @@ impl EventManager {
                         MouseButton::X1 => "X1",
                         MouseButton::X2 => "X2",
                     };
-                    if seed_buttons.hovering_all_buttons && mouse_btn == MouseButton::Left {
+                    //ADD CHECK
+                    if mouse_btn == MouseButton::Left && ButtonManager::check_clicked(seed_buttons) {
                         game.seed_outline_visible = !game.seed_outline_visible;
                         println!("MOUSE CLICKED SEED: {}", mouse_btn_str);
                     }
-                    if build_buttons.hovering_all_buttons && mouse_btn == MouseButton::Left {
+                    if mouse_btn == MouseButton::Left && ButtonManager::check_clicked(build_buttons) {
                         game.build_outline_visible = !game.build_outline_visible;
                         println!("MOUSE CLICKED BUILD: {}", mouse_btn_str);
                     }

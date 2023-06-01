@@ -1,9 +1,3 @@
-use sdl2::video::Window;
-use sdl2::render::{Canvas, BlendMode};
-use sdl2::pixels::Color;
-use sdl2::video::{WindowContext, GLProfile};
-
-use crate::button_manager::ButtonType;
 use crate::{level_manager, button_manager, player_manager, texture_manager, constants, tower_manager, enemy_manager};
 
 pub enum Movement {
@@ -30,7 +24,7 @@ pub struct GameManager {
     pub tomato_amount: u32,
     pub cam_x: i32,
     pub cam_y: i32,
-    pub canvas: Canvas<Window>,
+    pub canvas: sdl2::render::Canvas<sdl2::video::Window>,
     pub mouse_point: sdl2::rect::Point,
     pub mouse_button: sdl2::mouse::MouseButton,
     pub movement: Movement,
@@ -60,11 +54,11 @@ impl GameManager {
         // assert_eq!(gl_attr.context_version(), (3, 2));
 
         let mut canvas = window.into_canvas()
-/*             .present_vsync() */
+            .present_vsync()
             .accelerated()
             .build()
             .expect("Failed to initialize canvas");
-        canvas.set_blend_mode(BlendMode::Blend);
+        canvas.set_blend_mode(sdl2::render::BlendMode::Blend);
 
         let game = GameManager {  
             quit: false,
@@ -91,7 +85,7 @@ impl GameManager {
     }
 
     pub fn prepare_background(&mut self) {
-        self.canvas.set_draw_color(Color::RGBA(69, 69, 69, 69));
+        self.canvas.set_draw_color(constants::COLOR_BACKGROUND);
         self.canvas.clear(); 
     }
 
@@ -102,7 +96,7 @@ impl GameManager {
 
     pub fn update_game(
         &mut self, 
-        tex_man: &mut texture_manager::TextureManager<WindowContext>, 
+        tex_man: &mut texture_manager::TextureManager<sdl2::video::WindowContext>, 
         player: &mut player_manager::PlayerManager, 
         level: &mut level_manager::LevelManager, 
         towers: &mut tower_manager::TowerManager, 
@@ -110,29 +104,37 @@ impl GameManager {
         seed_buttons: &mut button_manager::ButtonManager, 
         build_buttons: &mut button_manager::ButtonManager,
     ) {
-
         player.update_player(self);
         self.update_camera(player);
 
         if self.seed_outline_visible || self.build_outline_visible {
-            seed_buttons.check_for_clicked(ButtonType::Seed);
-            build_buttons.check_for_clicked(ButtonType::Build);
+            seed_buttons.check_for_clicked(button_manager::ButtonType::Seed);
+            build_buttons.check_for_clicked(button_manager::ButtonType::Build);
         }
+
         for col_index in 0..level.level_vec.len() {
             for row_index in 0..level.level_vec[col_index].len() {
-                let temp_tile = &mut level.level_vec[col_index][row_index];
-
+                let temp_tile = &mut level.level_vec[col_index][row_index];  
+                
                 level_manager::LevelManager::render_level(self, player, tex_man, temp_tile, col_index, row_index).unwrap();
                 level_manager::LevelManager::update_buildings(self, towers, enemies, seed_buttons, build_buttons, temp_tile, col_index, row_index);
+//                 if temp_tile.tile_type == constants::TILE_TYPE_GOBLIN_TEST {
+//                     enemies.astar((col_index, row_index), (10, 30), &mut level.level_vec);
+// /*                     println!("PATH: {:?}", enemies.enemy_vec[0].final_path); */
+//                     // println!("OUT: OPEN SET: \n{:?}", enemies.enemy_vec[0].open_set);
+//                     // std::process::exit(1);
+//                 }
             }
         }
-        //dont do too much more than o(n^2)
         tower_manager::TowerManager::render_towers(towers, self, tex_man).unwrap();
-        enemy_manager::EnemyManager::render_enemies(enemies, self, tex_man/* , temp_tile, col_index, row_index */).unwrap();
+        enemy_manager::EnemyManager::render_enemies(enemies, self, tex_man, level).unwrap();
+
+
+
+
 
         //TODO: REFACTOR TO LOOP
         player.render_player(self, tex_man).unwrap();
-
 
         /*  enemies.enemy_pathfinding(player, level); */
         /* println!("|| GAME || CAM_X: {}, CAM_Y: {} || PLAYER || X: {}, Y: {}, rectX: {}, rectY: {}", self.cam_x, self.cam_y, player.x, player.y, player.rect.x(), player.rect.y()); */
