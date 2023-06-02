@@ -46,6 +46,7 @@ pub struct Enemy {
     pub row_index: usize,
     pub attack_speed: i8,
     pub attack_damage: i8,
+    pub found_target: bool,
     pub rect: sdl2::rect::Rect,
     pub texture_path: String,
 }
@@ -76,6 +77,7 @@ impl EnemyManager {
                     final_path: None,
                     attack_speed: 5,
                     attack_damage: 5,
+                    found_target: false,
                     row_index,
                     col_index,
                     rect: sdl2::rect::Rect::new(temp_tile.rect.x(), temp_tile.rect.y(), constants::TILE_SIZE, constants::TILE_SIZE),
@@ -89,6 +91,7 @@ impl EnemyManager {
                     final_path: None,
                     attack_speed: 5,
                     attack_damage: 5,
+                    found_target: false,
                     row_index,
                     col_index,
                     rect: sdl2::rect::Rect::new(temp_tile.rect.x(), temp_tile.rect.y(), constants::TILE_SIZE, constants::TILE_SIZE),
@@ -123,40 +126,52 @@ impl EnemyManager {
                 false,    // flip horizontal
                 false,     // flip vertical
             )?;
-            if self.enemy_vec[enemy_index].final_path == None {
-                self.astar((self.enemy_vec[enemy_index].col_index, self.enemy_vec[enemy_index].row_index), (10, 30), &mut level.level_vec);
-                println!("PATH: {:?}", self.enemy_vec[enemy_index].final_path);
+
+            //TODO: maybe make this async...
+            if self.enemy_vec[enemy_index].final_path.is_none() && /* !game.targets.is_empty() &&  */!self.enemy_vec[enemy_index].found_target {
+                for target_index in 0..game.targets.len() {
+                    println!("TARGET i: {}", target_index);
+                    if (self.enemy_vec[enemy_index].col_index, self.enemy_vec[enemy_index].row_index) != game.targets[target_index] {
+                        Self::astar(&mut self.enemy_vec[enemy_index], game.targets[target_index], &mut level.level_vec);
+
+                        //COMMENT TO KEEP TARGETS
+                        game.targets.remove(0);
+                        break;
+                    }
+                }
+/*                 println!("PATH: {:?}", self.enemy_vec[enemy_index].final_path);  */
             }
-            else {
+            else if !self.enemy_vec[enemy_index].found_target {
                 //step through path
                 //TODO: add counter to game tick for movement speed
                 //FIXME: remove last element after moving
                 if let Some(mut path) = self.enemy_vec[enemy_index].final_path.take() {
-                    if let Some((col, row)) = path.first().cloned() {
-                        self.enemy_vec[enemy_index].col_index = col;
-                        self.enemy_vec[enemy_index].row_index = row;
+                    if let Some((col, row)) = path.first() {
+                        self.enemy_vec[enemy_index].col_index = *col;
+                        self.enemy_vec[enemy_index].row_index = *row;
                         path.remove(0);
                         self.enemy_vec[enemy_index].final_path = Some(path);
                     }
+                    if self.enemy_vec[enemy_index].final_path.is_none() {
+                        self.enemy_vec[enemy_index].found_target = true;
+                    }
                 }
             }
+/*             println!("FOUND TARGET: {}, i: {}", self.enemy_vec[enemy_index].found_target, enemy_index); */
         }
         Ok(())
     }
 
-    pub fn astar(&mut self, start: (usize, usize), goal: (usize, usize), tiles: &[Vec<LevelTile>]) {
+    pub fn astar(enemy: &mut Enemy, goal: (usize, usize), tiles: &[Vec<LevelTile>]) {
         let mut frontier: BinaryHeap<State> = BinaryHeap::new();
         let mut priorities: HashMap<(usize, usize), usize> = HashMap::new();
         let mut came_from: HashMap<(usize, usize), (usize, usize)> = HashMap::new();
-
         let initial_state = State {
-            position: start,
-            priority: heuristic(start, goal),
+            position: (enemy.col_index, enemy.row_index),
+            priority: heuristic((enemy.col_index, enemy.row_index), goal),
         };
-
-        for enemy_index in 0..self.enemy_vec.len() {
             frontier.push(initial_state);
-            priorities.insert(start, initial_state.priority);
+            priorities.insert((enemy.col_index, enemy.row_index), initial_state.priority);
 
             while let Some(current_state) = frontier.pop() {
                 let current = current_state.position;
@@ -169,7 +184,7 @@ impl EnemyManager {
                         current = prev;
                     }
                     path.reverse();
-                    self.enemy_vec[enemy_index].final_path = Some(path);
+                    enemy.final_path = Some(path);
                 }
 
                 let neighbors = get_neighbors(current, tiles);
@@ -189,8 +204,6 @@ impl EnemyManager {
                     }
                 }
             }
-        }
-
         fn heuristic(position: (usize, usize), goal: (usize, usize)) -> usize {
             let (x1, y1) = position;
             let (x2, y2) = goal;

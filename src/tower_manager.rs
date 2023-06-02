@@ -34,7 +34,9 @@ impl TowerManager {
         towers
     }
 
-    pub fn place_tower(&mut self, 
+    pub fn place_tower(
+        &mut self, 
+        game: &mut game_manager::GameManager, 
         temp_tile: &level_manager::LevelTile, 
         col_index: usize,
         row_index: usize, 
@@ -54,6 +56,7 @@ impl TowerManager {
                     attack_speed: 5,
                     attack_damage: 5,
                 };
+                game.targets.push((tower_tile.bottom_col_index, tower_tile.bottom_row_index));
                 self.tower_vec.push(tower_tile);
             },
             _=> {
@@ -61,14 +64,15 @@ impl TowerManager {
                     bottom_row_index: row_index,
                     bottom_col_index: col_index,
                     bottom_rect: sdl2::rect::Rect::new(temp_tile.rect.x(), temp_tile.rect.y(), constants::TILE_SIZE, constants::TILE_SIZE),
-                    bottom_texture_path: constants::TEXTURE_TOWER_ARCHER_FRONT.to_string(),
+                    bottom_texture_path: constants::TEXTURE_DEFAULT.to_string(),
                     top_row_index: row_index - 1,
                     top_col_index: col_index,
                     top_rect: sdl2::rect::Rect::new(temp_tile.rect.x(), temp_tile.rect.y() - constants::TILE_SIZE as i32, constants::TILE_SIZE, constants::TILE_SIZE),
-                    top_texture_path: constants::TEXTURE_TOWER_ARCHER_BOTTOM.to_string(),
+                    top_texture_path: constants::TEXTURE_DEFAULT.to_string(),
                     attack_speed: 5,
                     attack_damage: 5,
                 };
+                game.targets.push((tower_tile.bottom_col_index, tower_tile.bottom_row_index));
                 self.tower_vec.push(tower_tile);
             }
         }
@@ -116,15 +120,6 @@ impl TowerManager {
             )?;
 
         }
-        // PREVENT FROM PLACING BELOW TOWER
-        // level.level_vec[col_index][row_index + 1].prev_type = constants::TILE_TYPE_ARCHER_BOTTOM;
-        // //PREVENT FROM PLACING ON TOP OF TOWER
-        // level.level_vec[col_index][row_index - 1].prev_type = constants::TILE_TYPE_ARCHER_BOTTOM;
-        // //PREVENT FORM PLACING ON THIS TOWER
-        // level.level_vec[col_index][row_index].prev_type = constants::TILE_TYPE_ARCHER_BOTTOM;
-        // //CREATE TOP OF TOWER
-        // level.level_vec[col_index][row_index - 1].tile_type = constants::TILE_TYPE_ARCHER_TOP;
-        // level.level_vec[col_index][row_index - 1].tile_data = TileData::ArcherTowerTop;     
         Ok(())
     }
 }

@@ -28,6 +28,7 @@ pub struct GameManager {
     pub mouse_point: sdl2::rect::Point,
     pub mouse_button: sdl2::mouse::MouseButton,
     pub movement: Movement,
+    pub targets: Vec<(usize, usize)>,
 }
 
 impl GameManager {
@@ -80,6 +81,7 @@ impl GameManager {
             mouse_point: sdl2::rect::Point::new(0, 0),
             mouse_button: sdl2::mouse::MouseButton::Unknown,
             movement: Movement::None,
+            targets: Vec::new(),
         };
         game
     }
@@ -118,12 +120,6 @@ impl GameManager {
                 
                 level_manager::LevelManager::render_level(self, player, tex_man, temp_tile, col_index, row_index).unwrap();
                 level_manager::LevelManager::update_buildings(self, towers, enemies, seed_buttons, build_buttons, temp_tile, col_index, row_index);
-//                 if temp_tile.tile_type == constants::TILE_TYPE_GOBLIN_TEST {
-//                     enemies.astar((col_index, row_index), (10, 30), &mut level.level_vec);
-// /*                     println!("PATH: {:?}", enemies.enemy_vec[0].final_path); */
-//                     // println!("OUT: OPEN SET: \n{:?}", enemies.enemy_vec[0].open_set);
-//                     // std::process::exit(1);
-//                 }
             }
         }
         tower_manager::TowerManager::render_towers(towers, self, tex_man).unwrap();
@@ -135,10 +131,7 @@ impl GameManager {
 
         //TODO: REFACTOR TO LOOP
         player.render_player(self, tex_man).unwrap();
-
-        /*  enemies.enemy_pathfinding(player, level); */
         /* println!("|| GAME || CAM_X: {}, CAM_Y: {} || PLAYER || X: {}, Y: {}, rectX: {}, rectY: {}", self.cam_x, self.cam_y, player.x, player.y, player.rect.x(), player.rect.y()); */
-        /*         towers.render_towers(level, self, tex_man, player).unwrap();  */
         seed_buttons.render_seed_buttons(player, tex_man, self).unwrap();
         build_buttons.render_build_buttons(player, tex_man, self).unwrap();  
     }

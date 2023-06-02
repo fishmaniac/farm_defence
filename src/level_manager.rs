@@ -231,7 +231,7 @@ impl LevelManager {
                 if temp_tile.prev_type == constants::TILE_TYPE_GRASS && temp_tile.tile_type != constants::TILE_TYPE_ARCHER_BOTTOM {
                     temp_tile.tile_type = constants::TILE_TYPE_ARCHER_BOTTOM;
                     temp_tile.tile_data = TileData::ArcherTowerBottom;
-                    towers.place_tower(&temp_tile, col_index, row_index);
+                    towers.place_tower(game, &temp_tile, col_index, row_index);
 
                 }
             }
