@@ -19,22 +19,21 @@ fn game_loop (
     seed_buttons: &mut button_manager::ButtonManager,
     build_buttons: &mut button_manager::ButtonManager,
 ) {
-    let mut fps: u32 = 0;
+    let mut fps: u32;
     let mut frame_count: u32 = 0;
-    let mut last_frame_time = std::time::Instant::now();
+    let mut last_fps_time = std::time::Instant::now();
 
     while !game.quit {
         frame_count += 1;
-        let elapsed_time = last_frame_time.elapsed();
+        game.frame_time += 1;
 
-        if elapsed_time >= std::time::Duration::from_secs(1) {
-            // Calculate FPS every second
-            fps = frame_count;
-            frame_count = 0;
-            last_frame_time = std::time::Instant::now();
-        }
         if frame_count % 16 == 0 {
-            println!("FPS: {} FRAME COUNT: {} ELAPSED: {:?}", fps, frame_count, elapsed_time);
+            let elapsed_fps_time = last_fps_time.elapsed();
+            let elapsed_seconds = elapsed_fps_time.as_secs_f64();
+            fps = (frame_count as f64 / elapsed_seconds) as u32;
+            println!("FPS: {}, ELAPSED: {:?}, FRAME TIME: {}", fps, elapsed_seconds, game.frame_time);
+            frame_count = 0;
+            last_fps_time = std::time::Instant::now();
         }
 
         game.prepare_background();

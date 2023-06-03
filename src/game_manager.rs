@@ -24,11 +24,12 @@ pub struct GameManager {
     pub tomato_amount: u32,
     pub cam_x: i32,
     pub cam_y: i32,
+    pub frame_time: u32,
     pub canvas: sdl2::render::Canvas<sdl2::video::Window>,
     pub mouse_point: sdl2::rect::Point,
     pub mouse_button: sdl2::mouse::MouseButton,
     pub movement: Movement,
-    pub targets: Vec<(usize, usize)>,
+    pub target_vec: Vec<(usize, usize)>,
 }
 
 impl GameManager {
@@ -55,7 +56,7 @@ impl GameManager {
         // assert_eq!(gl_attr.context_version(), (3, 2));
 
         let mut canvas = window.into_canvas()
-            .present_vsync()
+            .present_vsync() 
             .accelerated()
             .build()
             .expect("Failed to initialize canvas");
@@ -77,11 +78,12 @@ impl GameManager {
             tomato_amount: 0,
             cam_x: 0,
             cam_y: 0,
+            frame_time: 0,
             canvas,
             mouse_point: sdl2::rect::Point::new(0, 0),
             mouse_button: sdl2::mouse::MouseButton::Unknown,
             movement: Movement::None,
-            targets: Vec::new(),
+            target_vec: Vec::new(),
         };
         game
     }
@@ -117,9 +119,9 @@ impl GameManager {
         for col_index in 0..level.level_vec.len() {
             for row_index in 0..level.level_vec[col_index].len() {
                 let temp_tile = &mut level.level_vec[col_index][row_index];  
-                
+                level_manager::LevelManager::update_buildings(self, towers, enemies, seed_buttons, build_buttons, temp_tile, col_index, row_index);      
                 level_manager::LevelManager::render_level(self, player, tex_man, temp_tile, col_index, row_index).unwrap();
-                level_manager::LevelManager::update_buildings(self, towers, enemies, seed_buttons, build_buttons, temp_tile, col_index, row_index);
+
             }
         }
         tower_manager::TowerManager::render_towers(towers, self, tex_man).unwrap();

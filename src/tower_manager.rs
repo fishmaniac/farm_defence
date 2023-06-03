@@ -56,7 +56,7 @@ impl TowerManager {
                     attack_speed: 5,
                     attack_damage: 5,
                 };
-                game.targets.push((tower_tile.bottom_col_index, tower_tile.bottom_row_index));
+                game.target_vec.push((tower_tile.bottom_col_index, tower_tile.bottom_row_index));
                 self.tower_vec.push(tower_tile);
             },
             _=> {
@@ -72,7 +72,7 @@ impl TowerManager {
                     attack_speed: 5,
                     attack_damage: 5,
                 };
-                game.targets.push((tower_tile.bottom_col_index, tower_tile.bottom_row_index));
+                game.target_vec.push((tower_tile.bottom_col_index, tower_tile.bottom_row_index));
                 self.tower_vec.push(tower_tile);
             }
         }
