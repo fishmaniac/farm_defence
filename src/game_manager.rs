@@ -1,4 +1,4 @@
-use crate::{level_manager, button_manager, player_manager, texture_manager, constants, tower_manager, enemy_manager};
+use crate::{level_manager, button_manager, player_manager, texture_manager, constants, tower_manager, enemy_manager, gui_manager};
 
 pub enum Movement {
     Up,
@@ -107,6 +107,7 @@ impl GameManager {
         enemies: &mut enemy_manager::EnemyManager, 
         seed_buttons: &mut button_manager::ButtonManager, 
         build_buttons: &mut button_manager::ButtonManager,
+        health_bars: &mut gui_manager::GUIManager,
     ) {
         player.update_player(self);
         self.update_camera(player);
@@ -118,14 +119,18 @@ impl GameManager {
 
         for col_index in 0..level.level_vec.len() {
             for row_index in 0..level.level_vec[col_index].len() {
-                let temp_tile = &mut level.level_vec[col_index][row_index];  
+                let temp_tile = &mut level.level_vec[col_index][row_index];
+
                 level_manager::LevelManager::update_buildings(self, towers, enemies, seed_buttons, build_buttons, temp_tile, col_index, row_index);      
                 level_manager::LevelManager::render_level(self, player, tex_man, temp_tile, col_index, row_index).unwrap();
 
             }
         }
-        tower_manager::TowerManager::render_towers(towers, self, tex_man).unwrap();
-        enemy_manager::EnemyManager::render_enemies(enemies, self, tex_man, level).unwrap();
+        towers.check_attacks(self, level, enemies, health_bars);
+        enemy_manager::EnemyManager::render_enemies(enemies, self, tex_man, level).unwrap(); 
+        tower_manager::TowerManager::render_towers(towers, self, tex_man, enemies, health_bars).unwrap();
+
+
 
 
 

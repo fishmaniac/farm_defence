@@ -19,17 +19,17 @@ pub struct Button {
 
 
 pub struct ButtonManager {
-    pub button_amount: u8,
+    pub button_amount: usize,
     pub button_vec: Vec<Button>,
     pub current_button_clicked_seed: usize,
     pub current_button_clicked_build: usize,
 }
 
 impl ButtonManager {
-    pub fn new(button_amount: u8, button_type: ButtonType, player: &player_manager::PlayerManager) -> ButtonManager {
+    pub fn new(button_amount: usize, button_type: ButtonType, player: &player_manager::PlayerManager) -> ButtonManager {
         let mut buttons = ButtonManager {
             button_amount,
-            button_vec: Vec::new(),
+            button_vec: Vec::with_capacity(button_amount as usize),
             current_button_clicked_seed: 0,
             current_button_clicked_build: 0,
         };
@@ -40,7 +40,7 @@ impl ButtonManager {
         buttons
     }
     fn create_seed_buttons (&mut self, player: &player_manager::PlayerManager) {
-        for i in 0..self.button_amount {
+        for i in 0..self.button_vec.len() {
             let temp_button = self::Button {
                 rect: Rect::new(player.x, player.y, constants::TILE_SIZE, constants::TILE_SIZE),
                 texture_path: match i {

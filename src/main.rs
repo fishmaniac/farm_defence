@@ -6,7 +6,10 @@ pub mod player_manager;
 pub mod level_manager;
 pub mod tower_manager;
 pub mod enemy_manager;
+pub mod project_manager;
+pub mod gui_manager;
 pub mod button_manager;
+
 
 fn game_loop (
     game: &mut game_manager::GameManager, 
@@ -18,6 +21,7 @@ fn game_loop (
     enemies: &mut enemy_manager::EnemyManager,
     seed_buttons: &mut button_manager::ButtonManager,
     build_buttons: &mut button_manager::ButtonManager,
+    health_bars: &mut gui_manager::GUIManager,
 ) {
     let mut fps: u32;
     let mut frame_count: u32 = 0;
@@ -38,7 +42,7 @@ fn game_loop (
 
         game.prepare_background();
         events.do_event(game, seed_buttons, build_buttons);
-        game.update_game(tex_man, player, level, towers, enemies, seed_buttons, build_buttons);
+        game.update_game(tex_man, player, level, towers, enemies, seed_buttons, build_buttons, health_bars);
         game.canvas.present();
 
         // if towers.tower_vec.len() > 0 {
@@ -62,6 +66,7 @@ fn main() -> Result<(), String> {
 
     let mut seed_buttons = button_manager::ButtonManager::new(constants::SEED_BUTTON_AMT, button_manager::ButtonType::Seed, &player);
     let mut build_buttons = button_manager::ButtonManager::new(constants::BUILD_BUTTON_AMT, button_manager::ButtonType::Build, &player);
+    let mut health_bars = gui_manager::GUIManager::new();
 
     level.create_level(); 
     level.read_file("dungeon.txt").unwrap();
@@ -89,7 +94,7 @@ fn main() -> Result<(), String> {
     //     }
     // });
 
-    game_loop(&mut game, &mut tex_man, &mut events, &mut player, &mut level, &mut towers, &mut enemies, &mut seed_buttons, &mut build_buttons);
+    game_loop(&mut game, &mut tex_man, &mut events, &mut player, &mut level, &mut towers, &mut enemies, &mut seed_buttons, &mut build_buttons, &mut health_bars);
 
     Ok(())
 }

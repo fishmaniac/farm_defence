@@ -130,7 +130,6 @@ impl PlayerManager {
                     self.colliding = false;
                     println!("Right");
                 }
-                //MAYBE CHANGE TO PLAYER_SPEED / 2 FOR DIAGONALS
                 Direction::UpLeft => {
                     self.y += original_y - new_y + constants::PLAYER_SPEED as i32;
                     self.x += original_y - new_y + constants::PLAYER_SPEED as i32;
@@ -163,6 +162,18 @@ impl PlayerManager {
         else {
             self.x = new_x;
             self.y = new_y;
+
+            //TODO: CAP SPEED IN ALL DIRECTIONS
+            // match self.direction {
+            //     Direction::Up | Direction::Down | Direction::Left | Direction::Right => {
+            //         self.x = new_x;
+            //         self.y = new_y;
+            //     },
+            //     Direction::UpLeft | Direction::UpRight | Direction::DownLeft | Direction::DownRight => {
+            //     
+            //     }
+            //     _ => {}
+            // }
         }
     }
 

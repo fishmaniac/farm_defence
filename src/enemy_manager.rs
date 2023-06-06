@@ -44,8 +44,10 @@ pub struct Enemy {
     pub final_path: Option<Vec<(usize, usize)>>,
     pub col_index: usize,
     pub row_index: usize,
-    pub movement_speed: i8,
-    pub attack_damage: i8,
+    pub health: u16,
+    pub movement_speed: u8,
+    pub attack_damage: u8,
+    pub attack_radius: i32,
     pub found_target: bool,
     pub direction: player_manager::Direction,
     pub rect: sdl2::rect::Rect,
@@ -76,8 +78,10 @@ impl EnemyManager {
                 let temp_enemy = self::Enemy {
                     cost_total: 0.0,
                     final_path: None,
-                    movement_speed: 3,
-                    attack_damage: 5,
+                    movement_speed: constants::ENEMY_GOBLIN_SPEED,
+                    attack_damage: constants::ENEMY_GOBLIN_DAMAGE,
+                    attack_radius: constants::ENEMY_GOBLIN_RADIUS,
+                    health: constants::ENEMY_GOBLIN_HEALTH,
                     found_target: false,
                     row_index,
                     col_index,
@@ -91,8 +95,10 @@ impl EnemyManager {
                 let temp_enemy = self::Enemy {
                     cost_total: 0.0,
                     final_path: None,
-                    movement_speed: 5,
-                    attack_damage: 5,
+                    movement_speed: 0,
+                    attack_damage: 0,
+                    attack_radius: 0,
+                    health: 0,
                     found_target: false,
                     row_index,
                     col_index,
@@ -163,8 +169,8 @@ impl EnemyManager {
                         match level.level_vec[self.enemy_vec[enemy_index].col_index][self.enemy_vec[enemy_index].row_index].tile_data {
                             TileData::Goblin => {
                                 level.level_vec[self.enemy_vec[enemy_index].col_index][self.enemy_vec[enemy_index].row_index].tile_type = level.level_vec[self.enemy_vec[enemy_index].col_index][self.enemy_vec[enemy_index].row_index].prev_type;
-
                                 level.level_vec[self.enemy_vec[enemy_index].col_index][self.enemy_vec[enemy_index].row_index].tile_data = TileData::None;
+
                                 let random_direction = game.frame_time as usize % 4;
                                 match random_direction {
                                     0 => self.enemy_vec[enemy_index].col_index -= 1,
@@ -176,7 +182,7 @@ impl EnemyManager {
 
                                 level.level_vec[self.enemy_vec[enemy_index].col_index][self.enemy_vec[enemy_index].row_index].tile_type = constants::TILE_TYPE_GOBLIN_TEST;
                                 level.level_vec[self.enemy_vec[enemy_index].col_index][self.enemy_vec[enemy_index].row_index].tile_data = TileData::Goblin;
-                                println!("OCCUPIED!");
+/*                                 println!("OCCUPIED!"); */
                             },
                             _ => {}
                         }
@@ -189,14 +195,15 @@ impl EnemyManager {
     }
 
     pub fn astar(enemy: &mut Enemy, goal: (usize, usize), tiles: &[Vec<LevelTile>]) {
-        let mut frontier: BinaryHeap<State> = BinaryHeap::new();
-        let mut priorities: HashMap<(usize, usize), usize> = HashMap::new();
-        let mut came_from: HashMap<(usize, usize), (usize, usize)> = HashMap::new();
         let initial_state = State {
             position: (enemy.col_index, enemy.row_index),
             priority: heuristic((enemy.col_index, enemy.row_index), goal),
         };
-        frontier.push(initial_state);
+
+        let mut frontier: BinaryHeap<State> = [initial_state].into();
+        let mut priorities: HashMap<(usize, usize), usize> = HashMap::new();
+        let mut came_from: HashMap<(usize, usize), (usize, usize)> = HashMap::new();
+
         priorities.insert((enemy.col_index, enemy.row_index), initial_state.priority);
 
         while let Some(current_state) = frontier.pop() {
@@ -243,7 +250,7 @@ impl EnemyManager {
             let (x, y) = position;
             let width = level_vec[0].len();
             let height = level_vec.len();
-            let mut neighbors = Vec::new();
+            let mut neighbors = Vec::with_capacity(4);
 
             if y > 0 && level_vec[x][y - 1].tile_type != constants::TILE_TYPE_WALL {
                 neighbors.push((x, y - 1));

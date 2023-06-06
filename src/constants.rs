@@ -10,16 +10,20 @@ pub const OUTPUT_HEIGHT: u8 = IMAGE_HEIGHT * IMAGE_SCALING;
 
 pub const COLOR_BACKGROUND: sdl2::pixels::Color = sdl2::pixels::Color::RGBA(69, 69, 69, 255);
 pub const COLOR_OUTLINE: sdl2::pixels::Color = sdl2::pixels::Color::RGBA(252, 186, 3, 255);
+pub const COLOR_RED: sdl2::pixels::Color = sdl2::pixels::Color::RGBA(255, 0, 0, 255);
+pub const COLOR_GREEN: sdl2::pixels::Color = sdl2::pixels::Color::RGBA(0, 255, 0, 255);
 
 pub const TILE_SIZE: u32 = 32;
 pub const MAX_HEIGHT: u16 = 150;
 pub const MAX_WIDTH: u16 = 300;
 
+
 pub const PLAYER_SPEED: u8 = 16;
+pub const PLAYER_SPEED_DIAGONAL: u8 = 4; //SQUARE ROOT OF PLAYER_SPEED
 pub const CROP_TIME: u16 = 100;
 
-pub const SEED_BUTTON_AMT: u8 = 8;
-pub const BUILD_BUTTON_AMT: u8 = 4;
+pub const SEED_BUTTON_AMT: usize = 8;
+pub const BUILD_BUTTON_AMT: usize = 4;
 
 pub static TEXTURE_DEFAULT: &str = "assets/default-texture.png";
 
@@ -51,12 +55,12 @@ pub static TEXTURE_TOWER_ARCHER_BOTTOM: &str = "assets/archer-tower-bottom.png";
 
 pub static TEXTURE_GOBLIN_ENEMY_FRONT: &str = "assets/goblin-enemy-front.png";
 
-pub const CURRENT_BUILD_HO: u8 = 0;
-pub const CURRENT_BUILD_ARCHER_TOWER: u8 = 1;
-pub const CURRENT_BUILD_GOBLIN_TEST: u8 = 2;
+pub const CURRENT_BUILD_HO: usize = 0;
+pub const CURRENT_BUILD_ARCHER_TOWER: usize = 1;
+pub const CURRENT_BUILD_GOBLIN_TEST: usize = 2;
 
-pub const CURRENT_SEED_CARROT: u8 = 0;
-pub const CURRENT_SEED_TOMATO: u8 = 1;
+pub const CURRENT_SEED_CARROT: usize = 0;
+pub const CURRENT_SEED_TOMATO: usize = 1;
 
 pub const TILE_TYPE_GRASS: char = '0';
 pub const TILE_TYPE_WALL: char = '2';
@@ -70,3 +74,19 @@ pub const TILE_TYPE_ARCHER_TOP: char = 'A';
 pub const TILE_TYPE_ARCHER_BOTTOM: char = 'a';
 
 pub const TILE_TYPE_GOBLIN_TEST: char = 'G';
+
+pub const ENEMY_GOBLIN_HEALTH: u16 = 500;
+pub const ENEMY_GOBLIN_RADIUS: i32 = 1;
+pub const ENEMY_GOBLIN_SPEED: u8 = 3;
+pub const ENEMY_GOBLIN_DAMAGE: u8 = 5;
+
+pub const ENEMY_GOBLIN_HEALTH_BAR_WIDTH: u32 = 24;
+pub const ENEMY_GOBLIN_HEALTH_BAR_HEIGHT: u32 = 4;
+
+
+pub const TOWER_ARCHER_DAMAGE: u8 = 5;
+pub const TOWER_ARCHER_RADIUS: i32 = 10;
+pub const TOWER_ARCHER_HEALTH: u16 = 1000;
+pub const TOWER_ARCHER_HEALTH_BAR_WIDTH: u32 = 32;
+pub const TOWER_ARCHER_HEALTH_BAR_HEIGHT: u32 = 6;
+
