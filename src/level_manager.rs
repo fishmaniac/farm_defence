@@ -187,7 +187,7 @@ impl LevelManager {
             _ => {}
         }
 
-        //PRETTY SURE HOVERING ALL BUTTONS = BUG
+        //PRETTY SURE HOVERING ALL BUTTONS = BUG....i think i fixed it?
         //CHECK FOR CLICK ON BUTTON
         if Rect::contains_point(&temp_tile.rect, game.mouse_point) && game.mouse_button == MouseButton::Left {
             if game.build_mode && !button_manager::ButtonManager::check_clicked(build_buttons) {

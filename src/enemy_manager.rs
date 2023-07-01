@@ -14,7 +14,7 @@ use crate::level_manager;
 use crate::level_manager::LevelTile;
 use crate::level_manager::TileData;
 use crate::texture_manager;
-use crate::enemy_manager;
+use crate::projectile_manager;
 
 /* #[derive(Debug, PartialEq, Eq, Hash, Clone)] */
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -44,6 +44,7 @@ pub struct Enemy {
     pub final_path: Option<Vec<(usize, usize)>>,
     pub col_index: usize,
     pub row_index: usize,
+    pub max_health: u16,
     pub health: u16,
     pub movement_speed: u8,
     pub attack_damage: u8,
@@ -81,6 +82,7 @@ impl EnemyManager {
                     movement_speed: constants::ENEMY_GOBLIN_SPEED,
                     attack_damage: constants::ENEMY_GOBLIN_DAMAGE,
                     attack_radius: constants::ENEMY_GOBLIN_RADIUS,
+                    max_health: constants::ENEMY_GOBLIN_HEALTH,
                     health: constants::ENEMY_GOBLIN_HEALTH,
                     found_target: false,
                     row_index,
@@ -98,6 +100,7 @@ impl EnemyManager {
                     movement_speed: 0,
                     attack_damage: 0,
                     attack_radius: 0,
+                    max_health: 0,
                     health: 0,
                     found_target: false,
                     row_index,
@@ -136,8 +139,13 @@ impl EnemyManager {
                 false,     // flip vertical
             )?;
 
+            // let enemy: &mut Enemy = &mut self.enemy_vec[enemy_index];
+            // let enemy_position: (&mut usize, &mut usize) = (&mut enemy.col_index, &mut enemy.row_index);
+            let has_no_target:bool = self.enemy_vec[enemy_index].final_path.is_none() && !game.target_vec.is_empty() &&  !self.enemy_vec[enemy_index].found_target;
+            let can_move:bool = !self.enemy_vec[enemy_index].found_target && game.frame_time % self.enemy_vec[enemy_index].movement_speed as u32 == 0;
+
             //TODO: maybe make this async...
-            if self.enemy_vec[enemy_index].final_path.is_none() && !game.target_vec.is_empty() &&  !self.enemy_vec[enemy_index].found_target {
+            if has_no_target {
                 let random_index = game.frame_time as usize % game.target_vec.len();
                 //TODO: COMBINE IFs
                 if (self.enemy_vec[enemy_index].col_index, self.enemy_vec[enemy_index].row_index) != game.target_vec[random_index] {
@@ -146,11 +154,11 @@ impl EnemyManager {
                     /* game.targets.remove(random_index); */
                 }
             }
-            /*                 println!("PATH: {:?}", self.enemy_vec[enemy_index].final_path);  */
-            else if !self.enemy_vec[enemy_index].found_target && game.frame_time % self.enemy_vec[enemy_index].movement_speed as u32 == 0 {
+            else if can_move {
                 //FIXME?: remove last element after moving
                 if let Some(mut path) = self.enemy_vec[enemy_index].final_path.take() {
                     if let Some((col, row)) = path.first() {
+
                         level.level_vec[self.enemy_vec[enemy_index].col_index][self.enemy_vec[enemy_index].row_index].tile_type = level.level_vec[self.enemy_vec[enemy_index].col_index][self.enemy_vec[enemy_index].row_index].prev_type;
                         level.level_vec[self.enemy_vec[enemy_index].col_index][self.enemy_vec[enemy_index].row_index].tile_data = TileData::None;
 
@@ -163,30 +171,31 @@ impl EnemyManager {
                         path.remove(0);
                         self.enemy_vec[enemy_index].final_path = Some(path);
                     }
-                    if self.enemy_vec[enemy_index].final_path.is_none() {
-                        self.enemy_vec[enemy_index].found_target = true;
-
-                        match level.level_vec[self.enemy_vec[enemy_index].col_index][self.enemy_vec[enemy_index].row_index].tile_data {
-                            TileData::Goblin => {
-                                level.level_vec[self.enemy_vec[enemy_index].col_index][self.enemy_vec[enemy_index].row_index].tile_type = level.level_vec[self.enemy_vec[enemy_index].col_index][self.enemy_vec[enemy_index].row_index].prev_type;
-                                level.level_vec[self.enemy_vec[enemy_index].col_index][self.enemy_vec[enemy_index].row_index].tile_data = TileData::None;
-
-                                let random_direction = game.frame_time as usize % 4;
-                                match random_direction {
-                                    0 => self.enemy_vec[enemy_index].col_index -= 1,
-                                    1 => self.enemy_vec[enemy_index].col_index += 1,
-                                    2 => self.enemy_vec[enemy_index].row_index -= 1,
-                                    3 => self.enemy_vec[enemy_index].row_index += 1,
-                                    _ => {}
-                                }
-
-                                level.level_vec[self.enemy_vec[enemy_index].col_index][self.enemy_vec[enemy_index].row_index].tile_type = constants::TILE_TYPE_GOBLIN_TEST;
-                                level.level_vec[self.enemy_vec[enemy_index].col_index][self.enemy_vec[enemy_index].row_index].tile_data = TileData::Goblin;
-/*                                 println!("OCCUPIED!"); */
-                            },
-                            _ => {}
-                        }
-                    }
+                    // if self.enemy_vec[enemy_index].final_path.is_none() {
+                    //     //makes enemies get stuck after tower destroyed..
+                    //     /*                         self.enemy_vec[enemy_index].found_target = true; */
+                    //
+                    //     match level.level_vec[self.enemy_vec[enemy_index].col_index][self.enemy_vec[enemy_index].row_index].tile_data {
+                    //         TileData::Goblin => {
+                    //             level.level_vec[self.enemy_vec[enemy_index].col_index][self.enemy_vec[enemy_index].row_index].tile_type = level.level_vec[self.enemy_vec[enemy_index].col_index][self.enemy_vec[enemy_index].row_index].prev_type;
+                    //             level.level_vec[self.enemy_vec[enemy_index].col_index][self.enemy_vec[enemy_index].row_index].tile_data = TileData::None;
+                    //
+                    //             let random_direction = game.frame_time as usize % 4;
+                    //             match random_direction {
+                    //                 0 => self.enemy_vec[enemy_index].col_index -= 1,
+                    //                 1 => self.enemy_vec[enemy_index].col_index += 1,
+                    //                 2 => self.enemy_vec[enemy_index].row_index -= 1,
+                    //                 3 => self.enemy_vec[enemy_index].row_index += 1,
+                    //                 _ => {}
+                    //             }
+                    //
+                    //             level.level_vec[self.enemy_vec[enemy_index].col_index][self.enemy_vec[enemy_index].row_index].tile_type = constants::TILE_TYPE_GOBLIN_TEST;
+                    //             level.level_vec[self.enemy_vec[enemy_index].col_index][self.enemy_vec[enemy_index].row_index].tile_data = TileData::Goblin;
+                    //             /*                                 println!("OCCUPIED!"); */
+                    //         },
+                    //         _ => {}
+                    //     }
+                    // }
                 }
             }
 
@@ -194,10 +203,10 @@ impl EnemyManager {
         Ok(())
     }
 
-    pub fn astar(enemy: &mut Enemy, goal: (usize, usize), tiles: &[Vec<LevelTile>]) {
+    pub fn astar(enemy: &mut Enemy, target: (usize, usize), level_vec: &[Vec<LevelTile>]) {
         let initial_state = State {
             position: (enemy.col_index, enemy.row_index),
-            priority: heuristic((enemy.col_index, enemy.row_index), goal),
+            priority: heuristic((enemy.col_index, enemy.row_index), target),
         };
 
         let mut frontier: BinaryHeap<State> = [initial_state].into();
@@ -209,7 +218,7 @@ impl EnemyManager {
         while let Some(current_state) = frontier.pop() {
             let current = current_state.position;
 
-            if current == goal {
+            if current == target {
                 let mut path = vec![current];
                 let mut current = current;
                 while let Some(&prev) = came_from.get(&current) {
@@ -220,12 +229,12 @@ impl EnemyManager {
                 enemy.final_path = Some(path);
             }
 
-            let neighbors = get_neighbors(enemy, current, tiles);
+            let neighbors = get_neighbors(enemy, current, level_vec);
 
             for next in neighbors {
                 //1 FOR 4 WAY OR IMPLEMENT COST
                 let new_cost = 1;
-                let priority = new_cost + heuristic(next, goal);
+                let priority = new_cost + heuristic(next, target);
 
                 if !priorities.contains_key(&next) || priority < priorities[&next] {
                     priorities.insert(next, priority);
@@ -252,15 +261,19 @@ impl EnemyManager {
             let height = level_vec.len();
             let mut neighbors = Vec::with_capacity(4);
 
+            //Up
             if y > 0 && level_vec[x][y - 1].tile_type != constants::TILE_TYPE_WALL {
                 neighbors.push((x, y - 1));
             }
+            //Down
             if y < height - 1 && level_vec[x][y + 1].tile_type != constants::TILE_TYPE_WALL {
                 neighbors.push((x, y + 1));
             }
+            //Left
             if x > 0 && level_vec[x - 1][y].tile_type != constants::TILE_TYPE_WALL {
                 neighbors.push((x - 1, y));
             }
+            //Right
             if x < width - 1 && level_vec[x + 1][y].tile_type != constants::TILE_TYPE_WALL {
                 neighbors.push((x + 1, y));
             }

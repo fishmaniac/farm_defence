@@ -1,4 +1,4 @@
-use crate::{level_manager, button_manager, player_manager, texture_manager, constants, tower_manager, enemy_manager, gui_manager};
+use crate::{level_manager, button_manager, player_manager, texture_manager, constants, tower_manager, enemy_manager, gui_manager, projectile_manager};
 
 pub enum Movement {
     Up,
@@ -44,7 +44,7 @@ impl GameManager {
         // gl_attr.set_multisample_samples(4);
 
         let window = video_subsystem
-            .window("Farm Defence", constants::SCREEN_WIDTH.try_into().unwrap(), constants::SCREEN_HEIGHT.try_into().unwrap())
+            .window("Farm Defense", constants::SCREEN_WIDTH.try_into().unwrap(), constants::SCREEN_HEIGHT.try_into().unwrap())
             .opengl()
             .resizable()
             .fullscreen_desktop()
@@ -105,9 +105,10 @@ impl GameManager {
         level: &mut level_manager::LevelManager, 
         towers: &mut tower_manager::TowerManager, 
         enemies: &mut enemy_manager::EnemyManager, 
+        projectiles: &mut projectile_manager::ProjectileManager,
+        health_bars: &mut gui_manager::GUIManager,
         seed_buttons: &mut button_manager::ButtonManager, 
         build_buttons: &mut button_manager::ButtonManager,
-        health_bars: &mut gui_manager::GUIManager,
     ) {
         player.update_player(self);
         self.update_camera(player);
@@ -126,9 +127,11 @@ impl GameManager {
 
             }
         }
-        towers.check_attacks(self, level, enemies, health_bars);
+        towers.check_attacks(self, level, enemies, projectiles, health_bars);
         enemy_manager::EnemyManager::render_enemies(enemies, self, tex_man, level).unwrap(); 
+        projectile_manager::ProjectileManager::render_projectiles(projectiles, self, tex_man).unwrap();
         tower_manager::TowerManager::render_towers(towers, self, tex_man, enemies, health_bars).unwrap();
+
 
 
 

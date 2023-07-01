@@ -55,6 +55,8 @@ pub static TEXTURE_TOWER_ARCHER_BOTTOM: &str = "assets/archer-tower-bottom.png";
 
 pub static TEXTURE_GOBLIN_ENEMY_FRONT: &str = "assets/goblin-enemy-front.png";
 
+pub static TEXTURE_PROJECTILE_ARROW: &str = "assets/archer-arrow-large.png";
+
 pub const CURRENT_BUILD_HO: usize = 0;
 pub const CURRENT_BUILD_ARCHER_TOWER: usize = 1;
 pub const CURRENT_BUILD_GOBLIN_TEST: usize = 2;
@@ -85,8 +87,12 @@ pub const ENEMY_GOBLIN_HEALTH_BAR_HEIGHT: u32 = 4;
 
 
 pub const TOWER_ARCHER_DAMAGE: u8 = 5;
+pub const TOWER_ARCHER_ATTACK_SPEED: u8 = 5;
+
 pub const TOWER_ARCHER_RADIUS: i32 = 10;
 pub const TOWER_ARCHER_HEALTH: u16 = 1000;
 pub const TOWER_ARCHER_HEALTH_BAR_WIDTH: u32 = 32;
 pub const TOWER_ARCHER_HEALTH_BAR_HEIGHT: u32 = 6;
+
+pub const PROJECTILE_ARROW_SPEED: u8 = 16;
 

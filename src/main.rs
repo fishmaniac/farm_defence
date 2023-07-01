@@ -6,7 +6,7 @@ pub mod player_manager;
 pub mod level_manager;
 pub mod tower_manager;
 pub mod enemy_manager;
-pub mod project_manager;
+pub mod projectile_manager;
 pub mod gui_manager;
 pub mod button_manager;
 
@@ -19,6 +19,7 @@ fn game_loop (
     level: &mut level_manager::LevelManager,
     towers: &mut tower_manager::TowerManager,
     enemies: &mut enemy_manager::EnemyManager,
+    projectiles: &mut projectile_manager::ProjectileManager,
     seed_buttons: &mut button_manager::ButtonManager,
     build_buttons: &mut button_manager::ButtonManager,
     health_bars: &mut gui_manager::GUIManager,
@@ -42,7 +43,7 @@ fn game_loop (
 
         game.prepare_background();
         events.do_event(game, seed_buttons, build_buttons);
-        game.update_game(tex_man, player, level, towers, enemies, seed_buttons, build_buttons, health_bars);
+        game.update_game(tex_man, player, level, towers, enemies, projectiles, health_bars, seed_buttons, build_buttons);
         game.canvas.present();
 
         // if towers.tower_vec.len() > 0 {
@@ -63,6 +64,7 @@ fn main() -> Result<(), String> {
     let mut level = level_manager::LevelManager::new();
     let mut towers = tower_manager::TowerManager::new();
     let mut enemies = enemy_manager::EnemyManager::new();
+    let mut projectiles = projectile_manager::ProjectileManager::new();
 
     let mut seed_buttons = button_manager::ButtonManager::new(constants::SEED_BUTTON_AMT, button_manager::ButtonType::Seed, &player);
     let mut build_buttons = button_manager::ButtonManager::new(constants::BUILD_BUTTON_AMT, button_manager::ButtonType::Build, &player);
@@ -94,7 +96,7 @@ fn main() -> Result<(), String> {
     //     }
     // });
 
-    game_loop(&mut game, &mut tex_man, &mut events, &mut player, &mut level, &mut towers, &mut enemies, &mut seed_buttons, &mut build_buttons, &mut health_bars);
+    game_loop(&mut game, &mut tex_man, &mut events, &mut player, &mut level, &mut towers, &mut enemies, &mut projectiles, &mut seed_buttons, &mut build_buttons, &mut health_bars);
 
     Ok(())
 }
