@@ -145,10 +145,12 @@ impl EnemyManager {
             let can_move:bool = !self.enemy_vec[enemy_index].found_target && game.frame_time % self.enemy_vec[enemy_index].movement_speed as u32 == 0;
 
             //TODO: maybe make this async...
+            println!("FOUND TARGET: {:?}, INDEX: {:?}", self.enemy_vec[enemy_index].found_target, enemy_index);
             if has_no_target {
                 let random_index = game.frame_time as usize % game.target_vec.len();
                 //TODO: COMBINE IFs
                 if (self.enemy_vec[enemy_index].col_index, self.enemy_vec[enemy_index].row_index) != game.target_vec[random_index] {
+                    println!("PATHING INDEX: {:?} FROM: {:?}{:?} TO: {:?}", enemy_index, self.enemy_vec[enemy_index].col_index, self.enemy_vec[enemy_index].row_index, game.target_vec[random_index]);
                     Self::astar(&mut self.enemy_vec[enemy_index], game.target_vec[random_index], &mut level.level_vec);
                     //COMMENT TO KEEP TARGETS
                     /* game.targets.remove(random_index); */
@@ -180,14 +182,14 @@ impl EnemyManager {
                     //             level.level_vec[self.enemy_vec[enemy_index].col_index][self.enemy_vec[enemy_index].row_index].tile_type = level.level_vec[self.enemy_vec[enemy_index].col_index][self.enemy_vec[enemy_index].row_index].prev_type;
                     //             level.level_vec[self.enemy_vec[enemy_index].col_index][self.enemy_vec[enemy_index].row_index].tile_data = TileData::None;
                     //
-                    //             let random_direction = game.frame_time as usize % 4;
-                    //             match random_direction {
-                    //                 0 => self.enemy_vec[enemy_index].col_index -= 1,
-                    //                 1 => self.enemy_vec[enemy_index].col_index += 1,
-                    //                 2 => self.enemy_vec[enemy_index].row_index -= 1,
-                    //                 3 => self.enemy_vec[enemy_index].row_index += 1,
-                    //                 _ => {}
-                    //             }
+                    //             // let random_direction = game.frame_time as usize % 4;
+                    //             // match random_direction {
+                    //             //     0 => self.enemy_vec[enemy_index].col_index -= 1,
+                    //             //     1 => self.enemy_vec[enemy_index].col_index += 1,
+                    //             //     2 => self.enemy_vec[enemy_index].row_index -= 1,
+                    //             //     3 => self.enemy_vec[enemy_index].row_index += 1,
+                    //             //     _ => {}
+                    //             // }
                     //
                     //             level.level_vec[self.enemy_vec[enemy_index].col_index][self.enemy_vec[enemy_index].row_index].tile_type = constants::TILE_TYPE_GOBLIN_TEST;
                     //             level.level_vec[self.enemy_vec[enemy_index].col_index][self.enemy_vec[enemy_index].row_index].tile_data = TileData::Goblin;

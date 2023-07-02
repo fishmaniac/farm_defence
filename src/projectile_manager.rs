@@ -12,6 +12,7 @@ pub struct Projectile {
     start: (i32, i32),
     position: (i32, i32),
     target: (i32, i32),
+    angle: f64,
     speed: u8,
 }
 
@@ -36,7 +37,8 @@ impl ProjectileManager {
                 position,
                 target,
                 speed: constants::PROJECTILE_ARROW_SPEED,
-            };
+                angle: Self::calculate_angle(start, target),
+        };
 
 
             self.projectile_vec.push(projectile);
@@ -62,14 +64,13 @@ impl ProjectileManager {
 
                 self.projectile_vec[projectile_index].rect.set_x(position.0 - game.cam_x);
                 self.projectile_vec[projectile_index].rect.set_y(position.1 - game.cam_y);
+
                 let texture = tex_man.load(&self.projectile_vec[projectile_index].texture_path)?;
-                let angle = Self::calculate_angle(self.projectile_vec[projectile_index].position, self.projectile_vec[projectile_index].target);
-                println!("angle: {:?}", angle);
                 game.canvas.copy_ex(
                     &texture, // Texture object
                     None,      // source rect
                     self.projectile_vec[projectile_index].rect,     // destination rect
-                    angle,      // angle (degrees)
+                    self.projectile_vec[projectile_index].angle,      // angle (degrees)
                     None,   // center
                     false,    // flip horizontal
                     false,     // flip vertical

@@ -154,29 +154,30 @@ impl TowerManager {
                 let enemy_pos_pixel = (constants::TILE_SIZE as i32 * enemy_pos_vec.0, constants::TILE_SIZE as i32 * enemy_pos_vec.1);
 
                 //TOWER ATTACK
-                if Self::is_within_radius(tower_pos_vec, enemy_pos_vec, self.tower_vec[tower_index].attack_radius) && game.frame_time % self.tower_vec[tower_index].attack_speed as u32 == 0 {
+                if tower_index < self.tower_vec.len() && Self::is_within_radius(tower_pos_vec, enemy_pos_vec, self.tower_vec[tower_index].attack_radius) && game.frame_time % self.tower_vec[tower_index].attack_speed as u32 == 0 {
                     if enemies.enemy_vec[enemy_index].health != 0 {
                         //TODO: ADD CHECK HERE IN GAME TIME
                         //DRAW DEBUG LINE
-                        game.canvas.draw_line((enemies.enemy_vec[enemy_index].rect.x(), enemies.enemy_vec[enemy_index].rect.y()), (self.tower_vec[tower_index].top_rect.x() + constants::TILE_SIZE as i32 / 2, self.tower_vec[tower_index].top_rect.y() + constants::TILE_SIZE as i32 / 2));
+                        /*                         game.canvas.draw_line((enemies.enemy_vec[enemy_index].rect.x(), enemies.enemy_vec[enemy_index].rect.y()), (self.tower_vec[tower_index].top_rect.x() + constants::TILE_SIZE as i32 / 2, self.tower_vec[tower_index].top_rect.y() + constants::TILE_SIZE as i32 / 2)); */
                         if tower_pos_pixel != enemy_pos_pixel {
-                            projectile_manager.spawn_projectile(tower_pos_pixel, enemy_pos_pixel);
+                            projectile_manager.spawn_projectile(tower_pos_pixel, tower_pos_pixel, enemy_pos_pixel);
                         }
 
                         enemies.enemy_vec[enemy_index].health -= self.tower_vec[tower_index].attack_damage as u16;
                         /*                         enemies.enemy_vec[enemy_index].found_target = true; */
                     } else {
                         enemies.enemy_vec[enemy_index].found_target = false; 
-                        level.level_vec[enemies.enemy_vec[enemy_index].col_index][enemies.enemy_vec[enemy_index].row_index].tile_type = level.level_vec[enemies.enemy_vec[enemy_index].col_index][enemies.enemy_vec[enemy_index].row_index].prev_type;
-                        level.level_vec[enemies.enemy_vec[enemy_index].col_index][enemies.enemy_vec[enemy_index].row_index].tile_data = TileData::None;
+                        level.level_vec[enemy_pos_vec.0 as usize][enemy_pos_vec.1 as usize].tile_type = level.level_vec[enemy_pos_vec.0 as usize][enemy_pos_vec.1 as usize].prev_type;
+                        level.level_vec[enemy_pos_vec.0 as usize][enemy_pos_vec.1 as usize].tile_data = TileData::None;
                         enemies.enemy_vec.remove(enemy_index);
                         continue;                     
                     }
                 }
                 //ENEMY ATTACK
-                if Self::is_within_radius(tower_pos_vec, enemy_pos_vec, enemies.enemy_vec[enemy_index].attack_radius) && game.frame_time % self.tower_vec[tower_index].attack_speed as u32 == 0 {
+                if tower_index < self.tower_vec.len() && Self::is_within_radius(tower_pos_vec, enemy_pos_vec, enemies.enemy_vec[enemy_index].attack_radius) && game.frame_time % self.tower_vec[tower_index].attack_speed as u32 == 0 {
                     if self.tower_vec[tower_index].health != 0/*  && game.frame_time % self.tower_vec[tower_index].attack_speed as u32 == 0  */{
                         self.tower_vec[tower_index].health -= enemies.enemy_vec[enemy_index].attack_damage as u16;
+                        enemies.enemy_vec[enemy_index].found_target = true;
                     } else {
 
                         let mut target_index = 0;
@@ -188,13 +189,11 @@ impl TowerManager {
                         }
 
                         enemies.enemy_vec[enemy_index].found_target = false; 
-                        level.level_vec[enemies.enemy_vec[enemy_index].col_index][enemies.enemy_vec[enemy_index].row_index].tile_type = level.level_vec[enemies.enemy_vec[enemy_index].col_index][enemies.enemy_vec[enemy_index].row_index].prev_type;
-                        level.level_vec[enemies.enemy_vec[enemy_index].col_index][enemies.enemy_vec[enemy_index].row_index].tile_data = TileData::None;
+                        level.level_vec[enemy_pos_vec.0 as usize][enemy_pos_vec.1 as usize].tile_type = level.level_vec[enemies.enemy_vec[enemy_index].col_index][enemies.enemy_vec[enemy_index].row_index].prev_type;
+                        level.level_vec[enemy_pos_vec.0 as usize][enemy_pos_vec.1 as usize].tile_data = TileData::None;
 
                         //FIXME: might need to iterate through and set all enemies within radius found_target to false
-                        println!("REMOVING TOWER");
                         self.tower_vec.remove(tower_index);
-                        break;
                     }
                 }
                 if enemy_index < enemies.enemy_vec.len() && enemies.enemy_vec[enemy_index].health < enemies.enemy_vec[enemy_index].max_health {

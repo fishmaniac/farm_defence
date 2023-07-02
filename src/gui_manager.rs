@@ -30,7 +30,6 @@ impl GUIManager {
             row_index: enemy.row_index,
             rect: sdl2::rect::Rect::new(back_rect.x(), back_rect.y(), (back_rect.width() as f64 * health_percentage) as u32, back_rect.height()),
         };
-        println!("ENEMY HEALTH BAR: X:{}, Y:{}, HEALTH: {}, %: {}", temp_gui.col_index, temp_gui.row_index, enemy.health, health_percentage);
         /*  self.gui_vec.push(temp_gui); */
         game.canvas.set_draw_color(constants::COLOR_RED);
         game.canvas.fill_rect(back_rect);
@@ -48,7 +47,6 @@ impl GUIManager {
             row_index: tower.top_row_index,
             rect: sdl2::rect::Rect::new(back_rect.x(), back_rect.y(), (back_rect.width() as f64 * health_percentage) as u32, back_rect.height()),
         };
-        println!("TOWER HEALTH BAR: X:{}, Y:{}, HEALTH: {}, %: {}", temp_gui.col_index, temp_gui.row_index, tower.health, health_percentage);
         /*  self.gui_vec.push(temp_gui); */
         game.canvas.set_draw_color(constants::COLOR_RED);
         game.canvas.fill_rect(back_rect);

@@ -132,13 +132,6 @@ impl GameManager {
         projectile_manager::ProjectileManager::render_projectiles(projectiles, self, tex_man).unwrap();
         tower_manager::TowerManager::render_towers(towers, self, tex_man, enemies, health_bars).unwrap();
 
-
-
-
-
-
-
-
         //TODO: REFACTOR TO LOOP
         player.render_player(self, tex_man).unwrap();
         /* println!("|| GAME || CAM_X: {}, CAM_Y: {} || PLAYER || X: {}, Y: {}, rectX: {}, rectY: {}", self.cam_x, self.cam_y, player.x, player.y, player.rect.x(), player.rect.y()); */
