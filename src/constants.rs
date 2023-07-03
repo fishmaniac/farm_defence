@@ -78,9 +78,10 @@ pub const TILE_TYPE_ARCHER_BOTTOM: char = 'a';
 pub const TILE_TYPE_GOBLIN_TEST: char = 'G';
 
 pub const ENEMY_GOBLIN_HEALTH: u16 = 500;
-pub const ENEMY_GOBLIN_RADIUS: i32 = 1;
+pub const ENEMY_GOBLIN_RADIUS: i32 = 3;
 pub const ENEMY_GOBLIN_SPEED: u8 = 3;
 pub const ENEMY_GOBLIN_DAMAGE: u8 = 5;
+pub const ENEMY_GOBLIN_ATTACK_SPEED: u8 = 10;
 
 pub const ENEMY_GOBLIN_HEALTH_BAR_WIDTH: u32 = 24;
 pub const ENEMY_GOBLIN_HEALTH_BAR_HEIGHT: u32 = 4;

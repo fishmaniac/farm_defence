@@ -6,12 +6,13 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::env;
 
-use crate::constants;
+use crate::{constants, projectile_manager, gui_manager, game_manager};
 use crate::game_manager::GameManager;
 use crate::texture_manager::TextureManager;
 use crate::player_manager::PlayerManager;
 use crate::tower_manager;
 use crate::enemy_manager::EnemyManager;
+use crate::enemy_manager;
 use crate::button_manager;
 
 pub enum TileData {
@@ -231,7 +232,7 @@ impl LevelManager {
                 if temp_tile.prev_type == constants::TILE_TYPE_GRASS && temp_tile.tile_type != constants::TILE_TYPE_ARCHER_BOTTOM {
                     temp_tile.tile_type = constants::TILE_TYPE_ARCHER_BOTTOM;
                     temp_tile.tile_data = TileData::ArcherTowerBottom;
-                    towers.place_tower(game, &temp_tile, col_index, row_index);
+                    towers.place_tower(game, &temp_tile, (col_index, row_index));
 
                 }
             }
@@ -239,7 +240,7 @@ impl LevelManager {
                 if temp_tile.prev_type == constants::TILE_TYPE_GRASS && temp_tile.tile_type != constants::TILE_TYPE_GOBLIN_TEST {
                     temp_tile.tile_type = constants::TILE_TYPE_GOBLIN_TEST;
                     temp_tile.tile_data = TileData::Goblin;
-                    enemies.place_enemy(temp_tile, col_index, row_index);
+                    enemies.place_enemy(temp_tile, (col_index, row_index));
                 }
             }
             _ => {}
@@ -297,5 +298,49 @@ impl LevelManager {
                 }
             }
         }
+    }
+    pub fn check_attacks (
+        game: &mut game_manager::GameManager,
+        enemies: &mut enemy_manager::EnemyManager, 
+        towers: &mut tower_manager::TowerManager,
+        projectiles: &mut projectile_manager::ProjectileManager,
+        health_bars: &mut gui_manager::GUIManager,
+    ) {
+        for tower in &mut towers.tower_vec {
+            let tower_pos_pixel = (constants::TILE_SIZE as i32 * tower.top_index.0 as i32, constants::TILE_SIZE as i32 * tower.top_index.1 as i32);
+            for enemy in &mut enemies.enemy_vec {
+                let enemy_pos_pixel = (constants::TILE_SIZE as i32 * enemy.index.0 as i32, constants::TILE_SIZE as i32 * enemy.index.1 as i32);
+                let tower_can_attack: bool = tower_manager::TowerManager::is_within_area((tower.bottom_index.0 as i32, tower.bottom_index.1 as i32), (enemy.index.0 as i32, enemy.index.1 as i32), constants::TOWER_ARCHER_RADIUS) && game.frame_time % tower.attack_speed as u32 == 0;
+                let enemy_can_attack: bool = tower_manager::TowerManager::is_within_area((tower.bottom_index.0 as i32, tower.bottom_index.1 as i32), (enemy.index.0 as i32, enemy.index.1 as i32), constants::ENEMY_GOBLIN_RADIUS) && game.frame_time % enemy.attack_speed as u32 == 0;
+
+                if enemy.health != 0 {
+                    if tower_can_attack {
+                        if tower_pos_pixel != enemy_pos_pixel {
+                            projectiles.spawn_projectile(tower_pos_pixel, tower_pos_pixel, enemy_pos_pixel)
+                        }
+                        enemy.health -= tower.attack_damage as u16;
+                    }
+                }
+                //ENEMY ATTACK
+                if tower.health != 0 {
+                    if enemy_can_attack {
+                        tower.health -= enemy.attack_damage as u16;
+                    }
+                }
+                // else {
+                //     enemy.found_target = false;
+                // }
+                if enemy.health < enemy.max_health {
+                    health_bars.render_health_bar_enemy(game, enemy);
+                }
+            }
+            if tower.health < tower.max_health {
+                health_bars.render_health_bar_tower(game, tower);
+            }
+        }
+    }
+    pub fn delete_all_dead (enemies: &mut enemy_manager::EnemyManager, towers: &mut tower_manager::TowerManager) {
+        enemies.enemy_vec.retain(|enemy| enemy.health != 0);
+        towers.tower_vec.retain(|tower| tower.health != 0);
     }
 }

@@ -4,6 +4,7 @@ use sdl2::mouse::MouseButton;
 
 use crate::game_manager::GameManager;
 use crate::button_manager::ButtonManager;
+use crate::tower_manager::TowerManager;
 
 pub struct EventManager {
     event_pump: EventPump,
@@ -22,7 +23,8 @@ impl EventManager {
         &mut self, 
         game: &mut GameManager, 
         seed_buttons: &mut ButtonManager, 
-        build_buttons: &mut ButtonManager
+        build_buttons: &mut ButtonManager,
+        towers: &mut TowerManager,
     ) {
         for event in self.event_pump.poll_iter() {
             match event {
@@ -31,7 +33,7 @@ impl EventManager {
                     break
                 }
                 Event::KeyDown { keycode: Some(keycode), .. } => {
-                    self.do_key_down(game, keycode);
+                    self.do_key_down(game, towers, keycode);
                     break
                 }, 
                 Event::KeyUp {keycode: Some(keycode), .. } => {
@@ -73,9 +75,14 @@ impl EventManager {
 
     fn do_key_down(&mut self, 
         game: &mut GameManager, 
-        keycode: sdl2::keyboard::Keycode
+        towers: &mut TowerManager,
+        keycode: sdl2::keyboard::Keycode,
     ) {
         match keycode {
+            sdl2::keyboard::Keycode::P => { 
+                towers.tower_vec.clear();
+                game.target_vec.clear();
+            },
             sdl2::keyboard::Keycode::Escape => game.quit = true,
             sdl2::keyboard::Keycode::Q => game.quit = true,
             sdl2::keyboard::Keycode::W => game.up = true,

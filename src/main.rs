@@ -42,7 +42,7 @@ fn game_loop (
         }
 
         game.prepare_background();
-        events.do_event(game, seed_buttons, build_buttons);
+        events.do_event(game, seed_buttons, build_buttons, towers);
         game.update_game(tex_man, player, level, towers, enemies, projectiles, health_bars, seed_buttons, build_buttons);
         game.canvas.present();
 

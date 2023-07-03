@@ -127,10 +127,13 @@ impl GameManager {
 
             }
         }
-        towers.check_attacks(self, level, enemies, projectiles, health_bars);
+        level_manager::LevelManager::check_attacks(self, enemies, towers, projectiles, health_bars);
+        level_manager::LevelManager::delete_all_dead(enemies, towers);
+
+
         enemy_manager::EnemyManager::render_enemies(enemies, self, tex_man, level).unwrap(); 
         projectile_manager::ProjectileManager::render_projectiles(projectiles, self, tex_man).unwrap();
-        tower_manager::TowerManager::render_towers(towers, self, tex_man, enemies, health_bars).unwrap();
+        tower_manager::TowerManager::render_towers(towers, self, tex_man).unwrap();
 
         //TODO: REFACTOR TO LOOP
         player.render_player(self, tex_man).unwrap();

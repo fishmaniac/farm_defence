@@ -4,8 +4,7 @@ use crate::enemy_manager;
 use crate::tower_manager;
 
 pub struct GUI {
-    pub col_index: usize,
-    pub row_index: usize,
+    pub index: (usize, usize),
     pub rect: sdl2::rect::Rect,
 }
 
@@ -26,8 +25,7 @@ impl GUIManager {
         let health_percentage = enemy.health as f64 / constants::ENEMY_GOBLIN_HEALTH as f64;
 
         let temp_gui = self::GUI {
-            col_index: enemy.col_index,
-            row_index: enemy.row_index,
+            index: enemy.index,
             rect: sdl2::rect::Rect::new(back_rect.x(), back_rect.y(), (back_rect.width() as f64 * health_percentage) as u32, back_rect.height()),
         };
         /*  self.gui_vec.push(temp_gui); */
@@ -43,8 +41,7 @@ impl GUIManager {
         let health_percentage = tower.health as f64 / constants::TOWER_ARCHER_HEALTH as f64;
 
         let temp_gui = self::GUI {
-            col_index: tower.top_col_index,
-            row_index: tower.top_row_index,
+            index: (tower.top_index.0, tower.top_index.1),
             rect: sdl2::rect::Rect::new(back_rect.x(), back_rect.y(), (back_rect.width() as f64 * health_percentage) as u32, back_rect.height()),
         };
         /*  self.gui_vec.push(temp_gui); */
