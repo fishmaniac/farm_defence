@@ -37,7 +37,7 @@ pub struct Enemy {
     pub health: u16,
     pub movement_speed: u8,
     pub attack_damage: u8,
-    pub attack_radius: i32,
+    pub attack_radius: u8,
     pub attack_speed: u8,
     pub found_target: bool,
     pub direction: player_manager::Direction,
@@ -125,6 +125,7 @@ impl EnemyManager {
                 false,    // flip horizontal
                 false,     // flip vertical
             )?;
+
             Self::move_enemies(enemy, game, level);
         }
         Ok(())
@@ -138,7 +139,7 @@ impl EnemyManager {
         let can_move: bool = !enemy.found_target && game.frame_time % enemy.movement_speed as u32 == 0;
         let enemy_tuple_index = (enemy.index.0 as i32, enemy.index.1 as i32);
 
-/*         println!("FOUND TARGET BOOL: {:?} {:?}", enemy.found_target, enemy.index); */
+        /*         println!("FOUND TARGET BOOL: {:?} {:?}", enemy.found_target, enemy.index); */
         if can_move {
             if let Some(mut path) = enemy.final_path.take() {
                 if let Some((col, row)) = path.first() {
@@ -150,13 +151,14 @@ impl EnemyManager {
                 }
             }
         }
-        else if has_no_targets {
+        else if has_no_targets{
             let random_index = game.frame_time as usize % game.target_vec.len();
             let target = game.target_vec[random_index];
             let target_tuple_index = (target.0 as i32, target.1 as i32);
 
-            if !tower_manager::TowerManager::is_within_area(enemy_tuple_index, target_tuple_index, constants::ENEMY_GOBLIN_RADIUS) {
+            if !game.is_pathfinding && !tower_manager::TowerManager::is_within_area(enemy_tuple_index, target_tuple_index, enemy.attack_radius as i32) {
                 Self::astar(enemy, target, &level.level_vec);
+                game.is_pathfinding = true;
             }
         }
     }
@@ -188,7 +190,7 @@ impl EnemyManager {
                 enemy.final_path = Some(path);
             }
 
-            let neighbors = get_neighbors(enemy, current, level_vec);
+            let neighbors = get_neighbors(current, level_vec);
 
             for next in neighbors {
                 //1 FOR 4 WAY OR IMPLEMENT COST
@@ -215,7 +217,7 @@ impl EnemyManager {
 
             dx + dy
         }
-        fn get_neighbors(enemy: &mut Enemy, position: (usize, usize), level_vec: &[Vec<LevelTile>]) -> Vec<(usize, usize)> {
+        fn get_neighbors(position: (usize, usize), level_vec: &[Vec<LevelTile>]) -> Vec<(usize, usize)> {
             let (x, y) = position;
             let width = level_vec[0].len();
             let height = level_vec.len();

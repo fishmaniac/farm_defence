@@ -5,6 +5,7 @@ use crate::constants;
 use crate::texture_manager;
 use crate::game_manager;
 
+#[derive(Debug, Clone)]
 pub enum Direction {
     Up,
     Down,
@@ -162,18 +163,6 @@ impl PlayerManager {
         else {
             self.x = new_x;
             self.y = new_y;
-
-            //TODO: CAP SPEED IN ALL DIRECTIONS
-            // match self.direction {
-            //     Direction::Up | Direction::Down | Direction::Left | Direction::Right => {
-            //         self.x = new_x;
-            //         self.y = new_y;
-            //     },
-            //     Direction::UpLeft | Direction::UpRight | Direction::DownLeft | Direction::DownRight => {
-            //     
-            //     }
-            //     _ => {}
-            // }
         }
     }
 
@@ -186,16 +175,41 @@ impl PlayerManager {
         let snapped_y = ((constants::SCREEN_HEIGHT as i32/ 2) - (self.y - game.cam_y)) / 32 * 32;
         self.rect.set_x(snapped_x);
         self.rect.set_y(snapped_y);
-        match self.direction {
-            Direction::Up => self.texture_path = constants::TEXTURE_PLAYER_BACK.to_string(),
-            Direction::Down => self.texture_path = constants::TEXTURE_PLAYER_FRONT.to_string(),
-            Direction::Left => self.texture_path = constants::TEXTURE_PLAYER_LEFT.to_string(),
-            Direction::Right => self.texture_path = constants::TEXTURE_PLAYER_RIGHT.to_string(),
-            _ => {
-                println!("NO PLAYER TEXTURE");
-                self.texture_path = constants::TEXTURE_PLAYER_FRONT.to_string();
+        /*         println!("PLAYER DIRECTION: {:?}", Some(&self.direction)); */
+
+        if (game.up || game.down || game.left || game.right) && game.frame_time % constants::PLAYER_SPEED as u32 == 0 {
+            match self.direction {
+                Direction::Up => self.texture_path = constants::TEXTURE_PLAYER_MOVING_BACK.to_string(),
+                Direction::Down => self.texture_path = constants::TEXTURE_PLAYER_MOVING_FRONT.to_string(),
+                Direction::Left => self.texture_path = constants::TEXTURE_PLAYER_MOVING_LEFT.to_string(),
+                Direction::Right => self.texture_path = constants::TEXTURE_PLAYER_MOVING_RIGHT.to_string(),
+                // Direction::UpLeft => self.texture_path = constants::TEXTURE_PLAYER_MOVING_BACK_LEFT.to_string(),
+                // Direction::UpRight => self.texture_path = constants::TEXTURE_PLAYER_MOVING_BACK_RIGHT.to_string(),
+                // Direction::DownLeft => self.texture_path = constants::TEXTURE_PLAYER_MOVING_FRONT_LEFT.to_string(),
+                // Direction::DownRight => self.texture_path = constants::TEXTURE_PLAYER_MOVING_FRONT_RIGHT.to_string(),
+                _ => {
+                    println!("NO PLAYER_MOVING TEXTURE");
+                    self.texture_path = constants::TEXTURE_PLAYER_MOVING_FRONT.to_string();
+                }
             }
         }
+        else {
+            match self.direction {
+                Direction::Up => self.texture_path = constants::TEXTURE_PLAYER_BACK.to_string(),
+                Direction::Down => self.texture_path = constants::TEXTURE_PLAYER_FRONT.to_string(),
+                Direction::Left => self.texture_path = constants::TEXTURE_PLAYER_LEFT.to_string(),
+                Direction::Right => self.texture_path = constants::TEXTURE_PLAYER_RIGHT.to_string(),
+                Direction::UpLeft => self.texture_path = constants::TEXTURE_PLAYER_BACK_LEFT.to_string(),
+                Direction::UpRight => self.texture_path = constants::TEXTURE_PLAYER_BACK_RIGHT.to_string(),
+                Direction::DownLeft => self.texture_path = constants::TEXTURE_PLAYER_FRONT_LEFT.to_string(),
+                Direction::DownRight => self.texture_path = constants::TEXTURE_PLAYER_FRONT_RIGHT.to_string(),
+                _ => {
+                    println!("NO PLAYER TEXTURE");
+                    self.texture_path = constants::TEXTURE_PLAYER_FRONT.to_string();
+                }
+            }
+        }
+
         let texture = tex_man.load(&self.texture_path)?;
         game.canvas.copy_ex(
             &texture, // Texture object

@@ -10,6 +10,7 @@ pub enum Movement {
 
 pub struct GameManager {
     pub quit: bool,
+    pub is_pathfinding: bool,
     pub build_mode: bool,
     pub seed_mode: bool,
     pub seed_outline_visible: bool,
@@ -25,10 +26,11 @@ pub struct GameManager {
     pub cam_x: i32,
     pub cam_y: i32,
     pub frame_time: u32,
+    pub fps: u32,
+    pub elapsed_seconds: f64,
     pub canvas: sdl2::render::Canvas<sdl2::video::Window>,
     pub mouse_point: sdl2::rect::Point,
     pub mouse_button: sdl2::mouse::MouseButton,
-    pub movement: Movement,
     pub target_vec: Vec<(usize, usize)>,
 }
 
@@ -64,6 +66,7 @@ impl GameManager {
 
         let game = GameManager {  
             quit: false,
+            is_pathfinding: false,
             seed_mode: false,
             build_mode: false,
             seed_outline_visible: true,
@@ -79,10 +82,11 @@ impl GameManager {
             cam_x: 0,
             cam_y: 0,
             frame_time: 0,
+            fps: 0,
+            elapsed_seconds: 0.0,
             canvas,
             mouse_point: sdl2::rect::Point::new(0, 0),
             mouse_button: sdl2::mouse::MouseButton::Unknown,
-            movement: Movement::None,
             target_vec: Vec::new(),
         };
         game

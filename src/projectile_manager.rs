@@ -76,7 +76,7 @@ impl ProjectileManager {
                     false,     // flip vertical
                 )?;
 
-                if !tower_manager::TowerManager::is_within_area(self.projectile_vec[projectile_index].position, self.projectile_vec[projectile_index].target, constants::PROJECTILE_ARROW_SPEED as i32) {
+                if !tower_manager::TowerManager::is_within_area(self.projectile_vec[projectile_index].position, self.projectile_vec[projectile_index].target, self.projectile_vec[projectile_index].speed as i32) {
                     Self::move_projectile(&mut self.projectile_vec[projectile_index], game);
                 }
                 else {

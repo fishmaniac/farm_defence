@@ -24,33 +24,30 @@ fn game_loop (
     build_buttons: &mut button_manager::ButtonManager,
     health_bars: &mut gui_manager::GUIManager,
 ) {
-    let mut fps: u32;
     let mut frame_count: u32 = 0;
     let mut last_fps_time = std::time::Instant::now();
 
     while !game.quit {
-        frame_count += 1;
-        game.frame_time += 1;
 
-        if frame_count % 16 == 0 {
-            let elapsed_fps_time = last_fps_time.elapsed();
-            let elapsed_seconds = elapsed_fps_time.as_secs_f64();
-            fps = (frame_count as f64 / elapsed_seconds) as u32;
-            println!("FPS: {}, ELAPSED: {:?}, FRAME TIME: {}", fps, elapsed_seconds, game.frame_time);
-            frame_count = 0;
-            last_fps_time = std::time::Instant::now();
-        }
 
         game.prepare_background();
         events.do_event(game, seed_buttons, build_buttons, towers);
         game.update_game(tex_man, player, level, towers, enemies, projectiles, health_bars, seed_buttons, build_buttons);
         game.canvas.present();
 
-        // if towers.tower_vec.len() > 0 {
-        //     println!("|| GAME || CAM_X: {}, CAM_Y: {} || PLAYER || X: {}, Y: {}, rectX: {}, rectY: {} || TOWER VEC POS || COL: {} ROW: {}", game.cam_x, game.cam_y, player.x, player.y, player.rect.x(), player.rect.y(), towers.tower_vec[0].col_index, towers.tower_vec[0].row_index);
-        // }
-        //
-        /* ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60)); */
+        game.frame_time += 1;
+
+        if game.frame_time % 16 == 0 {
+            let elapsed_fps_time = last_fps_time.elapsed();
+            game.elapsed_seconds = elapsed_fps_time.as_secs_f64();
+            game.fps = (frame_count as f64 / game.elapsed_seconds) as u32;
+            println!("FPS: {}\tELAPSED: {:.4}\tFRAME TIME: {}\nCARROTS: {}\tTOMATOES: {}", game.fps, game.elapsed_seconds, game.frame_time, game.carrot_amount, game.tomato_amount);
+            frame_count = 0;
+            last_fps_time = std::time::Instant::now();
+        }
+        if game.elapsed_seconds < 2.0 {
+            game.is_pathfinding = false;
+        }
     }
 }
 

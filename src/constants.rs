@@ -1,3 +1,15 @@
+//some notes on types..
+//
+// u8s can save on stack space
+// but for just going math, i32 is the default integer promotion target for llvm
+// (you should store them as i8s if going to i32s. signed math is optimized differently)
+// so storing it as an i8 will just sign extend to an i32 for basically free
+// say you have a vec of some struct that has a few i32s in it
+// say that vec has 100k elements
+// you'd save 3*1e5 bytes of stack/heap space by storing them as i8s over i32s
+// (will your values overflow/underflow an i8?)
+pub const TIMEOUT_DURATION: u128 = 10;
+
 pub const SCREEN_WIDTH: u16 = 1920;
 pub const SCREEN_HEIGHT: u16 = 1080;
 
@@ -31,6 +43,19 @@ pub static TEXTURE_PLAYER_FRONT: &str = "assets/player0-front.png";
 pub static TEXTURE_PLAYER_BACK: &str = "assets/player0-back.png";
 pub static TEXTURE_PLAYER_LEFT: &str = "assets/player0-left.png";
 pub static TEXTURE_PLAYER_RIGHT: &str = "assets/player0-right.png";
+pub static TEXTURE_PLAYER_FRONT_LEFT: &str = "assets/player0-front-left.png";
+pub static TEXTURE_PLAYER_FRONT_RIGHT: &str = "assets/player0-front-right.png";
+pub static TEXTURE_PLAYER_BACK_LEFT: &str = "assets/player0-back-left.png";
+pub static TEXTURE_PLAYER_BACK_RIGHT: &str = "assets/player0-back-right.png";
+pub static TEXTURE_PLAYER_MOVING_FRONT: &str = "assets/player1-front.png";
+pub static TEXTURE_PLAYER_MOVING_BACK: &str = "assets/player1-back.png";
+pub static TEXTURE_PLAYER_MOVING_LEFT: &str = "assets/player1-left.png";
+pub static TEXTURE_PLAYER_MOVING_RIGHT: &str = "assets/player1-right.png";
+pub static TEXTURE_PLAYER_MOVING_FRONT_LEFT: &str = "assets/player1-front-left.png";
+pub static TEXTURE_PLAYER_MOVING_FRONT_RIGHT: &str = "assets/player1-front-right.png";
+pub static TEXTURE_PLAYER_MOVING_BACK_LEFT: &str = "assets/player1-back-left.png";
+pub static TEXTURE_PLAYER_MOVING_BACK_RIGHT: &str = "assets/player1-back-right.png";
+
 
 pub static TEXTURE_FIELD_EMPTY: &str = "assets/field-empty.png";
 pub static TEXTURE_FIELD_SEEDS: &str = "assets/field-seeds.png";
@@ -43,7 +68,7 @@ pub static TEXTURE_BUTTON_TOMATO: &str = "assets/tomato-button.png";
 pub static TEXTURE_BUTTON_HO: &str = "assets/ho-button.png";
 pub static TEXTURE_BUTTON_ARCHER: &str = "assets/archer-button.png";
 
-pub static TEXTURE_TILE_EMPTY: &str = "assets/grass-1.png";
+pub static TEXTURE_TILE_EMPTY: &str = "assets/grass-0.png";
 pub static TEXTURE_TILE_WALL: &str = "assets/tile2.png";
 pub static TEXTURE_TILE_FLOOR: &str = "assets/tile3.png";
 
@@ -78,7 +103,7 @@ pub const TILE_TYPE_ARCHER_BOTTOM: char = 'a';
 pub const TILE_TYPE_GOBLIN_TEST: char = 'G';
 
 pub const ENEMY_GOBLIN_HEALTH: u16 = 500;
-pub const ENEMY_GOBLIN_RADIUS: i32 = 3;
+pub const ENEMY_GOBLIN_RADIUS: u8 = 3;
 pub const ENEMY_GOBLIN_SPEED: u8 = 3;
 pub const ENEMY_GOBLIN_DAMAGE: u8 = 5;
 pub const ENEMY_GOBLIN_ATTACK_SPEED: u8 = 10;

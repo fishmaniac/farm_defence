@@ -123,7 +123,17 @@ impl LevelManager {
                         };
                         row_vec.push(tile);
                     }
-                    _ => {} // Handle other cases if needed
+                    _ => {
+                        let tile = LevelTile {
+                            tile_type: ch,
+                            prev_type: ch,
+                            texture_path: constants::TEXTURE_DEFAULT.to_string(),
+                            rect,
+                            state: 0,
+                            tile_data: TileData::None,
+                        };
+                        row_vec.push(tile);
+                    }
                 }
             }
             temp_vec.push(row_vec);
@@ -224,7 +234,6 @@ impl LevelManager {
                     temp_tile.tile_type = constants::TILE_TYPE_FIELD_EMPTY;
                     temp_tile.texture_path = constants::TEXTURE_FIELD_EMPTY.to_string();
                     temp_tile.tile_data = TileData::None;
-                    println!("CARROTS: {}, TOMATOS: {}", game.carrot_amount, game.tomato_amount);
                 }
             }
             //BUILD MODE ARCHER TOWER
@@ -310,8 +319,8 @@ impl LevelManager {
             let tower_pos_pixel = (constants::TILE_SIZE as i32 * tower.top_index.0 as i32, constants::TILE_SIZE as i32 * tower.top_index.1 as i32);
             for enemy in &mut enemies.enemy_vec {
                 let enemy_pos_pixel = (constants::TILE_SIZE as i32 * enemy.index.0 as i32, constants::TILE_SIZE as i32 * enemy.index.1 as i32);
-                let tower_can_attack: bool = tower_manager::TowerManager::is_within_area((tower.bottom_index.0 as i32, tower.bottom_index.1 as i32), (enemy.index.0 as i32, enemy.index.1 as i32), constants::TOWER_ARCHER_RADIUS) && game.frame_time % tower.attack_speed as u32 == 0;
-                let enemy_can_attack: bool = tower_manager::TowerManager::is_within_area((tower.bottom_index.0 as i32, tower.bottom_index.1 as i32), (enemy.index.0 as i32, enemy.index.1 as i32), constants::ENEMY_GOBLIN_RADIUS) && game.frame_time % enemy.attack_speed as u32 == 0;
+                let tower_can_attack: bool = tower_manager::TowerManager::is_within_area((tower.bottom_index.0 as i32, tower.bottom_index.1 as i32), (enemy.index.0 as i32, enemy.index.1 as i32), tower.attack_radius) && game.frame_time % tower.attack_speed as u32 == 0;
+                let enemy_can_attack: bool = tower_manager::TowerManager::is_within_area((tower.bottom_index.0 as i32, tower.bottom_index.1 as i32), (enemy.index.0 as i32, enemy.index.1 as i32), enemy.attack_radius as i32) && game.frame_time % enemy.attack_speed as u32 == 0;
 
                 if enemy.health != 0 {
                     if tower_can_attack {
@@ -346,7 +355,7 @@ impl LevelManager {
         // towers.tower_vec.retain(|tower| tower.health != 0);
         for tower_index in (0..towers.tower_vec.len()).rev() {
             let tower = &mut towers.tower_vec[tower_index];
-            
+
             if tower.health == 0 {
                 for target_index in (0..game.target_vec.len()).rev() {
                     let target = game.target_vec[target_index];
@@ -356,8 +365,7 @@ impl LevelManager {
                 }
                 for enemy_index in (0..enemies.enemy_vec.len()).rev() {
                     let enemy = &mut enemies.enemy_vec[enemy_index];
-                    println!("ENEMY INDEX: {:?}, TOWER_INDEX: {:?}", enemy.index, tower.bottom_index);
-                    let within_range = tower_manager::TowerManager::is_within_area((tower.bottom_index.0 as i32, tower.bottom_index.1 as i32), (enemy.index.0 as i32, enemy.index.1 as i32), constants::ENEMY_GOBLIN_RADIUS);
+                    let within_range = tower_manager::TowerManager::is_within_area((tower.bottom_index.0 as i32, tower.bottom_index.1 as i32), (enemy.index.0 as i32, enemy.index.1 as i32), enemy.attack_radius as i32);
                     if within_range {
                         enemies.enemy_vec[enemy_index].found_target = false;
                     }
