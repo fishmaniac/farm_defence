@@ -128,7 +128,7 @@ impl GameManager {
             }
         }
         level_manager::LevelManager::check_attacks(self, enemies, towers, projectiles, health_bars);
-        level_manager::LevelManager::delete_all_dead(enemies, towers);
+        level_manager::LevelManager::delete_all_dead(self, enemies, towers);
 
 
         enemy_manager::EnemyManager::render_enemies(enemies, self, tex_man, level).unwrap(); 

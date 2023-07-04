@@ -134,21 +134,17 @@ impl EnemyManager {
         game: &mut game_manager::GameManager,
         level: &mut level_manager::LevelManager, 
     ) {
-        let has_no_targets: bool = !game.target_vec.is_empty() && enemy.final_path.is_none()&& !enemy.found_target;
+        let has_no_targets: bool = !game.target_vec.is_empty() && enemy.final_path.is_none() && !enemy.found_target;
         let can_move: bool = !enemy.found_target && game.frame_time % enemy.movement_speed as u32 == 0;
         let enemy_tuple_index = (enemy.index.0 as i32, enemy.index.1 as i32);
 
-/*         println!("FOUND TARGET BOOL: {:?}", enemy.found_target); */
+/*         println!("FOUND TARGET BOOL: {:?} {:?}", enemy.found_target, enemy.index); */
         if can_move {
             if let Some(mut path) = enemy.final_path.take() {
                 if let Some((col, row)) = path.first() {
-                    // if let Some((col_end, row_end)) = path.last() {
-                    //     if tower_manager::TowerManager::is_within_area((*col_end as i32, *row_end as i32), enemy_tuple_index, 3) {
-                    //         enemy.found_target = true;
-                    //     }
-                    // }
                     enemy.index.0 = *col;
                     enemy.index.1 = *row;
+
                     path.remove(0);
                     enemy.final_path = Some(path);
                 }

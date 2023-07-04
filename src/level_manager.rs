@@ -325,11 +325,9 @@ impl LevelManager {
                 if tower.health != 0 {
                     if enemy_can_attack {
                         tower.health -= enemy.attack_damage as u16;
+                        enemy.found_target = true;
                     }
                 }
-                // else {
-                //     enemy.found_target = false;
-                // }
                 if enemy.health < enemy.max_health {
                     health_bars.render_health_bar_enemy(game, enemy);
                 }
@@ -339,8 +337,33 @@ impl LevelManager {
             }
         }
     }
-    pub fn delete_all_dead (enemies: &mut enemy_manager::EnemyManager, towers: &mut tower_manager::TowerManager) {
+    pub fn delete_all_dead (
+        game: &mut game_manager::GameManager,
+        enemies: &mut enemy_manager::EnemyManager, 
+        towers: &mut tower_manager::TowerManager,
+    ) {
         enemies.enemy_vec.retain(|enemy| enemy.health != 0);
-        towers.tower_vec.retain(|tower| tower.health != 0);
+        // towers.tower_vec.retain(|tower| tower.health != 0);
+        for tower_index in (0..towers.tower_vec.len()).rev() {
+            let tower = &mut towers.tower_vec[tower_index];
+            
+            if tower.health == 0 {
+                for target_index in (0..game.target_vec.len()).rev() {
+                    let target = game.target_vec[target_index];
+                    if target == tower.bottom_index {
+                        game.target_vec.remove(target_index);
+                    }
+                }
+                for enemy_index in (0..enemies.enemy_vec.len()).rev() {
+                    let enemy = &mut enemies.enemy_vec[enemy_index];
+                    println!("ENEMY INDEX: {:?}, TOWER_INDEX: {:?}", enemy.index, tower.bottom_index);
+                    let within_range = tower_manager::TowerManager::is_within_area((tower.bottom_index.0 as i32, tower.bottom_index.1 as i32), (enemy.index.0 as i32, enemy.index.1 as i32), constants::ENEMY_GOBLIN_RADIUS);
+                    if within_range {
+                        enemies.enemy_vec[enemy_index].found_target = false;
+                    }
+                }
+                towers.tower_vec.remove(tower_index);
+            }
+        }
     }
 }
