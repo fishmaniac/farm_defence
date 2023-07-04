@@ -98,7 +98,6 @@ impl ButtonManager {
 
     pub fn render_seed_buttons (&mut self, player: &mut player_manager::PlayerManager, tex_man: &mut texture_manager::TextureManager<WindowContext>, game: &mut game_manager::GameManager) -> Result<(), String> {
         if game.seed_mode {
-                println!("SEED LEN: {}", self.button_vec.len());
             for button_index in 0..self.button_vec.len() {
                 self.button_vec[button_index].rect.set_x(player.rect.x() + constants::TILE_SIZE as i32 * button_index as i32 - constants::SCREEN_WIDTH as i32 / 2 + constants::TILE_SIZE as i32);
                 self.button_vec[button_index].rect.set_y(constants::TILE_SIZE as i32 + player.rect.y() - constants::SCREEN_HEIGHT as i32 / 2 + constants::TILE_SIZE as i32);

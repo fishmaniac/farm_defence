@@ -100,10 +100,10 @@ pub const TILE_TYPE_FIELD_HARVESTABLE: char = 'H';
 pub const TILE_TYPE_ARCHER_TOP: char = 'A';
 pub const TILE_TYPE_ARCHER_BOTTOM: char = 'a';
 
-pub const TILE_TYPE_GOBLIN_TEST: char = 'G';
+pub const TILE_TYPE_GOBLIN: char = 'G';
 
-pub const ENEMY_GOBLIN_HEALTH: u16 = 500;
-pub const ENEMY_GOBLIN_RADIUS: u8 = 3;
+pub const ENEMY_GOBLIN_HEALTH: u16 = 60;
+pub const ENEMY_GOBLIN_RADIUS: u8 = 1;
 pub const ENEMY_GOBLIN_SPEED: u8 = 3;
 pub const ENEMY_GOBLIN_DAMAGE: u8 = 5;
 pub const ENEMY_GOBLIN_ATTACK_SPEED: u8 = 10;
@@ -111,14 +111,15 @@ pub const ENEMY_GOBLIN_ATTACK_SPEED: u8 = 10;
 pub const ENEMY_GOBLIN_HEALTH_BAR_WIDTH: u32 = 24;
 pub const ENEMY_GOBLIN_HEALTH_BAR_HEIGHT: u32 = 4;
 
-
-pub const TOWER_ARCHER_DAMAGE: u8 = 20;
-pub const TOWER_ARCHER_ATTACK_SPEED: u8 = 20;
+pub const TOWER_ARCHER_DAMAGE: u8 = 5;
+pub const TOWER_ARCHER_ATTACK_SPEED: u8 = 16;
 
 pub const TOWER_ARCHER_RADIUS: i32 = 10;
-pub const TOWER_ARCHER_HEALTH: u16 = 100;
+pub const TOWER_ARCHER_HEALTH: u16 = 1000;
 pub const TOWER_ARCHER_HEALTH_BAR_WIDTH: u32 = 32;
 pub const TOWER_ARCHER_HEALTH_BAR_HEIGHT: u32 = 6;
 
+pub const PROJECTILE_DESPAWN_DURATION: u8 = 32;
+pub const PROJECTILE_HIT_DESPAWN_DURATION: u8 = 2;
 pub const PROJECTILE_ARROW_SPEED: u8 = 16;
 

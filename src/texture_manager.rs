@@ -59,7 +59,7 @@ pub trait ResourceLoader<'l, R> {
 impl<'l, T> ResourceLoader<'l, Texture<'l>> for TextureCreator<T> {
     type Args = str;
     fn load(&'l self, path: &str) -> Result<Texture, String> {
-        println!("INFO: LOADING TEXTURE");
+        println!("INFO: LOADING TEXTURE\t{}", path);
         self.load_texture(path)
     }
 }

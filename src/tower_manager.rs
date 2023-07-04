@@ -19,6 +19,7 @@ pub struct Tower {
     pub attack_speed: u8,
     pub max_health: u16,
     pub health: u16,
+    pub is_attacking: bool,
 }
 
 pub struct TowerManager {
@@ -53,6 +54,7 @@ impl TowerManager {
                     attack_speed: constants::TOWER_ARCHER_ATTACK_SPEED,
                     max_health: constants::TOWER_ARCHER_HEALTH,
                     health: constants::TOWER_ARCHER_HEALTH,
+                    is_attacking: false,
                 };
                 game.target_vec.push((tower_tile.bottom_index.0, tower_tile.bottom_index.1));
                 self.tower_vec.push(tower_tile);
@@ -70,6 +72,7 @@ impl TowerManager {
                     attack_speed: 0,
                     max_health: 0,
                     health: 0,
+                    is_attacking: false,
                 };
                 game.target_vec.push((tower_tile.bottom_index.0, tower_tile.bottom_index.1));
                 self.tower_vec.push(tower_tile);

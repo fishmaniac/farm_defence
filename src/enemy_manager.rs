@@ -141,6 +141,7 @@ impl EnemyManager {
 
         /*         println!("FOUND TARGET BOOL: {:?} {:?}", enemy.found_target, enemy.index); */
         if can_move {
+            level.level_vec[enemy.index.0][enemy.index.1].tile_type = level.level_vec[enemy.index.0][enemy.index.1].prev_type;
             if let Some(mut path) = enemy.final_path.take() {
                 if let Some((col, row)) = path.first() {
                     enemy.index.0 = *col;
@@ -148,6 +149,7 @@ impl EnemyManager {
 
                     path.remove(0);
                     enemy.final_path = Some(path);
+                    level.level_vec[enemy.index.0][enemy.index.1].tile_type = constants::TILE_TYPE_GOBLIN;
                 }
             }
         }
@@ -222,21 +224,25 @@ impl EnemyManager {
             let width = level_vec[0].len();
             let height = level_vec.len();
             let mut neighbors = Vec::with_capacity(4);
+            let top_tile_type = level_vec[x][y - 1].tile_type;
+            let bottom_tile_type = level_vec[x][y + 1].tile_type; 
+            let left_tile_type = level_vec[x - 1][y].tile_type;
+            let right_tile_type = level_vec[x + 1][y].tile_type;
 
             //Up
-            if y > 0 && level_vec[x][y - 1].tile_type != constants::TILE_TYPE_WALL {
+            if y > 0 && top_tile_type != constants::TILE_TYPE_WALL && top_tile_type != constants::TILE_TYPE_GOBLIN {
                 neighbors.push((x, y - 1));
             }
             //Down
-            if y < height - 1 && level_vec[x][y + 1].tile_type != constants::TILE_TYPE_WALL {
+            if y < height - 1 && bottom_tile_type != constants::TILE_TYPE_WALL && bottom_tile_type != constants::TILE_TYPE_GOBLIN {
                 neighbors.push((x, y + 1));
             }
             //Left
-            if x > 0 && level_vec[x - 1][y].tile_type != constants::TILE_TYPE_WALL {
+            if x > 0 && left_tile_type != constants::TILE_TYPE_WALL && left_tile_type != constants::TILE_TYPE_GOBLIN {
                 neighbors.push((x - 1, y));
             }
             //Right
-            if x < width - 1 && level_vec[x + 1][y].tile_type != constants::TILE_TYPE_WALL {
+            if x < width - 1 && right_tile_type != constants::TILE_TYPE_WALL && right_tile_type != constants::TILE_TYPE_GOBLIN {
                 neighbors.push((x + 1, y));
             }
             neighbors

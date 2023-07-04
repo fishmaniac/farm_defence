@@ -132,16 +132,14 @@ impl GameManager {
             }
         }
         level_manager::LevelManager::check_attacks(self, enemies, towers, projectiles, health_bars);
-        level_manager::LevelManager::delete_all_dead(self, enemies, towers);
+        level.delete_all_dead(self, enemies, towers, projectiles);
 
 
         enemy_manager::EnemyManager::render_enemies(enemies, self, tex_man, level).unwrap(); 
         projectile_manager::ProjectileManager::render_projectiles(projectiles, self, tex_man).unwrap();
         tower_manager::TowerManager::render_towers(towers, self, tex_man).unwrap();
 
-        //TODO: REFACTOR TO LOOP
         player.render_player(self, tex_man).unwrap();
-        /* println!("|| GAME || CAM_X: {}, CAM_Y: {} || PLAYER || X: {}, Y: {}, rectX: {}, rectY: {}", self.cam_x, self.cam_y, player.x, player.y, player.rect.x(), player.rect.y()); */
         seed_buttons.render_seed_buttons(player, tex_man, self).unwrap();
         build_buttons.render_build_buttons(player, tex_man, self).unwrap();  
     }

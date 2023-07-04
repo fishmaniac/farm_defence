@@ -241,13 +241,13 @@ impl LevelManager {
                 if temp_tile.prev_type == constants::TILE_TYPE_GRASS && temp_tile.tile_type != constants::TILE_TYPE_ARCHER_BOTTOM {
                     temp_tile.tile_type = constants::TILE_TYPE_ARCHER_BOTTOM;
                     temp_tile.tile_data = TileData::ArcherTowerBottom;
+                    println!("\nPLACING TOWER: {:?},{:?}\n", col_index, row_index);
                     towers.place_tower(game, &temp_tile, (col_index, row_index));
-
                 }
             }
             build if build == constants::CURRENT_BUILD_GOBLIN_TEST as usize => {
-                if temp_tile.prev_type == constants::TILE_TYPE_GRASS && temp_tile.tile_type != constants::TILE_TYPE_GOBLIN_TEST {
-                    temp_tile.tile_type = constants::TILE_TYPE_GOBLIN_TEST;
+                if temp_tile.prev_type == constants::TILE_TYPE_GRASS && temp_tile.tile_type != constants::TILE_TYPE_GOBLIN {
+                    temp_tile.tile_type = constants::TILE_TYPE_GOBLIN;
                     temp_tile.tile_data = TileData::Goblin;
                     enemies.place_enemy(temp_tile, (col_index, row_index));
                 }
@@ -322,12 +322,25 @@ impl LevelManager {
                 let tower_can_attack: bool = tower_manager::TowerManager::is_within_area((tower.bottom_index.0 as i32, tower.bottom_index.1 as i32), (enemy.index.0 as i32, enemy.index.1 as i32), tower.attack_radius) && game.frame_time % tower.attack_speed as u32 == 0;
                 let enemy_can_attack: bool = tower_manager::TowerManager::is_within_area((tower.bottom_index.0 as i32, tower.bottom_index.1 as i32), (enemy.index.0 as i32, enemy.index.1 as i32), enemy.attack_radius as i32) && game.frame_time % enemy.attack_speed as u32 == 0;
 
+                //TOWER ATTACK
                 if enemy.health != 0 {
                     if tower_can_attack {
-                        if tower_pos_pixel != enemy_pos_pixel {
-                            projectiles.spawn_projectile(tower_pos_pixel, tower_pos_pixel, enemy_pos_pixel)
+                        if tower_pos_pixel != enemy_pos_pixel && !tower.is_attacking {
+                            projectiles.spawn_projectile(tower, tower_pos_pixel, tower_pos_pixel, enemy_pos_pixel);
+                            tower.is_attacking = true;
                         }
-                        enemy.health -= tower.attack_damage as u16;
+                        for projectile in &mut projectiles.projectile_vec {
+                            let projectile_hit: bool = tower_manager::TowerManager::is_within_area(projectile.position, enemy_pos_pixel, projectile.radius as i32);
+
+                            if projectile_hit && enemy.health != 0 {
+                                enemy.health -= projectile.damage as u16;
+                                projectile.hit_target = true;
+                            }
+
+                        }
+                    }
+                    else {
+                        tower.is_attacking = false;
                     }
                 }
                 //ENEMY ATTACK
@@ -337,6 +350,7 @@ impl LevelManager {
                         enemy.found_target = true;
                     }
                 }
+
                 if enemy.health < enemy.max_health {
                     health_bars.render_health_bar_enemy(game, enemy);
                 }
@@ -347,31 +361,55 @@ impl LevelManager {
         }
     }
     pub fn delete_all_dead (
+        &mut self,
         game: &mut game_manager::GameManager,
         enemies: &mut enemy_manager::EnemyManager, 
         towers: &mut tower_manager::TowerManager,
+        projectiles: &mut projectile_manager::ProjectileManager,
     ) {
-        enemies.enemy_vec.retain(|enemy| enemy.health != 0);
-        // towers.tower_vec.retain(|tower| tower.health != 0);
+        /* enemies.enemy_vec.retain(|enemy| enemy.health != 0); */
+        for enemy_index in (0..enemies.enemy_vec.len()).rev() {
+            let enemy = &mut enemies.enemy_vec[enemy_index];
+
+            if enemy.health == 0 {
+                self.level_vec[enemy.index.0][enemy.index.1].tile_type = self.level_vec[enemy.index.0][enemy.index.1].prev_type;
+                enemies.enemy_vec.remove(enemy_index);
+
+            }
+        }
         for tower_index in (0..towers.tower_vec.len()).rev() {
             let tower = &mut towers.tower_vec[tower_index];
 
             if tower.health == 0 {
                 for target_index in (0..game.target_vec.len()).rev() {
                     let target = game.target_vec[target_index];
+
                     if target == tower.bottom_index {
                         game.target_vec.remove(target_index);
+
                     }
                 }
                 for enemy_index in (0..enemies.enemy_vec.len()).rev() {
                     let enemy = &mut enemies.enemy_vec[enemy_index];
                     let within_range = tower_manager::TowerManager::is_within_area((tower.bottom_index.0 as i32, tower.bottom_index.1 as i32), (enemy.index.0 as i32, enemy.index.1 as i32), enemy.attack_radius as i32);
+
                     if within_range {
                         enemies.enemy_vec[enemy_index].found_target = false;
                     }
                 }
                 towers.tower_vec.remove(tower_index);
             }
+        }
+
+        for projectile_index in (0..projectiles.projectile_vec.len()).rev() {
+            let projectile = &mut projectiles.projectile_vec[projectile_index];
+            let do_despawn_projectile: bool = (projectile.hit_target && projectile.time > constants::PROJECTILE_HIT_DESPAWN_DURATION) || projectile.time > constants::PROJECTILE_DESPAWN_DURATION;
+
+            if do_despawn_projectile {
+                projectiles.projectile_vec.remove(projectile_index);
+            }
+
+
         }
     }
 }

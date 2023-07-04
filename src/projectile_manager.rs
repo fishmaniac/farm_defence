@@ -9,11 +9,15 @@ use crate::tower_manager;
 pub struct Projectile {
     pub rect: sdl2::rect::Rect,
     pub texture_path: String,
-    start: (i32, i32),
-    position: (i32, i32),
-    target: (i32, i32),
+    pub time: u8,
+    pub start: (i32, i32),
+    pub position: (i32, i32),
+    pub target: (i32, i32),
+    pub hit_target: bool,
     angle: f64,
     speed: u8,
+    pub radius: u16,
+    pub damage: u8,
 }
 
 pub struct ProjectileManager {
@@ -27,22 +31,22 @@ impl ProjectileManager {
         };
         projectiles
     }
-    pub fn spawn_projectile (&mut self, start: (i32, i32), position: (i32, i32), target: (i32, i32)) {
-        //TODO: projectile
-/*         if self.projectile_vec.len() < 3 { */
-            let projectile = self::Projectile {
-                rect: sdl2::rect::Rect::new(position.0, position.1, constants::TILE_SIZE, constants::TILE_SIZE),
-                texture_path: constants::TEXTURE_PROJECTILE_ARROW.to_string(),
-                start,
-                position,
-                target,
-                speed: constants::PROJECTILE_ARROW_SPEED,
-                angle: Self::calculate_angle(start, target),
+    pub fn spawn_projectile (&mut self, tower: &mut tower_manager::Tower, start: (i32, i32), position: (i32, i32), target: (i32, i32)) {
+        let projectile = self::Projectile {
+            time: 0,
+            rect: sdl2::rect::Rect::new(position.0, position.1, constants::TILE_SIZE, constants::TILE_SIZE),
+            texture_path: constants::TEXTURE_PROJECTILE_ARROW.to_string(),
+            start,
+            position,
+            target,
+            hit_target: false,
+            angle: Self::calculate_angle(start, target),
+            speed: constants::PROJECTILE_ARROW_SPEED,
+            radius: 64,
+            damage: tower.attack_damage,
         };
 
-
-            self.projectile_vec.push(projectile);
-/*         } */
+        self.projectile_vec.push(projectile);
     }
 
     fn move_projectile (projectile: &mut Projectile, game: &mut game_manager::GameManager) {
@@ -57,31 +61,26 @@ impl ProjectileManager {
     }
 
     pub fn render_projectiles (&mut self, game: &mut game_manager::GameManager, tex_man: &mut texture_manager::TextureManager<sdl2::video::WindowContext>) -> Result<(), String> {
-        for projectile_index in 0..self.projectile_vec.len() {
-            if projectile_index < self.projectile_vec.len() {
-                //TODO: ADD CAM TRANSFORM?
-                let position: (i32, i32) = self.projectile_vec[projectile_index].position;
+        for projectile in &mut self.projectile_vec {
+            projectile.rect.set_x(projectile.position.0 - game.cam_x);
+            projectile.rect.set_y(projectile.position.1 - game.cam_y);
 
-                self.projectile_vec[projectile_index].rect.set_x(position.0 - game.cam_x);
-                self.projectile_vec[projectile_index].rect.set_y(position.1 - game.cam_y);
+            let texture = tex_man.load(&projectile.texture_path)?;
+            game.canvas.copy_ex(
+                &texture, // Texture object
+                None,      // source rect
+                projectile.rect,     // destination rect
+                projectile.angle,      // angle (degrees)
+                None,   // center
+                false,    // flip horizontal
+                false,     // flip vertical
+            )?;
 
-                let texture = tex_man.load(&self.projectile_vec[projectile_index].texture_path)?;
-                game.canvas.copy_ex(
-                    &texture, // Texture object
-                    None,      // source rect
-                    self.projectile_vec[projectile_index].rect,     // destination rect
-                    self.projectile_vec[projectile_index].angle,      // angle (degrees)
-                    None,   // center
-                    false,    // flip horizontal
-                    false,     // flip vertical
-                )?;
-
-                if !tower_manager::TowerManager::is_within_area(self.projectile_vec[projectile_index].position, self.projectile_vec[projectile_index].target, self.projectile_vec[projectile_index].speed as i32) {
-                    Self::move_projectile(&mut self.projectile_vec[projectile_index], game);
-                }
-                else {
-                    self.projectile_vec.remove(projectile_index);
-                }
+            if !tower_manager::TowerManager::is_within_area(projectile.position, projectile.target, projectile.speed as i32) {
+                Self::move_projectile(projectile, game);
+            }
+            else {
+                projectile.time += 1;
             }
         }
         Ok(())

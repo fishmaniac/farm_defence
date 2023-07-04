@@ -36,12 +36,13 @@ fn game_loop (
         game.canvas.present();
 
         game.frame_time += 1;
+        frame_count += 1;
 
         if game.frame_time % 16 == 0 {
             let elapsed_fps_time = last_fps_time.elapsed();
             game.elapsed_seconds = elapsed_fps_time.as_secs_f64();
             game.fps = (frame_count as f64 / game.elapsed_seconds) as u32;
-            println!("FPS: {}\tELAPSED: {:.4}\tFRAME TIME: {}\nCARROTS: {}\tTOMATOES: {}", game.fps, game.elapsed_seconds, game.frame_time, game.carrot_amount, game.tomato_amount);
+            println!("\nFPS: {}\tELAPSED: {:.4}\tFRAME TIME: {}\nCARROTS: {}\tTOMATOES: {}\n", game.fps, game.elapsed_seconds, game.frame_time, game.carrot_amount, game.tomato_amount);
             frame_count = 0;
             last_fps_time = std::time::Instant::now();
         }
