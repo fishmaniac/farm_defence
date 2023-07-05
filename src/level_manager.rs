@@ -15,6 +15,7 @@ use crate::enemy_manager::EnemyManager;
 use crate::enemy_manager;
 use crate::button_manager;
 
+#[derive(PartialEq)]
 pub enum TileData {
     Carrots,
     Tomatoes,
@@ -36,6 +37,7 @@ pub struct LevelTile {
     pub rect: Rect,
     pub state: u16,
     pub tile_data: TileData,
+    pub is_occupied: bool,
 }
 
 impl LevelManager {
@@ -60,6 +62,7 @@ impl LevelManager {
                     rect,
                     state: 0,
                     tile_data: TileData::None,
+                    is_occupied: false,
                 });
             }
             self.level_vec.push(row);
@@ -90,6 +93,7 @@ impl LevelManager {
                             rect,
                             state: 0,
                             tile_data: TileData::None,
+                            is_occupied: false,
                         };
                         row_vec.push(tile);
                     }
@@ -102,6 +106,7 @@ impl LevelManager {
                             rect,
                             state: 0,
                             tile_data: TileData::None,
+                            is_occupied: false,
                         };
                         row_vec.push(tile);
                     }
@@ -114,6 +119,7 @@ impl LevelManager {
                             rect,
                             state: 0,
                             tile_data: TileData::None,
+                            is_occupied: false,
                         };
                         row_vec.push(tile);
                     }
@@ -126,6 +132,7 @@ impl LevelManager {
                             rect,
                             state: 0,
                             tile_data: TileData::None,
+                            is_occupied: false,
                         };
                         row_vec.push(tile);
                     }
@@ -138,6 +145,7 @@ impl LevelManager {
                             rect,
                             state: 0,
                             tile_data: TileData::None,
+                            is_occupied: false,
                         };
                         row_vec.push(tile);
                     }
@@ -211,7 +219,7 @@ impl LevelManager {
             if game.build_mode && !button_manager::ButtonManager::check_clicked(build_buttons) {
                 Self::build_mode(game, towers, enemies, temp_tile, row_index, col_index);
             }
-            if game.seed_mode && !button_manager::ButtonManager::check_clicked(seed_buttons) && temp_tile.tile_type == constants::TILE_TYPE_FIELD_EMPTY {
+            if game.seed_mode && !button_manager::ButtonManager::check_clicked(seed_buttons) {
                 Self::seed_mode(game,temp_tile);
             }
         }
@@ -228,43 +236,19 @@ impl LevelManager {
         col_index: usize, 
     ) {
         match game.current_build {
-            //BUILD MODE HO
-            build if build == constants::CURRENT_BUILD_HO as usize => {
-                if temp_tile.original_type == constants::TILE_TYPE_GRASS {
-                    if temp_tile.tile_type == constants::TILE_TYPE_FIELD_HARVESTABLE {
-                        match temp_tile.tile_data {
-                            TileData::Carrots => game.carrot_amount += 1,
-                            TileData::Tomatoes => game.tomato_amount += 1,
-                            _ => {},
-                        }
-                    }
-                    temp_tile.prev_type = constants::TILE_TYPE_FIELD_EMPTY;
-                    temp_tile.tile_type = constants::TILE_TYPE_FIELD_EMPTY;
-                    temp_tile.texture_path = constants::TEXTURE_FIELD_EMPTY.to_string();
-                    temp_tile.tile_data = TileData::None;
-                }
-            }
-            //BUILD MODE ARCHER TOWER
-            build if build == constants::CURRENT_BUILD_ARCHER_TOWER as usize => {
-                if temp_tile.original_type == constants::TILE_TYPE_GRASS && temp_tile.tile_type != constants::TILE_TYPE_ARCHER_BOTTOM {
-/*                     temp_tile.prev_type = temp_tile.tile_type; */
-                    temp_tile.prev_type = constants::TILE_TYPE_ARCHER_BOTTOM;
+            build if build == constants::CURRENT_BUILD_ARCHER_TOWER => {
+                if temp_tile.tile_type == constants::TILE_TYPE_GRASS && temp_tile.tile_type != constants::TILE_TYPE_ARCHER_BOTTOM {
                     temp_tile.tile_type = constants::TILE_TYPE_ARCHER_BOTTOM;
                     temp_tile.tile_data = TileData::ArcherTowerBottom;
-                    println!("\nPLACING TOWER: {:?},{:?}\n", col_index, row_index);
                     towers.place_tower(game, &temp_tile, (col_index, row_index));
                 }
             }
-            build if build == constants::CURRENT_BUILD_GOBLIN_TEST as usize => {
-                println!("BEFORE GOBLIN PLACE:\tTILE TYPE:{:?}\tPREV TYPE{:?}\tORIGINAL TYPE:{:?}", temp_tile.tile_type, temp_tile.prev_type, temp_tile.original_type);
-                if temp_tile.original_type == constants::TILE_TYPE_GRASS && temp_tile.tile_type != constants::TILE_TYPE_GOBLIN {
-                    temp_tile.prev_type = constants::TILE_TYPE_GOBLIN;
+            build if build == constants::CURRENT_BUILD_GOBLIN => {
+                if temp_tile.tile_type == constants::TILE_TYPE_GRASS && temp_tile.tile_type != constants::TILE_TYPE_GOBLIN {
                     temp_tile.tile_type = constants::TILE_TYPE_GOBLIN;
                     temp_tile.tile_data = TileData::Goblin;
                     enemies.place_enemy(temp_tile, (col_index, row_index));
                 }
-                println!("AFTER GOBLIN PLACE:\tTILE TYPE:{:?}\tPREV TYPE{:?}\tORIGINAL TYPE:{:?}", temp_tile.tile_type, temp_tile.prev_type, temp_tile.original_type);
-
             }
             _ => {}
         }
@@ -272,15 +256,39 @@ impl LevelManager {
     }
     fn seed_mode (game: &mut GameManager, temp_tile: &mut LevelTile) {
         match game.current_seed {
-            seed if seed == constants::CURRENT_SEED_CARROT as usize => {
-                temp_tile.tile_type = constants::TILE_TYPE_FIELD_EMPTY;
-                temp_tile.texture_path = constants::TEXTURE_FIELD_SEEDS.to_string();
-                temp_tile.tile_data = TileData::Carrots;
+            seed if seed == constants::CURRENT_SEED_SHOVEL => {
+                temp_tile.tile_type = temp_tile.original_type;
+                temp_tile.texture_path = constants::TEXTURE_TILE_EMPTY.to_string();
+                temp_tile.tile_data = TileData::None;
             }
-            seed if seed == constants::CURRENT_SEED_TOMATO as usize => {
-                temp_tile.tile_type = constants::TILE_TYPE_FIELD_EMPTY;
-                temp_tile.texture_path = constants::TEXTURE_FIELD_SEEDS.to_string();
-                temp_tile.tile_data = TileData::Tomatoes;
+            seed if seed == constants::CURRENT_SEED_HO => {
+                if temp_tile.tile_type == constants::TILE_TYPE_GRASS || temp_tile.tile_type == constants::TILE_TYPE_FIELD_HARVESTABLE || temp_tile.tile_type == constants::TILE_TYPE_FIELD_GROWING || temp_tile.tile_type == constants::TILE_TYPE_FIELD_EMPTY {
+                    if temp_tile.tile_type == constants::TILE_TYPE_FIELD_HARVESTABLE {
+                        match temp_tile.tile_data {
+                            TileData::Carrots => game.carrot_amount += 1,
+                            TileData::Tomatoes => game.tomato_amount += 1,
+                            _ => {},
+                        }
+                    }
+                    temp_tile.tile_type = constants::TILE_TYPE_FIELD_EMPTY;
+                    temp_tile.texture_path = constants::TEXTURE_FIELD_EMPTY.to_string();
+                    temp_tile.tile_data = TileData::None;
+                }
+            }
+            seed if seed == constants::CURRENT_SEED_CARROT => {
+                if temp_tile.tile_type == constants::TILE_TYPE_FIELD_EMPTY {
+                    println!("CURRENT SEED: {}", game.current_seed);
+                    temp_tile.tile_type = constants::TILE_TYPE_FIELD_EMPTY;
+                    temp_tile.texture_path = constants::TEXTURE_FIELD_SEEDS.to_string();
+                    temp_tile.tile_data = TileData::Carrots;
+                }
+            }
+            seed if seed == constants::CURRENT_SEED_TOMATO => {
+                if temp_tile.tile_type == constants::TILE_TYPE_FIELD_EMPTY {
+                    temp_tile.tile_type = constants::TILE_TYPE_FIELD_EMPTY;
+                    temp_tile.texture_path = constants::TEXTURE_FIELD_SEEDS.to_string();
+                    temp_tile.tile_data = TileData::Tomatoes;
+                }
             }
             _ => {}
         }
@@ -385,7 +393,8 @@ impl LevelManager {
             let enemy = &mut enemies.enemy_vec[enemy_index];
 
             if enemy.health == 0 {
-                self.level_vec[enemy.index.0][enemy.index.1].tile_type = self.level_vec[enemy.index.0][enemy.index.1].original_type;
+                //MAYBE REMOVE TILE TYPE
+                self.level_vec[enemy.index.0][enemy.index.1].tile_type = self.level_vec[enemy.index.0][enemy.index.1].original_type; 
                 enemies.enemy_vec.remove(enemy_index);
 
             }
@@ -409,6 +418,7 @@ impl LevelManager {
                         enemies.enemy_vec[enemy_index].found_target = false;
                     }
                 }
+                //MAYBE REMOVE TILE TYPE
                 self.level_vec[tower.bottom_index.0][tower.bottom_index.1].tile_type = self.level_vec[tower.bottom_index.0][tower.bottom_index.1].original_type;
                 towers.tower_vec.remove(tower_index);
             }

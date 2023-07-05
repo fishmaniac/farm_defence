@@ -85,12 +85,12 @@ impl EnemyManager {
                 let temp_enemy = self::Enemy {
                     cost_total: 0.0,
                     final_path: None,
-                    movement_speed: 0,
-                    attack_damage: 0,
-                    attack_radius: 0,
-                    attack_speed: 0,
-                    max_health: 0,
-                    health: 0,
+                    movement_speed: 1,
+                    attack_damage: 1,
+                    attack_radius: 1,
+                    attack_speed: 1,
+                    max_health: 1,
+                    health: 1,
                     found_target: false,
                     index,
                     direction: player_manager::Direction::Down,
@@ -140,23 +140,16 @@ impl EnemyManager {
         let enemy_tuple_index = (enemy.index.0 as i32, enemy.index.1 as i32);
 
         if can_move {
-            level.level_vec[enemy.index.0][enemy.index.1].tile_type = level.level_vec[enemy.index.0][enemy.index.1].prev_type;
-            level.level_vec[enemy.index.0][enemy.index.1].prev_type = level.level_vec[enemy.index.0][enemy.index.1].original_type;
             if let Some(mut path) = enemy.final_path.take() {
                 if let Some((col, row)) = path.first() {
-                    let is_enemy: bool = level.level_vec[*col][*row].tile_type == constants::TILE_TYPE_GOBLIN;
-
-                    if !is_enemy {
+                    if !level.level_vec[*row][*col].is_occupied {
+                        level.level_vec[enemy.index.0][enemy.index.1].is_occupied = false;
                         enemy.index.0 = *col;
                         enemy.index.1 = *row;
-                        level.level_vec[*col][*row].tile_type = constants::TILE_TYPE_GOBLIN;
+                        level.level_vec[enemy.index.0][enemy.index.1].is_occupied = true;
+                        path.remove(0);
+                        enemy.final_path = Some(path);
                     }
-                    else {
-                        enemy.found_target = false;
-                    }
-
-                    path.remove(0);
-                    enemy.final_path = Some(path);
                 }
             }
         }
@@ -231,31 +224,31 @@ impl EnemyManager {
             let width = level_vec[0].len();
             let height = level_vec.len();
             let mut neighbors = Vec::with_capacity(4);
-            let top_tile_type = level_vec[x][y - 1].tile_type;
-            let bottom_tile_type = level_vec[x][y + 1].tile_type; 
-            let left_tile_type = level_vec[x - 1][y].tile_type;
-            let right_tile_type = level_vec[x + 1][y].tile_type;
+            let top_tile = &level_vec[x][y - 1];
+            let bottom_tile = &level_vec[x][y + 1]; 
+            let left_tile = &level_vec[x - 1][y];
+            let right_tile = &level_vec[x + 1][y];
 
 
             let tile_types_to_avoid = [
                 constants::TILE_TYPE_WALL,
-                constants::TILE_TYPE_GOBLIN,
+                /*                 constants::TILE_TYPE_GOBLIN, */
             ];
 
             //Up
-            if y > 0 && !tile_types_to_avoid.contains(&top_tile_type) {
+            if y > 0 && !tile_types_to_avoid.contains(&top_tile.tile_type) && !top_tile.is_occupied {
                 neighbors.push((x, y - 1));
             }
             //Down
-            if y < height - 1 && !tile_types_to_avoid.contains(&bottom_tile_type) {
+            if y < height - 1 && !tile_types_to_avoid.contains(&bottom_tile.tile_type) && !bottom_tile.is_occupied {
                 neighbors.push((x, y + 1));
             }
             //Left
-            if x > 0 && !tile_types_to_avoid.contains(&left_tile_type) {
+            if x > 0 && !tile_types_to_avoid.contains(&left_tile.tile_type) && !left_tile.is_occupied {
                 neighbors.push((x - 1, y));
             }
             //Right
-            if x < width - 1 && !tile_types_to_avoid.contains(&right_tile_type) {
+            if x < width - 1 && !tile_types_to_avoid.contains(&right_tile.tile_type) && !right_tile.is_occupied {
                 neighbors.push((x + 1, y));
             }
             neighbors

@@ -35,7 +35,7 @@ pub const PLAYER_SPEED_DIAGONAL: u8 = 4; //SQUARE ROOT OF PLAYER_SPEED
 pub const CROP_TIME: u16 = 100;
 
 pub const SEED_BUTTON_AMT: usize = 8;
-pub const BUILD_BUTTON_AMT: usize = 4;
+pub const BUILD_BUTTON_AMT: usize = 6;
 
 pub static TEXTURE_DEFAULT: &str = "assets/default-texture.png";
 
@@ -63,9 +63,10 @@ pub static TEXTURE_FIELD_GROWING: &str = "assets/field1.png";
 pub static TEXTURE_FIELD_CARROT: &str = "assets/carrots0.png";
 pub static TEXTURE_FIELD_TOMATO: &str = "assets/tomatoes0.png";
 
+pub static TEXTURE_BUTTON_SHOVEL: &str = "assets/shovel-button.png";
+pub static TEXTURE_BUTTON_HO: &str = "assets/ho-button.png";
 pub static TEXTURE_BUTTON_CARROT: &str = "assets/carrot-button.png";
 pub static TEXTURE_BUTTON_TOMATO: &str = "assets/tomato-button.png";
-pub static TEXTURE_BUTTON_HO: &str = "assets/ho-button.png";
 pub static TEXTURE_BUTTON_ARCHER: &str = "assets/archer-button.png";
 
 pub static TEXTURE_TILE_EMPTY: &str = "assets/grass-0.png";
@@ -82,12 +83,13 @@ pub static TEXTURE_GOBLIN_ENEMY_FRONT: &str = "assets/goblin-enemy-front.png";
 
 pub static TEXTURE_PROJECTILE_ARROW: &str = "assets/archer-arrow-large.png";
 
-pub const CURRENT_BUILD_HO: usize = 0;
-pub const CURRENT_BUILD_ARCHER_TOWER: usize = 1;
-pub const CURRENT_BUILD_GOBLIN_TEST: usize = 2;
+pub const CURRENT_BUILD_ARCHER_TOWER: usize = 0;
+pub const CURRENT_BUILD_GOBLIN: usize = 1;
 
-pub const CURRENT_SEED_CARROT: usize = 0;
-pub const CURRENT_SEED_TOMATO: usize = 1;
+pub const CURRENT_SEED_SHOVEL: usize = 0;
+pub const CURRENT_SEED_HO: usize = 1;
+pub const CURRENT_SEED_CARROT: usize = 2;
+pub const CURRENT_SEED_TOMATO: usize = 3;
 
 pub const TILE_TYPE_GRASS: char = '0';
 pub const TILE_TYPE_WALL: char = '2';

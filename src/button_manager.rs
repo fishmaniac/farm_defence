@@ -40,10 +40,12 @@ impl ButtonManager {
         buttons
     }
     fn create_seed_buttons (&mut self, player: &player_manager::PlayerManager) {
-        for i in 0..self.button_amount {
+        for button_index in 0..self.button_amount {
             let temp_button = self::Button {
                 rect: Rect::new(player.x, player.y, constants::TILE_SIZE, constants::TILE_SIZE),
-                texture_path: match i {
+                texture_path: match button_index {
+                    constants::CURRENT_SEED_SHOVEL => constants::TEXTURE_BUTTON_SHOVEL.to_string(),
+                    constants::CURRENT_SEED_HO => constants::TEXTURE_BUTTON_HO.to_string(),
                     constants::CURRENT_SEED_CARROT => constants::TEXTURE_BUTTON_CARROT.to_string(),
                     constants::CURRENT_SEED_TOMATO => constants::TEXTURE_BUTTON_TOMATO.to_string(),
                     _ => constants::TEXTURE_DEFAULT.to_string(),
@@ -55,13 +57,12 @@ impl ButtonManager {
         }
     }
     fn create_build_buttons (&mut self, player: &player_manager::PlayerManager) {
-        for i in 0..self.button_amount {
+        for button_index in 0..self.button_amount {
             let temp_button = self::Button {
                 rect: Rect::new(player.x, player.y, constants::TILE_SIZE, constants::TILE_SIZE),
-                texture_path: match i {
-                    constants::CURRENT_BUILD_HO => constants::TEXTURE_BUTTON_HO.to_string(),
+                texture_path: match button_index {
                     constants::CURRENT_BUILD_ARCHER_TOWER => constants::TEXTURE_BUTTON_ARCHER.to_string(),
-                    constants::CURRENT_BUILD_GOBLIN_TEST => constants::TEXTURE_GOBLIN_ENEMY_FRONT.to_string(),
+                    constants::CURRENT_BUILD_GOBLIN => constants::TEXTURE_GOBLIN_ENEMY_FRONT.to_string(),
                     _ => constants::TEXTURE_DEFAULT.to_string(),
                 },
                 clicked: true,

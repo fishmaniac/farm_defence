@@ -13,4 +13,4 @@ debug = true
 [dependencies.sdl2]
 version = "0.35"
 default-features = false
-features = ["ttf", "image"]
+features = ["ttf", "image", "mixer"]
