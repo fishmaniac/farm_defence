@@ -102,18 +102,17 @@ pub const TILE_TYPE_ARCHER_BOTTOM: char = 'a';
 
 pub const TILE_TYPE_GOBLIN: char = 'G';
 
-pub const ENEMY_GOBLIN_HEALTH: u16 = 60;
+pub const ENEMY_GOBLIN_HEALTH: u16 = 100;
 pub const ENEMY_GOBLIN_RADIUS: u8 = 1;
 pub const ENEMY_GOBLIN_SPEED: u8 = 3;
 pub const ENEMY_GOBLIN_DAMAGE: u8 = 5;
-pub const ENEMY_GOBLIN_ATTACK_SPEED: u8 = 10;
+pub const ENEMY_GOBLIN_ATTACK_SPEED: u8 = 16;
 
 pub const ENEMY_GOBLIN_HEALTH_BAR_WIDTH: u32 = 24;
 pub const ENEMY_GOBLIN_HEALTH_BAR_HEIGHT: u32 = 4;
 
 pub const TOWER_ARCHER_DAMAGE: u8 = 5;
-pub const TOWER_ARCHER_ATTACK_SPEED: u8 = 16;
-
+pub const TOWER_ARCHER_ATTACK_SPEED: u8 = 32;
 pub const TOWER_ARCHER_RADIUS: i32 = 10;
 pub const TOWER_ARCHER_HEALTH: u16 = 1000;
 pub const TOWER_ARCHER_HEALTH_BAR_WIDTH: u32 = 32;

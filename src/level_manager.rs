@@ -31,6 +31,7 @@ pub struct LevelManager {
 pub struct LevelTile {
     pub tile_type: char,
     pub prev_type: char,
+    pub original_type: char,
     pub texture_path: String,
     pub rect: Rect,
     pub state: u16,
@@ -54,6 +55,7 @@ impl LevelManager {
                 row.push(LevelTile { 
                     tile_type: constants::TILE_TYPE_GRASS,
                     prev_type: constants::TILE_TYPE_GRASS,
+                    original_type: constants::TILE_TYPE_GRASS,
                     texture_path: constants::TEXTURE_TILE_EMPTY.to_string(),
                     rect,
                     state: 0,
@@ -83,6 +85,7 @@ impl LevelManager {
                         let tile = LevelTile {
                             tile_type: ch,
                             prev_type: ch,
+                            original_type: ch,
                             texture_path: constants::TEXTURE_TILE_EMPTY.to_string(),
                             rect,
                             state: 0,
@@ -94,6 +97,7 @@ impl LevelManager {
                         let tile = LevelTile {
                             tile_type: ch,
                             prev_type: ch,
+                            original_type: ch,
                             texture_path: constants::TEXTURE_TILE_WALL.to_string(),
                             rect,
                             state: 0,
@@ -105,6 +109,7 @@ impl LevelManager {
                         let tile = LevelTile {
                             tile_type: ch,
                             prev_type: ch,
+                            original_type: ch,
                             texture_path: constants::TEXTURE_TILE_FLOOR.to_string(),
                             rect,
                             state: 0,
@@ -116,6 +121,7 @@ impl LevelManager {
                         let tile = LevelTile {
                             tile_type: ch,
                             prev_type: ch,
+                            original_type: ch,
                             texture_path: constants::TEXTURE_FIELD_EMPTY.to_string(),
                             rect,
                             state: 0,
@@ -127,6 +133,7 @@ impl LevelManager {
                         let tile = LevelTile {
                             tile_type: ch,
                             prev_type: ch,
+                            original_type: ch,
                             texture_path: constants::TEXTURE_DEFAULT.to_string(),
                             rect,
                             state: 0,
@@ -223,7 +230,7 @@ impl LevelManager {
         match game.current_build {
             //BUILD MODE HO
             build if build == constants::CURRENT_BUILD_HO as usize => {
-                if temp_tile.prev_type == constants::TILE_TYPE_GRASS {
+                if temp_tile.original_type == constants::TILE_TYPE_GRASS {
                     if temp_tile.tile_type == constants::TILE_TYPE_FIELD_HARVESTABLE {
                         match temp_tile.tile_data {
                             TileData::Carrots => game.carrot_amount += 1,
@@ -231,6 +238,7 @@ impl LevelManager {
                             _ => {},
                         }
                     }
+                    temp_tile.prev_type = constants::TILE_TYPE_FIELD_EMPTY;
                     temp_tile.tile_type = constants::TILE_TYPE_FIELD_EMPTY;
                     temp_tile.texture_path = constants::TEXTURE_FIELD_EMPTY.to_string();
                     temp_tile.tile_data = TileData::None;
@@ -238,7 +246,9 @@ impl LevelManager {
             }
             //BUILD MODE ARCHER TOWER
             build if build == constants::CURRENT_BUILD_ARCHER_TOWER as usize => {
-                if temp_tile.prev_type == constants::TILE_TYPE_GRASS && temp_tile.tile_type != constants::TILE_TYPE_ARCHER_BOTTOM {
+                if temp_tile.original_type == constants::TILE_TYPE_GRASS && temp_tile.tile_type != constants::TILE_TYPE_ARCHER_BOTTOM {
+/*                     temp_tile.prev_type = temp_tile.tile_type; */
+                    temp_tile.prev_type = constants::TILE_TYPE_ARCHER_BOTTOM;
                     temp_tile.tile_type = constants::TILE_TYPE_ARCHER_BOTTOM;
                     temp_tile.tile_data = TileData::ArcherTowerBottom;
                     println!("\nPLACING TOWER: {:?},{:?}\n", col_index, row_index);
@@ -246,11 +256,15 @@ impl LevelManager {
                 }
             }
             build if build == constants::CURRENT_BUILD_GOBLIN_TEST as usize => {
-                if temp_tile.prev_type == constants::TILE_TYPE_GRASS && temp_tile.tile_type != constants::TILE_TYPE_GOBLIN {
+                println!("BEFORE GOBLIN PLACE:\tTILE TYPE:{:?}\tPREV TYPE{:?}\tORIGINAL TYPE:{:?}", temp_tile.tile_type, temp_tile.prev_type, temp_tile.original_type);
+                if temp_tile.original_type == constants::TILE_TYPE_GRASS && temp_tile.tile_type != constants::TILE_TYPE_GOBLIN {
+                    temp_tile.prev_type = constants::TILE_TYPE_GOBLIN;
                     temp_tile.tile_type = constants::TILE_TYPE_GOBLIN;
                     temp_tile.tile_data = TileData::Goblin;
                     enemies.place_enemy(temp_tile, (col_index, row_index));
                 }
+                println!("AFTER GOBLIN PLACE:\tTILE TYPE:{:?}\tPREV TYPE{:?}\tORIGINAL TYPE:{:?}", temp_tile.tile_type, temp_tile.prev_type, temp_tile.original_type);
+
             }
             _ => {}
         }
@@ -324,8 +338,8 @@ impl LevelManager {
 
                 //TOWER ATTACK
                 if enemy.health != 0 {
-                    if tower_can_attack {
-                        if tower_pos_pixel != enemy_pos_pixel && !tower.is_attacking {
+                    if tower_can_attack && !tower.is_attacking {
+                        if tower_pos_pixel != enemy_pos_pixel {
                             projectiles.spawn_projectile(tower, tower_pos_pixel, tower_pos_pixel, enemy_pos_pixel);
                             tower.is_attacking = true;
                         }
@@ -339,9 +353,9 @@ impl LevelManager {
 
                         }
                     }
-                    else {
-                        tower.is_attacking = false;
-                    }
+                    // else {
+                    //     tower.is_attacking = false;
+                    // }
                 }
                 //ENEMY ATTACK
                 if tower.health != 0 {
@@ -350,7 +364,6 @@ impl LevelManager {
                         enemy.found_target = true;
                     }
                 }
-
                 if enemy.health < enemy.max_health {
                     health_bars.render_health_bar_enemy(game, enemy);
                 }
@@ -358,6 +371,7 @@ impl LevelManager {
             if tower.health < tower.max_health {
                 health_bars.render_health_bar_tower(game, tower);
             }
+            tower.is_attacking = false;
         }
     }
     pub fn delete_all_dead (
@@ -367,12 +381,11 @@ impl LevelManager {
         towers: &mut tower_manager::TowerManager,
         projectiles: &mut projectile_manager::ProjectileManager,
     ) {
-        /* enemies.enemy_vec.retain(|enemy| enemy.health != 0); */
         for enemy_index in (0..enemies.enemy_vec.len()).rev() {
             let enemy = &mut enemies.enemy_vec[enemy_index];
 
             if enemy.health == 0 {
-                self.level_vec[enemy.index.0][enemy.index.1].tile_type = self.level_vec[enemy.index.0][enemy.index.1].prev_type;
+                self.level_vec[enemy.index.0][enemy.index.1].tile_type = self.level_vec[enemy.index.0][enemy.index.1].original_type;
                 enemies.enemy_vec.remove(enemy_index);
 
             }
@@ -386,7 +399,6 @@ impl LevelManager {
 
                     if target == tower.bottom_index {
                         game.target_vec.remove(target_index);
-
                     }
                 }
                 for enemy_index in (0..enemies.enemy_vec.len()).rev() {
@@ -397,6 +409,7 @@ impl LevelManager {
                         enemies.enemy_vec[enemy_index].found_target = false;
                     }
                 }
+                self.level_vec[tower.bottom_index.0][tower.bottom_index.1].tile_type = self.level_vec[tower.bottom_index.0][tower.bottom_index.1].original_type;
                 towers.tower_vec.remove(tower_index);
             }
         }

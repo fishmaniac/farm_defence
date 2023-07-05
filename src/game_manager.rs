@@ -131,13 +131,13 @@ impl GameManager {
 
             }
         }
-        level_manager::LevelManager::check_attacks(self, enemies, towers, projectiles, health_bars);
-        level.delete_all_dead(self, enemies, towers, projectiles);
-
 
         enemy_manager::EnemyManager::render_enemies(enemies, self, tex_man, level).unwrap(); 
         projectile_manager::ProjectileManager::render_projectiles(projectiles, self, tex_man).unwrap();
         tower_manager::TowerManager::render_towers(towers, self, tex_man).unwrap();
+
+        level_manager::LevelManager::check_attacks(self, enemies, towers, projectiles, health_bars);
+        level.delete_all_dead(self, enemies, towers, projectiles);
 
         player.render_player(self, tex_man).unwrap();
         seed_buttons.render_seed_buttons(player, tex_man, self).unwrap();

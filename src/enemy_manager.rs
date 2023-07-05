@@ -139,17 +139,24 @@ impl EnemyManager {
         let can_move: bool = !enemy.found_target && game.frame_time % enemy.movement_speed as u32 == 0;
         let enemy_tuple_index = (enemy.index.0 as i32, enemy.index.1 as i32);
 
-        /*         println!("FOUND TARGET BOOL: {:?} {:?}", enemy.found_target, enemy.index); */
         if can_move {
             level.level_vec[enemy.index.0][enemy.index.1].tile_type = level.level_vec[enemy.index.0][enemy.index.1].prev_type;
+            level.level_vec[enemy.index.0][enemy.index.1].prev_type = level.level_vec[enemy.index.0][enemy.index.1].original_type;
             if let Some(mut path) = enemy.final_path.take() {
                 if let Some((col, row)) = path.first() {
-                    enemy.index.0 = *col;
-                    enemy.index.1 = *row;
+                    let is_enemy: bool = level.level_vec[*col][*row].tile_type == constants::TILE_TYPE_GOBLIN;
+
+                    if !is_enemy {
+                        enemy.index.0 = *col;
+                        enemy.index.1 = *row;
+                        level.level_vec[*col][*row].tile_type = constants::TILE_TYPE_GOBLIN;
+                    }
+                    else {
+                        enemy.found_target = false;
+                    }
 
                     path.remove(0);
                     enemy.final_path = Some(path);
-                    level.level_vec[enemy.index.0][enemy.index.1].tile_type = constants::TILE_TYPE_GOBLIN;
                 }
             }
         }
@@ -229,20 +236,26 @@ impl EnemyManager {
             let left_tile_type = level_vec[x - 1][y].tile_type;
             let right_tile_type = level_vec[x + 1][y].tile_type;
 
+
+            let tile_types_to_avoid = [
+                constants::TILE_TYPE_WALL,
+                constants::TILE_TYPE_GOBLIN,
+            ];
+
             //Up
-            if y > 0 && top_tile_type != constants::TILE_TYPE_WALL && top_tile_type != constants::TILE_TYPE_GOBLIN {
+            if y > 0 && !tile_types_to_avoid.contains(&top_tile_type) {
                 neighbors.push((x, y - 1));
             }
             //Down
-            if y < height - 1 && bottom_tile_type != constants::TILE_TYPE_WALL && bottom_tile_type != constants::TILE_TYPE_GOBLIN {
+            if y < height - 1 && !tile_types_to_avoid.contains(&bottom_tile_type) {
                 neighbors.push((x, y + 1));
             }
             //Left
-            if x > 0 && left_tile_type != constants::TILE_TYPE_WALL && left_tile_type != constants::TILE_TYPE_GOBLIN {
+            if x > 0 && !tile_types_to_avoid.contains(&left_tile_type) {
                 neighbors.push((x - 1, y));
             }
             //Right
-            if x < width - 1 && right_tile_type != constants::TILE_TYPE_WALL && right_tile_type != constants::TILE_TYPE_GOBLIN {
+            if x < width - 1 && !tile_types_to_avoid.contains(&right_tile_type) {
                 neighbors.push((x + 1, y));
             }
             neighbors
