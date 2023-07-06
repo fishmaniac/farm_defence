@@ -82,6 +82,7 @@ impl TowerManager {
     pub fn render_towers(&mut self, 
         game: &mut game_manager::GameManager, 
         tex_man: &mut texture_manager::TextureManager<sdl2::video::WindowContext>, 
+        health_bars: &mut gui_manager::GUIManager,
     ) -> Result<(), String> {
         for tower_bottom in &mut self.tower_vec {
             let pixel_index: (i32, i32) = (tower_bottom.bottom_index.0 as i32 * constants::TILE_SIZE as i32, tower_bottom.bottom_index.1 as i32 * constants::TILE_SIZE as i32);
@@ -99,6 +100,7 @@ impl TowerManager {
                 false,    // flip horizontal
                 false,     // flip vertical
             )?;
+
         }
         for tower_top in &mut self.tower_vec {
             let pixel_index: (i32, i32) = (tower_top.top_index.0 as i32 * constants::TILE_SIZE as i32, tower_top.top_index.1 as i32 * constants::TILE_SIZE as i32);
@@ -116,6 +118,9 @@ impl TowerManager {
                 false,    // flip horizontal
                 false,     // flip vertical
             )?;
+            if tower_top.health < tower_top.max_health {
+                health_bars.render_health_bar_tower(game, tower_top);
+            }
         }
         Ok(())
     }

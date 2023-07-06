@@ -358,12 +358,8 @@ impl LevelManager {
                                 enemy.health -= projectile.damage as u16;
                                 projectile.hit_target = true;
                             }
-
                         }
                     }
-                    // else {
-                    //     tower.is_attacking = false;
-                    // }
                 }
                 //ENEMY ATTACK
                 if tower.health != 0 {
@@ -372,12 +368,7 @@ impl LevelManager {
                         enemy.found_target = true;
                     }
                 }
-                if enemy.health < enemy.max_health {
-                    health_bars.render_health_bar_enemy(game, enemy);
-                }
-            }
-            if tower.health < tower.max_health {
-                health_bars.render_health_bar_tower(game, tower);
+
             }
             tower.is_attacking = false;
         }
@@ -395,8 +386,8 @@ impl LevelManager {
             if enemy.health == 0 {
                 //MAYBE REMOVE TILE TYPE
                 self.level_vec[enemy.index.0][enemy.index.1].tile_type = self.level_vec[enemy.index.0][enemy.index.1].original_type; 
+                self.level_vec[enemy.index.0][enemy.index.1].is_occupied = false;
                 enemies.enemy_vec.remove(enemy_index);
-
             }
         }
         for tower_index in (0..towers.tower_vec.len()).rev() {
@@ -412,18 +403,19 @@ impl LevelManager {
                 }
                 for enemy_index in (0..enemies.enemy_vec.len()).rev() {
                     let enemy = &mut enemies.enemy_vec[enemy_index];
-                    let within_range = tower_manager::TowerManager::is_within_area((tower.bottom_index.0 as i32, tower.bottom_index.1 as i32), (enemy.index.0 as i32, enemy.index.1 as i32), enemy.attack_radius as i32);
+/*                     let within_range = tower_manager::TowerManager::is_within_area((tower.bottom_index.0 as i32, tower.bottom_index.1 as i32), (enemy.index.0 as i32, enemy.index.1 as i32), enemy.attack_radius as i32); */
 
-                    if within_range {
-                        enemies.enemy_vec[enemy_index].found_target = false;
-                    }
+                    // TODO: need to make a way to keep track of what enemies were attacking this tower
+                    // if within_range {
+                    //     enemies.enemy_vec[enemy_index].found_target = false;
+                    // }
+                    enemies.enemy_vec[enemy_index].found_target = false;
                 }
                 //MAYBE REMOVE TILE TYPE
                 self.level_vec[tower.bottom_index.0][tower.bottom_index.1].tile_type = self.level_vec[tower.bottom_index.0][tower.bottom_index.1].original_type;
                 towers.tower_vec.remove(tower_index);
             }
         }
-
         for projectile_index in (0..projectiles.projectile_vec.len()).rev() {
             let projectile = &mut projectiles.projectile_vec[projectile_index];
             let do_despawn_projectile: bool = (projectile.hit_target && projectile.time > constants::PROJECTILE_HIT_DESPAWN_DURATION) || projectile.time > constants::PROJECTILE_DESPAWN_DURATION;
@@ -431,8 +423,6 @@ impl LevelManager {
             if do_despawn_projectile {
                 projectiles.projectile_vec.remove(projectile_index);
             }
-
-
         }
     }
 }

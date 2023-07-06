@@ -132,9 +132,9 @@ impl GameManager {
             }
         }
 
-        enemy_manager::EnemyManager::render_enemies(enemies, self, tex_man, level).unwrap(); 
+        enemy_manager::EnemyManager::render_enemies(enemies, self, tex_man, level, health_bars).unwrap(); 
         projectile_manager::ProjectileManager::render_projectiles(projectiles, self, tex_man).unwrap();
-        tower_manager::TowerManager::render_towers(towers, self, tex_man).unwrap();
+        tower_manager::TowerManager::render_towers(towers, self, tex_man, health_bars).unwrap();
 
         level_manager::LevelManager::check_attacks(self, enemies, towers, projectiles, health_bars);
         level.delete_all_dead(self, enemies, towers, projectiles);

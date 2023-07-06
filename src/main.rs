@@ -54,7 +54,7 @@ fn game_loop (
 
 fn main() -> Result<(), String> {
     let sdl_context = sdl2::init()?;
-    let mixer_context = sdl2::mixer::init(sdl2::mixer::InitFlag::MP3)?;
+    let mixer_context = sdl2::mixer::init(sdl2::mixer::InitFlag::MP3).unwrap();
 
     let mut game = game_manager::GameManager::new(&sdl_context);
     let texture_creator = game.canvas.texture_creator();
@@ -70,11 +70,16 @@ fn main() -> Result<(), String> {
     let mut build_buttons = button_manager::ButtonManager::new(constants::BUILD_BUTTON_AMT, button_manager::ButtonType::Build, &player);
     let mut health_bars = gui_manager::GUIManager::new();
 
-    sdl2::mixer::open_audio(sdl2::mixer::DEFAULT_FREQUENCY, sdl2::mixer::DEFAULT_FORMAT, sdl2::mixer::DEFAULT_CHANNELS, 1024)?;
-    sdl2::mixer::allocate_channels(16);
 
-    let audio_chunk = sdl2::mixer::Chunk::from_file("assets/music/song1.mp3")?;
-    let channel = sdl2::mixer::Channel::all().play(&audio_chunk, -1)?;
+    // music
+    sdl2::mixer::open_audio(44100, sdl2::mixer::DEFAULT_FORMAT, 2, 2048)?;
+    sdl2::mixer::allocate_channels(2);
+
+    let audio_chunk = sdl2::mixer::Music::from_file("assets/music/song1.mp3")?;
+
+    sdl2::mixer::Music::play(&audio_chunk, -1);
+
+
 
     level.create_level(); 
     level.read_file("dungeon.txt").unwrap();

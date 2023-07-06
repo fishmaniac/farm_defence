@@ -4,6 +4,7 @@ use sdl2::mouse::MouseButton;
 
 use crate::game_manager::GameManager;
 use crate::button_manager::ButtonManager;
+use crate::button_manager;
 use crate::tower_manager::TowerManager;
 
 pub struct EventManager {
@@ -33,7 +34,7 @@ impl EventManager {
                     break
                 }
                 Event::KeyDown { keycode: Some(keycode), .. } => {
-                    self.do_key_down(game, towers, keycode);
+                    self.do_key_down(game, towers, seed_buttons, keycode);
                     break
                 }, 
                 Event::KeyUp {keycode: Some(keycode), .. } => {
@@ -76,6 +77,7 @@ impl EventManager {
     fn do_key_down(&mut self, 
         game: &mut GameManager, 
         towers: &mut TowerManager,
+        seed_buttons: &mut button_manager::ButtonManager,
         keycode: sdl2::keyboard::Keycode,
     ) {
         match keycode {
@@ -113,6 +115,12 @@ impl EventManager {
                 }
                 println!("SEED MODE: {}", game.seed_mode);
             }
+            sdl2::keyboard::Keycode::Num1 => {
+                println!("1 pressed\tcurrent seed: {}", game.current_seed);
+            },
+            sdl2::keyboard::Keycode::Num2 => {
+                println!("2 pressed\tcurrent seed: {}", game.current_seed);
+            },
             _ => println!("INVALID INPUT"),
         }
     }

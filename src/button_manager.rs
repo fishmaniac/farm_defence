@@ -13,8 +13,8 @@ use crate::{player_manager, constants, texture_manager, game_manager};
 pub struct Button {
     rect: Rect,
     texture_path: String,
-    clicked: bool,
-    hovering_button: bool,
+    pub clicked: bool,
+    pub hovering_button: bool,
 }
 
 
@@ -50,8 +50,8 @@ impl ButtonManager {
                     constants::CURRENT_SEED_TOMATO => constants::TEXTURE_BUTTON_TOMATO.to_string(),
                     _ => constants::TEXTURE_DEFAULT.to_string(),
                 },
-                clicked: true,
-                hovering_button: true,
+                clicked: false,
+                hovering_button: false,
             };
             self.button_vec.push(temp_button);
         }
@@ -65,8 +65,8 @@ impl ButtonManager {
                     constants::CURRENT_BUILD_GOBLIN => constants::TEXTURE_GOBLIN_ENEMY_FRONT.to_string(),
                     _ => constants::TEXTURE_DEFAULT.to_string(),
                 },
-                clicked: true,
-                hovering_button: true,
+                clicked: false,
+                hovering_button: false,
             };
             self.button_vec.push(temp_button);
         }
@@ -84,12 +84,16 @@ impl ButtonManager {
         for (button_index, button) in self.button_vec.iter_mut().enumerate() {
             match button_type {
                 ButtonType::Seed => {
-                    if button.clicked && button_index != self.current_button_clicked_seed {
+                    if button_index == self.current_button_clicked_seed {
+                        button.clicked = true;
+                    } else {
                         button.clicked = false;
                     }
                 }
                 ButtonType::Build => {
-                    if button.clicked && button_index != self.current_button_clicked_build {
+                    if button_index == self.current_button_clicked_build {
+                        button.clicked = true;
+                    } else {
                         button.clicked = false;
                     }
                 }

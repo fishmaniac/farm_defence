@@ -6,6 +6,7 @@ use crate::level_manager::LevelTile;
 use crate::level_manager::TileData;
 use crate::texture_manager;
 use crate::projectile_manager;
+use crate::gui_manager;
 use crate::tower_manager;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -107,6 +108,7 @@ impl EnemyManager {
         game: &mut game_manager::GameManager, 
         tex_man: &mut texture_manager::TextureManager<sdl2::video::WindowContext>, 
         level: &mut level_manager::LevelManager, 
+        health_bars: &mut gui_manager::GUIManager,
     ) -> Result<(), String> {
         for enemy in &mut self.enemy_vec {
             let pixel_index: (i32, i32) = (enemy.index.0 as i32 * constants::TILE_SIZE as i32, enemy.index.1 as i32 * constants::TILE_SIZE as i32);
@@ -127,6 +129,9 @@ impl EnemyManager {
             )?;
 
             Self::move_enemies(enemy, game, level);
+            if enemy.health < enemy.max_health {
+                health_bars.render_health_bar_enemy(game, enemy);
+            }
         }
         Ok(())
     }
@@ -142,21 +147,53 @@ impl EnemyManager {
         if can_move {
             if let Some(mut path) = enemy.final_path.take() {
                 if let Some((col, row)) = path.first() {
-                    if !level.level_vec[*row][*col].is_occupied {
-                        level.level_vec[enemy.index.0][enemy.index.1].is_occupied = false;
-                        enemy.index.0 = *col;
-                        enemy.index.1 = *row;
-                        level.level_vec[enemy.index.0][enemy.index.1].is_occupied = true;
-                        path.remove(0);
-                        enemy.final_path = Some(path);
+                    if level.level_vec[enemy.index.0][enemy.index.1].tile_type == constants::TILE_TYPE_GOBLIN {
+                        level.level_vec[enemy.index.0][enemy.index.1].tile_type = level.level_vec[enemy.index.0][enemy.index.1].original_type;
                     }
+                    level.level_vec[enemy.index.0][enemy.index.1].is_occupied = false;
+                    enemy.index.0 = *col;
+                    enemy.index.1 = *row;
+                    level.level_vec[enemy.index.0][enemy.index.1].is_occupied = true;
+                    path.remove(0);
+                    enemy.final_path = Some(path);
                 }
             }
         }
         else if has_no_targets{
             let random_index = game.frame_time as usize % game.target_vec.len();
+            if level.level_vec[game.target_vec[random_index].0][game.target_vec[random_index].1].is_occupied {
+                let rand_direction = game.frame_time % 4;
+                println!("rand direction: {}", rand_direction);
+                match rand_direction {
+                    0 => {
+                        game.target_vec[random_index].0 += 1;
+                    },
+                    1 => {
+                        if game.target_vec[random_index].0 > 0 {
+                            game.target_vec[random_index].0 -= 1;
+                        }
+                        else {
+                            game.target_vec[random_index].0 += 1;
+                        }
+                    },
+                    2 => {
+                        game.target_vec[random_index].1 += 1;
+                    },
+                    3 => {
+                        if game.target_vec[random_index].1 > 0 {
+                            game.target_vec[random_index].1 -= 1;
+                        }
+                        else {
+                            game.target_vec[random_index].1 += 1;
+                        }
+                    },
+                    _ => {},
+                }
+            }
+
             let target = game.target_vec[random_index];
             let target_tuple_index = (target.0 as i32, target.1 as i32);
+
 
             if !game.is_pathfinding && !tower_manager::TowerManager::is_within_area(enemy_tuple_index, target_tuple_index, enemy.attack_radius as i32) {
                 Self::astar(enemy, target, &level.level_vec);
@@ -232,7 +269,6 @@ impl EnemyManager {
 
             let tile_types_to_avoid = [
                 constants::TILE_TYPE_WALL,
-                /*                 constants::TILE_TYPE_GOBLIN, */
             ];
 
             //Up
