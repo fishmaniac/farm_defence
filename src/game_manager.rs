@@ -11,14 +11,13 @@ pub enum Movement {
 pub struct GameManager {
     pub quit: bool,
     pub is_pathfinding: bool,
-    pub build_mode: bool,
-    pub seed_mode: bool,
-    pub seed_outline_visible: bool,
-    pub build_outline_visible: bool,
     pub up: bool,
     pub down: bool,
     pub left: bool,
     pub right: bool,
+    pub build_mode: bool,
+    pub seed_mode: bool,
+    pub hovering_button: bool,
     pub current_seed: usize,
     pub current_build: usize,
     pub carrot_amount: u32,
@@ -28,6 +27,7 @@ pub struct GameManager {
     pub frame_time: u32,
     pub fps: u32,
     pub elapsed_seconds: f64,
+    pub delta_time: std::time::Duration,
     pub canvas: sdl2::render::Canvas<sdl2::video::Window>,
     pub mouse_point: sdl2::rect::Point,
     pub mouse_button: sdl2::mouse::MouseButton,
@@ -67,16 +67,15 @@ impl GameManager {
         let game = GameManager {  
             quit: false,
             is_pathfinding: false,
-            seed_mode: false,
-            build_mode: false,
-            seed_outline_visible: true,
-            build_outline_visible: true,
             up: false,
             down: false,
             left: false,
             right: false,
-            current_seed: 0,
-            current_build: 0,
+            seed_mode: false,
+            build_mode: false,
+            hovering_button: false,
+            current_seed: usize::MAX,
+            current_build: usize::MAX,
             carrot_amount: 0,
             tomato_amount: 0,
             cam_x: 0,
@@ -84,6 +83,7 @@ impl GameManager {
             frame_time: 1,
             fps: 1,
             elapsed_seconds: 0.1,
+            delta_time: std::time::Duration::new(0, 0),
             canvas,
             mouse_point: sdl2::rect::Point::new(0, 0),
             mouse_button: sdl2::mouse::MouseButton::Unknown,
@@ -104,6 +104,31 @@ impl GameManager {
 
     pub fn update_game(
         &mut self, 
+        player: &mut player_manager::PlayerManager, 
+        level: &mut level_manager::LevelManager, 
+        towers: &mut tower_manager::TowerManager, 
+        enemies: &mut enemy_manager::EnemyManager, 
+        projectiles: &mut projectile_manager::ProjectileManager,
+        health_bars: &mut gui_manager::GUIManager,
+    ) {
+        player.update_player(self);
+        self.update_camera(player);
+
+        for col_index in 0..level.level_vec.len() {
+            for row_index in 0..level.level_vec[col_index].len() {
+                let temp_tile = &mut level.level_vec[col_index][row_index];
+
+                level_manager::LevelManager::update_buildings(self, towers, enemies, temp_tile, col_index, row_index);      
+
+            }
+        }
+        level_manager::LevelManager::check_attacks(self, enemies, towers, projectiles, health_bars);
+        level.delete_all_dead(self, enemies, towers, projectiles);
+    }
+
+
+    pub fn render_game(
+        &mut self, 
         tex_man: &mut texture_manager::TextureManager<sdl2::video::WindowContext>, 
         player: &mut player_manager::PlayerManager, 
         level: &mut level_manager::LevelManager, 
@@ -114,30 +139,12 @@ impl GameManager {
         seed_buttons: &mut button_manager::ButtonManager, 
         build_buttons: &mut button_manager::ButtonManager,
     ) {
-        player.update_player(self);
-        self.update_camera(player);
 
-        if self.seed_outline_visible || self.build_outline_visible {
-            seed_buttons.check_for_clicked(button_manager::ButtonType::Seed);
-            build_buttons.check_for_clicked(button_manager::ButtonType::Build);
-        }
 
-        for col_index in 0..level.level_vec.len() {
-            for row_index in 0..level.level_vec[col_index].len() {
-                let temp_tile = &mut level.level_vec[col_index][row_index];
-
-                level_manager::LevelManager::update_buildings(self, towers, enemies, seed_buttons, build_buttons, temp_tile, col_index, row_index);      
-                level_manager::LevelManager::render_level(self, player, tex_man, temp_tile, col_index, row_index).unwrap();
-
-            }
-        }
-
+        level.render_level(self, tex_man, player).unwrap();
         enemy_manager::EnemyManager::render_enemies(enemies, self, tex_man, level, health_bars).unwrap(); 
         projectile_manager::ProjectileManager::render_projectiles(projectiles, self, tex_man).unwrap();
         tower_manager::TowerManager::render_towers(towers, self, tex_man, health_bars).unwrap();
-
-        level_manager::LevelManager::check_attacks(self, enemies, towers, projectiles, health_bars);
-        level.delete_all_dead(self, enemies, towers, projectiles);
 
         player.render_player(self, tex_man).unwrap();
         seed_buttons.render_seed_buttons(player, tex_man, self).unwrap();

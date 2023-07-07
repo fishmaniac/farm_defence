@@ -58,7 +58,7 @@ impl LevelManager {
                     tile_type: constants::TILE_TYPE_GRASS,
                     prev_type: constants::TILE_TYPE_GRASS,
                     original_type: constants::TILE_TYPE_GRASS,
-                    texture_path: constants::TEXTURE_TILE_EMPTY.to_string(),
+                    texture_path: constants::TEXTURE_TILE_GRASS.to_string(),
                     rect,
                     state: 0,
                     tile_data: TileData::None,
@@ -89,7 +89,7 @@ impl LevelManager {
                             tile_type: ch,
                             prev_type: ch,
                             original_type: ch,
-                            texture_path: constants::TEXTURE_TILE_EMPTY.to_string(),
+                            texture_path: constants::TEXTURE_TILE_GRASS.to_string(),
                             rect,
                             state: 0,
                             tile_data: TileData::None,
@@ -158,26 +158,29 @@ impl LevelManager {
     }
 
     pub fn render_level(
+        &mut self,
         game: &mut GameManager, 
-        player: &mut PlayerManager, 
         tex_man: &mut TextureManager<WindowContext>,
-        temp_tile: &mut self::LevelTile, 
-        col_index: usize,
-        row_index: usize,
+        player: &mut PlayerManager,
     ) -> Result<(), String> {
-        temp_tile.rect.set_x((constants::TILE_SIZE as i32 * col_index as i32) - game.cam_x);
-        temp_tile.rect.set_y((constants::TILE_SIZE as i32 * row_index as i32) - game.cam_y);
-        let texture = tex_man.load(&temp_tile.texture_path)?;
-        game.canvas.copy_ex(
-            &texture, // Texture object
-            None,      // source rect
-            temp_tile.rect,     // destination rect
-            0.0,      // angle (degrees)
-            None,   // center
-            false,    // flip horizontal
-            false,     // flip vertical
-        )?;
-        check_collisions(player, temp_tile);
+        for col_index in 0..self.level_vec.len() {
+            for row_index in 0..self.level_vec[col_index].len() {
+                let temp_tile = &mut self.level_vec[col_index][row_index];
+                temp_tile.rect.set_x((constants::TILE_SIZE as i32 * col_index as i32) - game.cam_x);
+                temp_tile.rect.set_y((constants::TILE_SIZE as i32 * row_index as i32) - game.cam_y);
+                let texture = tex_man.load(&temp_tile.texture_path)?;
+                game.canvas.copy_ex(
+                    &texture, // Texture object
+                    None,      // source rect
+                    temp_tile.rect,     // destination rect
+                    0.0,      // angle (degrees)
+                    None,   // center
+                    false,    // flip horizontal
+                    false,     // flip vertical
+                )?;
+                check_collisions(player, temp_tile);
+            }
+        }
 
         fn check_collisions(player: &mut PlayerManager, temp_tile: &mut LevelTile) {
             if Rect::has_intersection(&player.rect, temp_tile.rect){
@@ -196,8 +199,6 @@ impl LevelManager {
         game: &mut GameManager, 
         towers: &mut tower_manager::TowerManager, 
         enemies: &mut EnemyManager, 
-        seed_buttons: &mut button_manager::ButtonManager, 
-        build_buttons: &mut button_manager::ButtonManager,
         temp_tile: &mut LevelTile,
         col_index: usize,
         row_index: usize,
@@ -213,13 +214,11 @@ impl LevelManager {
             _ => {}
         }
 
-        //PRETTY SURE HOVERING ALL BUTTONS = BUG....i think i fixed it?
-        //CHECK FOR CLICK ON BUTTON
-        if Rect::contains_point(&temp_tile.rect, game.mouse_point) && game.mouse_button == MouseButton::Left {
-            if game.build_mode && !button_manager::ButtonManager::check_clicked(build_buttons) {
+        if Rect::contains_point(&temp_tile.rect, game.mouse_point) && game.mouse_button == MouseButton::Left && !game.hovering_button {
+            if game.build_mode {
                 Self::build_mode(game, towers, enemies, temp_tile, row_index, col_index);
             }
-            if game.seed_mode && !button_manager::ButtonManager::check_clicked(seed_buttons) {
+            if game.seed_mode {
                 Self::seed_mode(game,temp_tile);
             }
         }
@@ -258,7 +257,12 @@ impl LevelManager {
         match game.current_seed {
             seed if seed == constants::CURRENT_SEED_SHOVEL => {
                 temp_tile.tile_type = temp_tile.original_type;
-                temp_tile.texture_path = constants::TEXTURE_TILE_EMPTY.to_string();
+                match temp_tile.tile_type {
+                    constants::TILE_TYPE_GRASS => {
+                        temp_tile.texture_path = constants::TEXTURE_TILE_GRASS.to_string();
+                    },
+                    _ => {},
+                }
                 temp_tile.tile_data = TileData::None;
             }
             seed if seed == constants::CURRENT_SEED_HO => {
@@ -402,16 +406,8 @@ impl LevelManager {
                     }
                 }
                 for enemy_index in (0..enemies.enemy_vec.len()).rev() {
-                    let enemy = &mut enemies.enemy_vec[enemy_index];
-/*                     let within_range = tower_manager::TowerManager::is_within_area((tower.bottom_index.0 as i32, tower.bottom_index.1 as i32), (enemy.index.0 as i32, enemy.index.1 as i32), enemy.attack_radius as i32); */
-
-                    // TODO: need to make a way to keep track of what enemies were attacking this tower
-                    // if within_range {
-                    //     enemies.enemy_vec[enemy_index].found_target = false;
-                    // }
                     enemies.enemy_vec[enemy_index].found_target = false;
                 }
-                //MAYBE REMOVE TILE TYPE
                 self.level_vec[tower.bottom_index.0][tower.bottom_index.1].tile_type = self.level_vec[tower.bottom_index.0][tower.bottom_index.1].original_type;
                 towers.tower_vec.remove(tower_index);
             }

@@ -34,7 +34,7 @@ impl EventManager {
                     break
                 }
                 Event::KeyDown { keycode: Some(keycode), .. } => {
-                    self.do_key_down(game, towers, seed_buttons, keycode);
+                    self.do_key_down(game, towers, keycode);
                     break
                 }, 
                 Event::KeyUp {keycode: Some(keycode), .. } => {
@@ -47,24 +47,6 @@ impl EventManager {
                 }
                 Event::MouseButtonDown { mouse_btn, .. } => {
                     game.mouse_button = mouse_btn;
-                    let mouse_btn_str = match game.mouse_button {
-                        MouseButton::Unknown => "Unknown",
-                        MouseButton::Left => "Left",
-                        MouseButton::Middle => "Middle",
-                        MouseButton::Right => "Right",
-                        MouseButton::X1 => "X1",
-                        MouseButton::X2 => "X2",
-                    };
-                    //ADD CHECK
-                    if mouse_btn == MouseButton::Left && ButtonManager::check_clicked(seed_buttons) {
-                        game.seed_outline_visible = !game.seed_outline_visible;
-                        println!("MOUSE CLICKED SEED: {}", mouse_btn_str);
-                    }
-                    if mouse_btn == MouseButton::Left && ButtonManager::check_clicked(build_buttons) {
-                        game.build_outline_visible = !game.build_outline_visible;
-                        println!("MOUSE CLICKED BUILD: {}", mouse_btn_str);
-                    }
-
                 }
                 Event::MouseButtonUp { .. } => {
                     game.mouse_button = MouseButton::Unknown;
@@ -77,7 +59,6 @@ impl EventManager {
     fn do_key_down(&mut self, 
         game: &mut GameManager, 
         towers: &mut TowerManager,
-        seed_buttons: &mut button_manager::ButtonManager,
         keycode: sdl2::keyboard::Keycode,
     ) {
         match keycode {

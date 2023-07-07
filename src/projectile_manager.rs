@@ -42,7 +42,7 @@ impl ProjectileManager {
             hit_target: false,
             angle: Self::calculate_angle(start, target),
             speed: constants::PROJECTILE_ARROW_SPEED,
-            radius: 64,
+            radius: 128,
             damage: tower.attack_damage,
         };
 

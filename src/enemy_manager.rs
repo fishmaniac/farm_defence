@@ -260,12 +260,15 @@ impl EnemyManager {
             let (x, y) = position;
             let width = level_vec[0].len();
             let height = level_vec.len();
-            let mut neighbors = Vec::with_capacity(4);
+            let mut neighbors = Vec::with_capacity(8);
             let top_tile = &level_vec[x][y - 1];
             let bottom_tile = &level_vec[x][y + 1]; 
             let left_tile = &level_vec[x - 1][y];
             let right_tile = &level_vec[x + 1][y];
-
+            let top_left_tile = &level_vec[x - 1][y - 1];
+            let top_right_tile = &level_vec[x - 1][y + 1];
+            let bottom_left_tile = &level_vec[x + 1][y - 1];
+            let bottom_right_tile = &level_vec[x + 1][y + 1];
 
             let tile_types_to_avoid = [
                 constants::TILE_TYPE_WALL,
@@ -287,6 +290,22 @@ impl EnemyManager {
             if x < width - 1 && !tile_types_to_avoid.contains(&right_tile.tile_type) && !right_tile.is_occupied {
                 neighbors.push((x + 1, y));
             }
+            // Top-left
+            if x > 0 && y > 0 && !tile_types_to_avoid.contains(&top_left_tile.tile_type) && !top_left_tile.is_occupied {
+                neighbors.push((x - 1, y - 1));
+            }
+            // Top-right
+            if x > 0 && y < height - 1 && !tile_types_to_avoid.contains(&top_right_tile.tile_type) && !top_right_tile.is_occupied {
+                neighbors.push((x - 1, y + 1));
+            }
+            // Bottom-left
+            if x < width - 1 && y > 0 && !tile_types_to_avoid.contains(&bottom_left_tile.tile_type) && !bottom_left_tile.is_occupied {
+                neighbors.push((x + 1, y - 1));
+            }
+            // Bottom-right
+            if x < width - 1 && y < height - 1 && !tile_types_to_avoid.contains(&bottom_right_tile.tile_type) && !bottom_right_tile.is_occupied {
+                neighbors.push((x + 1, y + 1));
+            }            
             neighbors
         }
     }

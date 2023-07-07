@@ -27,12 +27,13 @@ fn game_loop (
     let mut frame_count: u32 = 0;
     let mut last_fps_time = std::time::Instant::now();
 
+
     while !game.quit {
-
-
         game.prepare_background();
         events.do_event(game, seed_buttons, build_buttons, towers);
-        game.update_game(tex_man, player, level, towers, enemies, projectiles, health_bars, seed_buttons, build_buttons);
+        game.update_game(player, level, towers, enemies, projectiles, health_bars);
+        game.render_game(tex_man, player, level, towers, enemies, projectiles, health_bars, seed_buttons, build_buttons);
+
         game.canvas.present();
 
         game.frame_time += 1;
@@ -42,10 +43,11 @@ fn game_loop (
             let elapsed_fps_time = last_fps_time.elapsed();
             game.elapsed_seconds = elapsed_fps_time.as_secs_f64();
             game.fps = (frame_count as f64 / game.elapsed_seconds) as u32;
-            println!("\nFPS: {}\tELAPSED: {:.4}\tFRAME TIME: {}\nCARROTS: {}\tTOMATOES: {}\tCURRENT_SEED: {}\n", game.fps, game.elapsed_seconds, game.frame_time, game.carrot_amount, game.tomato_amount, game.current_seed); 
+            println!("\nFPS: {}\tELAPSED: {:.4}\tFRAME TIME: {}\nCARROTS: {}\tTOMATOES: {}\t", game.fps, game.elapsed_seconds, game.frame_time, game.carrot_amount, game.tomato_amount);
             frame_count = 0;
             last_fps_time = std::time::Instant::now();
         }
+
         if game.elapsed_seconds < 2.0 {
             game.is_pathfinding = false;
         }
@@ -75,14 +77,15 @@ fn main() -> Result<(), String> {
     sdl2::mixer::open_audio(44100, sdl2::mixer::DEFAULT_FORMAT, 2, 2048)?;
     sdl2::mixer::allocate_channels(2);
 
-    let audio_chunk = sdl2::mixer::Music::from_file("assets/music/song1.mp3")?;
+    let audio_chunk = sdl2::mixer::Music::from_file("assets/music/song2.mp3")?;
 
     sdl2::mixer::Music::play(&audio_chunk, -1);
+    sdl2::mixer::Music::set_volume(50);
 
 
 
     level.create_level(); 
-    level.read_file("dungeon.txt").unwrap();
+    level.read_file("farm.txt").unwrap();
 
 
     //~!~!~!~TODO: LOAD IMAGES BEFORE LOOP~!~!~!~
