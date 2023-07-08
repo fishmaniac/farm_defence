@@ -178,20 +178,20 @@ impl LevelManager {
                     false,    // flip horizontal
                     false,     // flip vertical
                 )?;
-                check_collisions(player, temp_tile);
+        /*         check_collisions(player, temp_tile); */
             }
         }
 
-        fn check_collisions(player: &mut PlayerManager, temp_tile: &mut LevelTile) {
-            if Rect::has_intersection(&player.rect, temp_tile.rect){
-                if temp_tile.tile_type == constants::TILE_TYPE_WALL {
-                    player.colliding = true;
-                }
-                else {
-                    player.colliding = false;
-                }
-            }
-        }
+        // fn check_collisions(player: &mut PlayerManager, temp_tile: &mut LevelTile) {
+        //     if Rect::has_intersection(&player.rect, temp_tile.rect){
+        //         if temp_tile.tile_type == constants::TILE_TYPE_WALL {
+        //             player.colliding = true;
+        //         }
+        //         else {
+        //             player.colliding = false;
+        //         }
+        //     }
+        // }
         Ok(())
     }
 

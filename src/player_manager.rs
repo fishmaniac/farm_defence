@@ -1,11 +1,8 @@
-use sdl2::rect::Rect;
-use sdl2::video::WindowContext;
-
 use crate::constants;
+use crate::level_manager;
 use crate::texture_manager;
 use crate::game_manager;
 
-#[derive(Debug, Clone)]
 pub enum Direction {
     Up,
     Down,
@@ -23,7 +20,7 @@ pub struct PlayerManager {
     pub down: bool,
     pub left: bool,
     pub right: bool,
-    pub colliding: bool,
+    pub colliding: bool, 
     pub x: i32,
     pub y: i32,
     pub texture_path: String,
@@ -39,11 +36,11 @@ impl PlayerManager {
             down: false,
             left: false,
             right: false,
-            colliding: false,
+            colliding: false, 
             x: 0,
             y: 0,
             texture_path: "".to_string(),
-            rect: Rect::new(0, 0, constants::OUTPUT_WIDTH as u32, constants::OUTPUT_HEIGHT as u32),
+            rect: sdl2::rect::Rect::new(constants::SCREEN_WIDTH as i32 / 2, constants::SCREEN_HEIGHT as i32 / 2, constants::OUTPUT_WIDTH as u32, constants::OUTPUT_HEIGHT as u32),
             direction: Direction::Up,
             menu_selection: 0,
         };
@@ -51,142 +48,99 @@ impl PlayerManager {
     }
 
     pub fn update_player(&mut self, 
-        game: &mut game_manager::GameManager
+        game: &mut game_manager::GameManager,
+        level: &mut level_manager::LevelManager,
     ) {
-        let original_x: i32 = self.x;
-        let original_y: i32 = self.y;
         let mut new_x: i32 = self.x;
         let mut new_y: i32 = self.y; 
 
-        if !self.colliding {
-            if game.up {
-                new_y -= constants::PLAYER_SPEED as i32;
-                if game.left && !game.right {
-                    self.direction = Direction::UpLeft;
-                }
-                else if game.right && !game.left {
-                    self.direction = Direction::UpRight;
-                }
-                else {
-                    self.direction = Direction::Up;
-                }
-            } 
-            if game.down {
-                new_y += constants::PLAYER_SPEED as i32;
-                if game.left && !game.right {
-                    self.direction = Direction::DownLeft;
-                }
-                else if game.right && !game.left {
-                    self.direction = Direction::DownRight;
-                }
-                else {
-                    self.direction = Direction::Down;
-                }
+        if game.up {
+            new_y -= constants::PLAYER_SPEED as i32;
+            if game.left && !game.right {
+                self.direction = Direction::UpLeft;
             }
-            if game.left {
-                new_x -= constants::PLAYER_SPEED as i32;
-                if game.up && !game.down {
-                    self.direction = Direction::UpLeft;
-                }
-                else if game.down && !game.up {
-                    self.direction = Direction::DownLeft;
-                }
-                else {
-                    self.direction = Direction::Left;
-                }
+            else if game.right && !game.left {
+                self.direction = Direction::UpRight;
             }
-            if game.right {
-                new_x += constants::PLAYER_SPEED as i32;
-                if game.up && !game.down {
-                    self.direction = Direction::UpRight;
-                }
-                else if game.down && !game.up {
-                    self.direction = Direction::DownRight;
-                }
-                else {
-                    self.direction = Direction::Right;
-                }
+            else {
+                self.direction = Direction::Up;
+            }
+        } 
+        if game.down {
+            new_y += constants::PLAYER_SPEED as i32;
+            if game.left && !game.right {
+                self.direction = Direction::DownLeft;
+            }
+            else if game.right && !game.left {
+                self.direction = Direction::DownRight;
+            }
+            else {
+                self.direction = Direction::Down;
+            }
+        }
+        if game.left {
+            new_x -= constants::PLAYER_SPEED as i32;
+            if game.up && !game.down {
+                self.direction = Direction::UpLeft;
+            }
+            else if game.down && !game.up {
+                self.direction = Direction::DownLeft;
+            }
+            else {
+                self.direction = Direction::Left;
+            }
+        }
+        if game.right {
+            new_x += constants::PLAYER_SPEED as i32;
+            if game.up && !game.down {
+                self.direction = Direction::UpRight;
+            }
+            else if game.down && !game.up {
+                self.direction = Direction::DownRight;
+            }
+            else {
+                self.direction = Direction::Right;
             }
         }
 
-        if self.colliding {
-            match self.direction {
-                Direction::Up => {
-                    self.y += original_y - new_y + constants::PLAYER_SPEED as i32;
-                    self.colliding = false;
-                    println!("Up");
-                }
-                Direction::Down => {
-                    self.y += original_y - new_y - constants::PLAYER_SPEED as i32;
-                    self.colliding = false;
-                    println!("Down");
-                }
-                Direction::Left => {
-                    self.x += original_x - new_x + constants::PLAYER_SPEED as i32;
-                    self.colliding = false;
-                    println!("Left");
-                }
-                Direction::Right => {
-                    self.x += original_x - new_x - constants::PLAYER_SPEED as i32;
-                    self.colliding = false;
-                    println!("Right");
-                }
-                Direction::UpLeft => {
-                    self.y += original_y - new_y + constants::PLAYER_SPEED as i32;
-                    self.x += original_y - new_y + constants::PLAYER_SPEED as i32;
-                    self.colliding = false;
-                    println!("UpLeft");
-                }
-                Direction::UpRight => {
-                    self.y += original_y - new_y + constants::PLAYER_SPEED as i32;
-                    self.x += original_y - new_y - constants::PLAYER_SPEED as i32;
-                    self.colliding = false;
-                    println!("UpRight");
-                }
-                Direction::DownLeft => {
-                    self.y += original_y - new_y - constants::PLAYER_SPEED as i32;
-                    self.x += original_x - new_x + constants::PLAYER_SPEED as i32;
-                    self.colliding = false;
-                    println!("DownLeft");
-                }
-                Direction::DownRight => {
-                    self.y += original_y - new_y - constants::PLAYER_SPEED as i32;
-                    self.x += original_x - new_x - constants::PLAYER_SPEED as i32;
-                    self.colliding = false;
-                    println!("DownRight");
-                }
-                _=> {
-                    println!("ERROR IN DIRECTION");
-                }
-            }
-        }
-        else {
+        if !self.check_collisions((new_x, new_y), level) {
             self.x = new_x;
             self.y = new_y;
         }
     }
+    fn check_collisions (&mut self, new_position: (i32, i32), level: &mut level_manager::LevelManager) -> bool {
+        let mut colliding = false;
+        let tile_size_offset = constants::TILE_SIZE as i32 / 2;
+        let new_offset = constants::TILE_SIZE as i32 / 4;
+        let centered_new_x = new_position.0 + (constants::SCREEN_WIDTH as i32 / 2);
+        let centered_new_y = new_position.1 + (constants::SCREEN_HEIGHT as i32 / 2);
+        let new_rect = sdl2::rect::Rect::new(centered_new_x - self.x + new_offset, centered_new_y - self.y + new_offset, tile_size_offset as u32, tile_size_offset as u32);
+        for col_index in 0..level.level_vec.len() {
+            for row_index in 0..level.level_vec[col_index].len() {
+                let temp_tile = &mut level.level_vec[col_index][row_index];
 
+                if temp_tile.rect.has_intersection(new_rect) && temp_tile.tile_type == constants::TILE_TYPE_WALL {
+                    colliding = true;
+                    break;
+                }
+            }
+            if colliding {
+                break;
+            }
+        }
+        colliding
+    }
     pub fn render_player(
         &mut self, 
         game: &mut game_manager::GameManager, 
-        tex_man: &mut texture_manager::TextureManager<WindowContext>
+        tex_man: &mut texture_manager::TextureManager<sdl2::video::WindowContext>
     ) -> Result<(), String> {
-        let snapped_x = ((constants::SCREEN_WIDTH as i32 / 2) - (self.x - game.cam_x)) / 32 * 32;
-        let snapped_y = ((constants::SCREEN_HEIGHT as i32/ 2) - (self.y - game.cam_y)) / 32 * 32;
-        self.rect.set_x(snapped_x);
-        self.rect.set_y(snapped_y);
-        /*         println!("PLAYER DIRECTION: {:?}", Some(&self.direction)); */
-
         if (game.up || game.down || game.left || game.right) && game.frame_time % constants::PLAYER_SPEED as u32 == 0 {
             match self.direction {
                 Direction::Up => self.texture_path = constants::TEXTURE_PLAYER_MOVING_BACK.to_string(),
                 Direction::Down => self.texture_path = constants::TEXTURE_PLAYER_MOVING_FRONT.to_string(),
                 Direction::Left => self.texture_path = constants::TEXTURE_PLAYER_MOVING_LEFT.to_string(),
                 Direction::Right => self.texture_path = constants::TEXTURE_PLAYER_MOVING_RIGHT.to_string(),
-                // Direction::UpLeft => self.texture_path = constants::TEXTURE_PLAYER_MOVING_BACK_LEFT.to_string(),
-                // Direction::UpRight => self.texture_path = constants::TEXTURE_PLAYER_MOVING_BACK_RIGHT.to_string(),
-                // Direction::DownLeft => self.texture_path = constants::TEXTURE_PLAYER_MOVING_FRONT_LEFT.to_string(),
-                // Direction::DownRight => self.texture_path = constants::TEXTURE_PLAYER_MOVING_FRONT_RIGHT.to_string(),
                 _ => {
                     println!("NO PLAYER_MOVING TEXTURE");
                     self.texture_path = constants::TEXTURE_PLAYER_MOVING_FRONT.to_string();
@@ -223,3 +177,5 @@ impl PlayerManager {
         Ok(())
     }
 }
+
+

@@ -111,7 +111,7 @@ impl GameManager {
         projectiles: &mut projectile_manager::ProjectileManager,
         health_bars: &mut gui_manager::GUIManager,
     ) {
-        player.update_player(self);
+        player.update_player(self, level);
         self.update_camera(player);
 
         for col_index in 0..level.level_vec.len() {

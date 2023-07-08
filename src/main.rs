@@ -34,6 +34,13 @@ fn game_loop (
         game.update_game(player, level, towers, enemies, projectiles, health_bars);
         game.render_game(tex_man, player, level, towers, enemies, projectiles, health_bars, seed_buttons, build_buttons);
 
+
+        // let player_rect = sdl2::rect::Rect::new(player.rect.x(), player.rect.y(), constants::TILE_SIZE, constants::TILE_SIZE);
+        // let player_pos_rect = sdl2::rect::Rect::new(constants::SCREEN_WIDTH as i32 / 2, constants::SCREEN_HEIGHT as i32 / 2, constants::TILE_SIZE, constants::TILE_SIZE);
+        //
+        // game.canvas.set_draw_color(constants::COLOR_OUTLINE);
+        // game.canvas.fill_rect(player_pos_rect);
+
         game.canvas.present();
 
         game.frame_time += 1;
@@ -43,7 +50,7 @@ fn game_loop (
             let elapsed_fps_time = last_fps_time.elapsed();
             game.elapsed_seconds = elapsed_fps_time.as_secs_f64();
             game.fps = (frame_count as f64 / game.elapsed_seconds) as u32;
-            println!("\nFPS: {}\tELAPSED: {:.4}\tFRAME TIME: {}\nCARROTS: {}\tTOMATOES: {}\t", game.fps, game.elapsed_seconds, game.frame_time, game.carrot_amount, game.tomato_amount);
+            println!("\nFPS: {}\tELAPSED: {:.4}\tFRAME TIME: {}\tPLAYER POS: X: {}\tY: {}\nCARROTS: {}\tTOMATOES: {}\t", game.fps, game.elapsed_seconds, game.frame_time, player.x, player.y, game.carrot_amount, game.tomato_amount);
             frame_count = 0;
             last_fps_time = std::time::Instant::now();
         }
