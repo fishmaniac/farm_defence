@@ -30,7 +30,7 @@ pub struct PlayerManager {
 }
 
 impl PlayerManager {
-    pub fn new() -> PlayerManager {
+    pub fn new(game: &mut game_manager::GameManager) -> PlayerManager {
         let player = PlayerManager {
             up: false,
             down: false,
@@ -40,7 +40,7 @@ impl PlayerManager {
             x: 0,
             y: 0,
             texture_path: "".to_string(),
-            rect: sdl2::rect::Rect::new(constants::SCREEN_WIDTH as i32 / 2, constants::SCREEN_HEIGHT as i32 / 2, constants::OUTPUT_WIDTH as u32, constants::OUTPUT_HEIGHT as u32),
+            rect: sdl2::rect::Rect::new(game.screen_size.0 / 2, game.screen_size.1 / 2, constants::OUTPUT_WIDTH as u32, constants::OUTPUT_HEIGHT as u32),
             direction: Direction::Up,
             menu_selection: 0,
         };
@@ -103,17 +103,17 @@ impl PlayerManager {
             }
         }
 
-        if !self.check_collisions((new_x, new_y), level) {
+        if !self.check_collisions(game, (new_x, new_y), level) {
             self.x = new_x;
             self.y = new_y;
         }
     }
-    fn check_collisions (&mut self, new_position: (i32, i32), level: &mut level_manager::LevelManager) -> bool {
+    fn check_collisions (&mut self, game: &mut game_manager::GameManager, new_position: (i32, i32), level: &mut level_manager::LevelManager) -> bool {
         let mut colliding = false;
         let tile_size_offset = constants::TILE_SIZE as i32 / 2;
         let new_offset = constants::TILE_SIZE as i32 / 4;
-        let centered_new_x = new_position.0 + (constants::SCREEN_WIDTH as i32 / 2);
-        let centered_new_y = new_position.1 + (constants::SCREEN_HEIGHT as i32 / 2);
+        let centered_new_x = new_position.0 + (game.screen_size.0 / 2);
+        let centered_new_y = new_position.1 + (game.screen_size.1 / 2);
         let new_rect = sdl2::rect::Rect::new(centered_new_x - self.x + new_offset, centered_new_y - self.y + new_offset, tile_size_offset as u32, tile_size_offset as u32);
         for col_index in 0..level.level_vec.len() {
             for row_index in 0..level.level_vec[col_index].len() {

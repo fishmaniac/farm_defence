@@ -10,8 +10,8 @@
 // (will your values overflow/underflow an i8?)
 pub const TIMEOUT_DURATION: u128 = 10;
 
-pub const SCREEN_WIDTH: u16 = 1920;
-pub const SCREEN_HEIGHT: u16 = 1080;
+// pub const SCREEN_WIDTH: u16 = 1920;
+// pub const SCREEN_HEIGHT: u16 = 1080;
 
 pub const IMAGE_WIDTH:u8 = 32;
 pub const IMAGE_HEIGHT:u8 = 32;
@@ -20,10 +20,11 @@ pub const IMAGE_SCALING:u8 = 1;
 pub const OUTPUT_WIDTH: u8 = IMAGE_WIDTH * IMAGE_SCALING;
 pub const OUTPUT_HEIGHT: u8 = IMAGE_HEIGHT * IMAGE_SCALING;
 
-pub const COLOR_BACKGROUND: sdl2::pixels::Color = sdl2::pixels::Color::RGBA(69, 69, 69, 255);
+pub const COLOR_BACKGROUND: sdl2::pixels::Color = sdl2::pixels::Color::RGBA(50, 50, 50, 255);
 pub const COLOR_OUTLINE: sdl2::pixels::Color = sdl2::pixels::Color::RGBA(252, 186, 3, 255);
 pub const COLOR_RED: sdl2::pixels::Color = sdl2::pixels::Color::RGBA(255, 0, 0, 255);
 pub const COLOR_GREEN: sdl2::pixels::Color = sdl2::pixels::Color::RGBA(0, 255, 0, 255);
+pub const COLOR_WHITE: sdl2::pixels::Color = sdl2::pixels::Color::RGBA(255, 255, 255, 255);
 
 pub const TILE_SIZE: u32 = 32;
 pub const MAX_HEIGHT: u16 = 150;
@@ -37,7 +38,10 @@ pub const CROP_TIME: u16 = 100;
 pub const SEED_BUTTON_AMT: usize = 8;
 pub const BUILD_BUTTON_AMT: usize = 6;
 
+pub static FONT_PATH: &str = "assets/font/slkscr.ttf";
 pub static TEXTURE_DEFAULT: &str = "assets/default-texture.png";
+
+pub static TEXTURE_HUD_COIN: &str = "assets/coin.png";
 
 pub static TEXTURE_PLAYER_FRONT: &str = "assets/player0-front.png";
 pub static TEXTURE_PLAYER_BACK: &str = "assets/player0-back.png";
@@ -67,12 +71,21 @@ pub static TEXTURE_BUTTON_HO: &str = "assets/ho-button.png";
 pub static TEXTURE_BUTTON_CARROT: &str = "assets/carrot-button.png";
 pub static TEXTURE_BUTTON_TOMATO: &str = "assets/tomato-button.png";
 pub static TEXTURE_BUTTON_ARCHER: &str = "assets/archer-button.png";
-pub static TEXTURE_BUILDING_HOUSE: &str = "assets/house.png";
-pub static TEXTURE_PREVIEW_HOUSE: &str = "assets/preview-house.png";
 
-pub static TEXTURE_TILE_GRASS: &str = "assets/grass-0.png";
+pub static TEXTURE_BUILDING_HOUSE: &str = "assets/house.png";
+pub static TEXTURE_BUILDING_HOUSE_BOTTOM_LEFT: &str = "assets/house-bottom-left.png";
+pub static TEXTURE_BUILDING_HOUSE_BOTTOM_RIGHT: &str = "assets/house-bottom-right.png";
+pub static TEXTURE_BUILDING_HOUSE_TOP_LEFT: &str = "assets/house-top-left.png";
+pub static TEXTURE_BUILDING_HOUSE_TOP_RIGHT: &str = "assets/house-top-right.png";
+
+pub static TEXTURE_PREVIEW_HOUSE_BOTTOM_LEFT: &str = "assets/preview-house-bottom-left.png";
+pub static TEXTURE_PREVIEW_HOUSE_BOTTOM_RIGHT: &str = "assets/preview-house-bottom-right.png";
+pub static TEXTURE_PREVIEW_HOUSE_TOP_LEFT: &str = "assets/preview-house-top-left.png";
+pub static TEXTURE_PREVIEW_HOUSE_TOP_RIGHT: &str = "assets/preview-house-top-right.png";
+
+pub static TEXTURE_TILE_GRASS: &str = "assets/grass-1.png";
 pub static TEXTURE_TILE_WALL: &str = "assets/cobblestone-dark.png";
-pub static TEXTURE_TILE_FLOOR: &str = "assets/tile3.png";
+pub static TEXTURE_TILE_FLOOR: &str = "assets/cobblestone.png";
 pub static TEXTURE_PREVIEW_COBBLESTONE: &str = "assets/preview-cobblestone-dark.png";
 
 pub static TEXTURE_TOWER_ARCHER_FRONT: &str = "assets/archer-tower-front-top.png";
@@ -83,15 +96,26 @@ pub static TEXTURE_TOWER_ARCHER_BOTTOM: &str = "assets/archer-tower-bottom.png";
 pub static TEXTURE_PREVIEW_TOWER_ARCHER_BOTTOM: &str = "assets/preview-archer-tower-bottom.png";
 pub static TEXTURE_PREVIEW_TOWER_ARCHER_TOP: &str = "assets/preview-archer-tower-top.png";
 
+pub static TEXTURE_TOWER_FIREBALL_FRONT: &str = "assets/fireball-tower-front-top.png";
+pub static TEXTURE_TOWER_FIREBALL_BACK: &str = "assets/fireball-tower-back-top.png";
+pub static TEXTURE_TOWER_FIREBALL_LEFT: &str = "assets/fireball-tower-left-top.png";
+pub static TEXTURE_TOWER_FIREBALL_RIGHT: &str = "assets/fireball-tower-right-top.png";
+pub static TEXTURE_TOWER_FIREBALL_BOTTOM: &str = "assets/fireball-tower-bottom.png";
+pub static TEXTURE_PREVIEW_TOWER_FIREBALL_BOTTOM: &str = "assets/preview-fireball-tower-bottom.png";
+pub static TEXTURE_PREVIEW_TOWER_FIREBALL_TOP: &str = "assets/preview-fireball-tower-top.png";
+
+
 pub static TEXTURE_GOBLIN_ENEMY_FRONT: &str = "assets/goblin-enemy-front.png";
 pub static TEXTURE_PREVIEW_GOBLIN_ENEMY: &str = "assets/preview-goblin-enemy.png";
 
 pub static TEXTURE_PROJECTILE_ARROW: &str = "assets/archer-arrow-large.png";
+pub static TEXTURE_PROJECTILE_FIREBALL: &str = "assets/projectile-fireball.png";
 
 pub const CURRENT_BUILD_ARCHER_TOWER: usize = 0;
-pub const CURRENT_BUILD_GOBLIN: usize = 1;
-pub const CURRENT_BUILD_WALL: usize = 2;
-pub const CURRENT_BUILD_BASE: usize = 3;
+pub const CURRENT_BUILD_FIREBALL_TOWER: usize = 1;
+pub const CURRENT_BUILD_GOBLIN: usize = 2;
+pub const CURRENT_BUILD_WALL: usize = 3;
+pub const CURRENT_BUILD_BASE: usize = 4;
 
 pub const CURRENT_SEED_SHOVEL: usize = 0;
 pub const CURRENT_SEED_HO: usize = 1;
@@ -106,6 +130,8 @@ pub const TILE_TYPE_FIELD_GROWING: char = 'G';
 pub const TILE_TYPE_FIELD_HARVESTABLE: char = 'H';
 pub const TILE_TYPE_ARCHER_TOP: char = 'A';
 pub const TILE_TYPE_ARCHER_BOTTOM: char = 'a';
+pub const TILE_TYPE_FIREBALL_TOP: char = 'F';
+pub const TILE_TYPE_FIREBALL_BOTTOM: char = 'f';
 pub const TILE_TYPE_GOBLIN: char = 'G';
 pub const TILE_TYPE_BASE: char = 'B';
 
@@ -124,10 +150,22 @@ pub const TOWER_ARCHER_HEALTH: u16 = 1000;
 pub const TOWER_ARCHER_HEALTH_BAR_WIDTH: u32 = 32;
 pub const TOWER_ARCHER_HEALTH_BAR_HEIGHT: u32 = 6;
 
+pub const TOWER_FIREBALL_DAMAGE: u8 = 50;
+pub const TOWER_FIREBALL_ATTACK_SPEED: u8 = 32;
+pub const TOWER_FIREBALL_RADIUS: i32 = 6;
+pub const TOWER_FIREBALL_HEALTH: u16 = 2000;
+pub const TOWER_FIREBALL_HEALTH_BAR_WIDTH: u32 = 32;
+pub const TOWER_FIREBALL_HEALTH_BAR_HEIGHT: u32 = 6;
+
 pub const PROJECTILE_DESPAWN_DURATION: u8 = 32;
 pub const PROJECTILE_HIT_DESPAWN_DURATION: u8 = 2;
 
 pub const PROJECTILE_ARROW_SPEED: u8 = 8;
 pub const PROJECTILE_ARROW_RADIUS: u8 = 32;
+pub const PROJECTILE_FIREBALL_SPEED: u8 = 6;
+pub const PROJECTILE_FIREBALL_RADIUS: u8 = 128;
+
 
 pub const BUILDING_BASE_HEALTH: u16 = 2000;
+pub const BUILDING_BASE_HEALTH_BAR_WIDTH: u32 = 64;
+pub const BUILDING_BASE_HEALTH_BAR_HEIGHT: u32 = 8;

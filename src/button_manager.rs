@@ -61,6 +61,7 @@ impl ButtonManager {
                 rect: sdl2::rect::Rect::new(player.x, player.y, constants::TILE_SIZE, constants::TILE_SIZE),
                 texture_path: match button_index {
                     constants::CURRENT_BUILD_ARCHER_TOWER => constants::TEXTURE_BUTTON_ARCHER.to_string(),
+                    constants::CURRENT_BUILD_FIREBALL_TOWER => constants::TEXTURE_PROJECTILE_FIREBALL.to_string(),
                     constants::CURRENT_BUILD_GOBLIN => constants::TEXTURE_GOBLIN_ENEMY_FRONT.to_string(),
                     constants::CURRENT_BUILD_WALL => constants::TEXTURE_TILE_WALL.to_string(),
                     constants::CURRENT_BUILD_BASE => constants::TEXTURE_BUILDING_HOUSE.to_string(),
@@ -107,7 +108,6 @@ impl ButtonManager {
         }
         if button.outline_visible {
             Self::draw_rect_outline(game, button.rect);
-            //maybe can replace this with returning a bool and updating in render function
             for other_button_index in 0..self.button_vec.len() {
                 let other_button = &mut self.button_vec[other_button_index];
                 if other_button_index != button_index {
@@ -131,18 +131,18 @@ impl ButtonManager {
     pub fn render_build_buttons (&mut self, player: &mut player_manager::PlayerManager, tex_man: &mut texture_manager::TextureManager<sdl2::video::WindowContext>, game: &mut game_manager::GameManager) -> Result<(), String> {
         if game.build_mode {
             for button_index in 0..self.button_vec.len() {
-                self.button_vec[button_index].rect.set_x(player.rect.x() + constants::TILE_SIZE as i32 * button_index as i32 - constants::SCREEN_WIDTH as i32 / 2 + constants::TILE_SIZE as i32);
-                self.button_vec[button_index].rect.set_y(constants::TILE_SIZE as i32 + player.rect.y() - constants::SCREEN_HEIGHT as i32 / 2 + constants::TILE_SIZE as i32);
+                self.button_vec[button_index].rect.set_x(player.rect.x() + constants::TILE_SIZE as i32 * button_index as i32 - game.screen_size.0 / 2 + constants::TILE_SIZE as i32);
+                self.button_vec[button_index].rect.set_y(constants::TILE_SIZE as i32 + player.rect.y() - game.screen_size.1 / 2 + constants::TILE_SIZE as i32);
 
                 let texture = tex_man.load(&self.button_vec[button_index].texture_path)?;
                 game.canvas.copy_ex(
-                    &texture, // Texture object
-                    None,      // source rect
-                    self.button_vec[button_index].rect,     // destination rect
-                    0.0,      // angle (degrees)
-                    None,   // center
-                    false,    // flip horizontal
-                    false,     // flip vertical
+                    &texture,
+                    None,
+                    self.button_vec[button_index].rect,
+                    0.0,
+                    None,
+                    false,
+                    false,
                 )?;
                 self.update_buttons(button_index, game);
             }
@@ -153,18 +153,18 @@ impl ButtonManager {
     pub fn render_seed_buttons (&mut self, player: &mut player_manager::PlayerManager, tex_man: &mut texture_manager::TextureManager<sdl2::video::WindowContext>, game: &mut game_manager::GameManager) -> Result<(), String> {
         if game.seed_mode {
             for button_index in 0..self.button_vec.len() {
-                self.button_vec[button_index].rect.set_x(player.rect.x() + constants::TILE_SIZE as i32 * button_index as i32 - constants::SCREEN_WIDTH as i32 / 2 + constants::TILE_SIZE as i32);
-                self.button_vec[button_index].rect.set_y(constants::TILE_SIZE as i32 + player.rect.y() - constants::SCREEN_HEIGHT as i32 / 2 + constants::TILE_SIZE as i32);
+                self.button_vec[button_index].rect.set_x(player.rect.x() + constants::TILE_SIZE as i32 * button_index as i32 - game.screen_size.0 as i32 / 2 + constants::TILE_SIZE as i32);
+                self.button_vec[button_index].rect.set_y(constants::TILE_SIZE as i32 + player.rect.y() - game.screen_size.1 / 2 + constants::TILE_SIZE as i32);
 
                 let texture = tex_man.load(&self.button_vec[button_index].texture_path)?;
                 game.canvas.copy_ex(
-                    &texture, // Texture object
-                    None,      // source rect
-                    self.button_vec[button_index].rect,     // destination rect
-                    0.0,      // angle (degrees)
-                    None,   // center
-                    false,    // flip horizontal
-                    false,     // flip vertical
+                    &texture,
+                    None,
+                    self.button_vec[button_index].rect,
+                    0.0,
+                    None,
+                    false,
+                    false,
                 )?;
                 self.update_buttons(button_index, game);
             }

@@ -27,6 +27,8 @@ pub struct GameManager {
     pub current_build: usize,
     pub carrot_amount: u32,
     pub tomato_amount: u32,
+    pub gold_amount: u32,
+    pub screen_size: (i32, i32),
     pub cam_x: i32,
     pub cam_y: i32,
     pub frame_time: u32,
@@ -52,7 +54,7 @@ impl GameManager {
         // gl_attr.set_multisample_samples(4);
 
         let window = video_subsystem
-            .window("Farm Defense", constants::SCREEN_WIDTH.try_into().unwrap(), constants::SCREEN_HEIGHT.try_into().unwrap())
+            .window("Farm Defense", 640, 480)
             .opengl()
             .resizable()
             .fullscreen_desktop()
@@ -89,8 +91,10 @@ impl GameManager {
             current_build: usize::MAX,
             carrot_amount: 0,
             tomato_amount: 0,
+            gold_amount: 0,
             cam_x: 0,
             cam_y: 0,
+            screen_size: (canvas.window().display_mode().unwrap().w, canvas.window().display_mode().unwrap().h),
             frame_time: 1,
             fps: 1,
             elapsed_seconds: 0.1,
@@ -126,6 +130,7 @@ impl GameManager {
         seed_buttons: &mut button_manager::ButtonManager, 
         build_buttons: &mut button_manager::ButtonManager,
     ) {
+        self.screen_size = (self.canvas.window().display_mode().unwrap().w, self.canvas.window().display_mode().unwrap().h);
         player.update_player(self, level);
         self.update_camera(player);
 
@@ -137,8 +142,8 @@ impl GameManager {
 
             }
         }
-        level_manager::LevelManager::check_attacks(self, enemies, towers, buildings, projectiles);
-        level.delete_all_dead(self, enemies, towers, buildings, projectiles);
+        level_manager::LevelManager::check_attacks(self, enemies, towers, buildings, projectiles, gui_manager);
+        level.delete_all_dead(self, enemies, towers, buildings, projectiles, gui_manager);
     }
 
 
@@ -161,10 +166,12 @@ impl GameManager {
         enemy_manager::EnemyManager::render_enemies(enemies, self, tex_man, level, gui_manager).unwrap(); 
         projectile_manager::ProjectileManager::render_projectiles(projectiles, self, tex_man).unwrap();
         tower_manager::TowerManager::render_towers(towers, self, tex_man, gui_manager).unwrap();
-        buildings.render_buildings(self, tex_man);
+        buildings.render_buildings(self, tex_man, gui_manager);
         gui_manager.render_preview(self, tex_man);
         player.render_player(self, tex_man).unwrap();
         seed_buttons.render_seed_buttons(player, tex_man, self).unwrap();
-        build_buttons.render_build_buttons(player, tex_man, self).unwrap();  
+        build_buttons.render_build_buttons(player, tex_man, self).unwrap();
+        gui_manager.render_inventory_hud(self, tex_man);
+        gui_manager.render_messages(self, tex_man);
     }
 }

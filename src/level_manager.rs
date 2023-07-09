@@ -21,6 +21,8 @@ pub enum TileData {
     Tomatoes,
     ArcherTowerBottom,
     ArcherTowerTop,
+    FireballTowerBottom,
+    FireballTowerTop,
     Goblin,
     None,
 }
@@ -74,8 +76,10 @@ impl LevelManager {
                     TileData::Tomatoes => 1,
                     TileData::ArcherTowerBottom => 2,
                     TileData::ArcherTowerTop => 3,
-                    TileData::Goblin => 4,
-                    TileData::None => 5,
+                    TileData::FireballTowerTop => 4,
+                    TileData::FireballTowerBottom => 5,
+                    TileData::Goblin => 6,
+                    TileData::None => 7,
                 }])?;
                 file.write_all(&[tile.is_occupied as u8])?;
             }
@@ -311,13 +315,13 @@ impl LevelManager {
                 temp_tile.rect.set_y((constants::TILE_SIZE as i32 * row_index as i32) - game.cam_y);
                 let texture = tex_man.load(&temp_tile.texture_path)?;
                 game.canvas.copy_ex(
-                    &texture, // Texture object
-                    None,      // source rect
-                    temp_tile.rect,     // destination rect
-                    0.0,      // angle (degrees)
-                    None,   // center
-                    false,    // flip horizontal
-                    false,     // flip vertical
+                    &texture,
+                    None,
+                    temp_tile.rect,
+                    0.0,
+                    None,
+                    false,
+                    false,
                 )?;
             }
         }
@@ -330,6 +334,7 @@ impl LevelManager {
         towers: &mut tower_manager::TowerManager,
         buildings: &mut building_manager::BuildingManager,
         projectiles: &mut projectile_manager::ProjectileManager,
+        gui_manager: &mut gui_manager::GUIManager,
     ) {
         for tower in &mut towers.tower_vec {
             let tower_pos_pixel = (constants::TILE_SIZE as i32 * tower.top_index.0 as i32, constants::TILE_SIZE as i32 * tower.top_index.1 as i32);
@@ -349,7 +354,12 @@ impl LevelManager {
                             let projectile_hit: bool = tower_manager::TowerManager::is_within_area(projectile.position, enemy_pos_pixel, projectile.radius as i32);
 
                             if projectile_hit && enemy.health != 0 && !projectile.hit_target {
-                                enemy.health -= projectile.damage as u16;
+                                if enemy.health > projectile.damage as u16 {
+                                    enemy.health -= projectile.damage as u16;
+                                }
+                                else {
+                                    enemy.health = 0;
+                                }
                                 projectile.hit_target = true;
                             }
                         }
@@ -357,7 +367,12 @@ impl LevelManager {
                 }
                 //ENEMY ATTACK
                 if tower.health != 0 && enemy_can_attack {
-                    tower.health -= enemy.attack_damage as u16;
+                    if tower.health > enemy.attack_damage as u16 {
+                        tower.health -= enemy.attack_damage as u16;
+                    }
+                    else {
+                        tower.health = 0;
+                    }
                     enemy.found_target = true;
                 }
 
@@ -369,9 +384,15 @@ impl LevelManager {
                 let enemy_pos_pixel = (constants::TILE_SIZE as i32 * enemy.grid_index.0 as i32, constants::TILE_SIZE as i32 * enemy.grid_index.1 as i32);
                 let enemy_can_attack: bool = tower_manager::TowerManager::is_within_area(building.pixel_index, enemy_pos_pixel, enemy.attack_radius as i32) && game.frame_time % enemy.attack_speed as u32 == 0;
                 if building.health != 0 && enemy_can_attack {
-                    building.health -= enemy.attack_damage as u16;
+                    if building.health > enemy.attack_damage as u16 {
+                        building.health -= enemy.attack_damage as u16;
+                        building.last_damaged = 0;
+                    }
+                    else {
+                        building.health = 0;
+                    }
                     enemy.found_target = true;
-                    println!("Building damaged\tHealth: {}", building.health);
+                    gui_manager.create_unique_message("base is under attack!".to_string(), 128);
                 }
 
             }
@@ -385,6 +406,7 @@ impl LevelManager {
         towers: &mut tower_manager::TowerManager,
         buildings: &mut building_manager::BuildingManager,
         projectiles: &mut projectile_manager::ProjectileManager,
+        gui_manager: &mut gui_manager::GUIManager,
     ) {
         for enemy_index in (0..enemies.enemy_vec.len()).rev() {
             let enemy = &mut enemies.enemy_vec[enemy_index];
@@ -395,6 +417,9 @@ impl LevelManager {
                 self.level_vec[enemy.grid_index.0][enemy.grid_index.1].is_occupied = false;
                 self.level_vec[enemy.grid_index.0][enemy.grid_index.1].tile_data = TileData::None;
                 enemies.enemy_vec.remove(enemy_index);
+                if buildings.building_vec.iter().any(|building| building.building_type == building_manager::BuildingType::Base) {                
+                    game.gold_amount += 1;
+                }
             }
         }
         for tower_index in (0..towers.tower_vec.len()).rev() {
@@ -427,7 +452,13 @@ impl LevelManager {
         for building_index in (0..buildings.building_vec.len()).rev() {
             let building = &mut buildings.building_vec[building_index];
             if building.health == 0 {
+                if building.building_type == building_manager::BuildingType::Base {
+                    //CLEAR TARGET VEC & SET PATH TO LOCATION WHERE ENEMIES CAN BE DESTROYED
+                    //ALLOW PLAYER TIME TO REBUILD
+                    game.gold_amount = 0;
+                }
                 buildings.building_vec.remove(building_index);
+                gui_manager.create_message("base destroyed, time to rebuild".to_string(), 256);
             }
         }
     }

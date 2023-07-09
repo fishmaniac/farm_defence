@@ -108,7 +108,7 @@ impl EnemyManager {
         game: &mut game_manager::GameManager, 
         tex_man: &mut texture_manager::TextureManager<sdl2::video::WindowContext>, 
         level: &mut level_manager::LevelManager, 
-        health_bars: &mut gui_manager::GUIManager,
+        gui_manager: &mut gui_manager::GUIManager,
     ) -> Result<(), String> {
         for enemy in &mut self.enemy_vec {
             let pixel_index: (i32, i32) = (enemy.grid_index.0 as i32 * constants::TILE_SIZE as i32, enemy.grid_index.1 as i32 * constants::TILE_SIZE as i32);
@@ -119,18 +119,18 @@ impl EnemyManager {
             let texture = tex_man.load(&enemy.texture_path)?;
 
             game.canvas.copy_ex(
-                &texture, // texture object
-                None,      // source rect
-                enemy.rect,     // destination rect
-                0.0,      // angle (degrees)
-                None,   // center
-                false,    // flip horizontal
-                false,     // flip vertical
+                &texture,
+                None,
+                enemy.rect,
+                0.0,
+                None,
+                false,
+                false,
             )?;
 
             Self::move_enemies(enemy, game, level);
             if enemy.health < enemy.max_health {
-                health_bars.render_health_bar_enemy(game, enemy);
+                gui_manager.render_health_bar_enemy(game, enemy);
             }
         }
         Ok(())
@@ -160,18 +160,16 @@ impl EnemyManager {
                 }
             }
         }
-        else if has_no_targets{
+        else if has_no_targets {
             let random_index = game.frame_time as usize % game.target_vec.len();
             let random_tile = &mut level.level_vec[game.target_vec[random_index].0][game.target_vec[random_index].1];
             //BUG: MIGHT NEED TO CHECK FOR GOBLIN TILE TYPE AND SET TO DEFAULT TILE
-            // if random_tile.tile_type == constants::TILE_TYPE_GOBLIN {
-            //     random_tile.tile_type = random_tile.original_type;
-            // }
+            if random_tile.tile_type == constants::TILE_TYPE_GOBLIN {
+                random_tile.tile_type = random_tile.original_type;
+            }
             if random_tile.is_occupied {
 
-                //THIS MAY DO NOTHING
                 let rand_direction = game.frame_time % 4;
-                println!("rand direction: {}", rand_direction);
                 match rand_direction {
                     0 => {
                         game.target_vec[random_index].0 += 1;
@@ -211,7 +209,7 @@ impl EnemyManager {
     }
 
     pub fn astar(enemy: &mut Enemy, target: (usize, usize), level_vec: &[Vec<LevelTile>]) {
-        println!("EXECUTING A*");
+        println!("EXECUTING A*"); 
         let initial_state = PathState {
             position: enemy.grid_index,
             priority: heuristic(enemy.grid_index, target),
@@ -240,7 +238,6 @@ impl EnemyManager {
             let neighbors = get_neighbors(current, level_vec);
 
             for next in neighbors {
-                //1 FOR 4 WAY OR IMPLEMENT COST
                 let new_cost = 1;
                 let priority = new_cost + heuristic(next, target);
 

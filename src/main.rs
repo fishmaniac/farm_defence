@@ -69,18 +69,18 @@ fn game_loop (
     projectiles: &mut projectile_manager::ProjectileManager,
     seed_buttons: &mut button_manager::ButtonManager,
     build_buttons: &mut button_manager::ButtonManager,
-    health_bars: &mut gui_manager::GUIManager,
-) {
+    gui_manager: &mut gui_manager::GUIManager,
+) -> Result<(), String> {
     let mut frame_count: u32 = 0;
     let mut last_fps_time = std::time::Instant::now();
 
 
     while !game.quit {
-        events.do_event(game, seed_buttons, build_buttons, towers);
+        events.do_event(game, towers, seed_buttons, build_buttons, gui_manager);
         if !game.paused {
             game.prepare_background();
-            game.update_game(player, level, towers, buildings, enemies, projectiles, health_bars, seed_buttons, build_buttons);
-            game.render_game(tex_man, player, level, towers, buildings, enemies, projectiles, health_bars, seed_buttons, build_buttons);
+            game.update_game(player, level, towers, buildings, enemies, projectiles, gui_manager, seed_buttons, build_buttons);
+            game.render_game(tex_man, player, level, towers, buildings, enemies, projectiles, gui_manager, seed_buttons, build_buttons);
 
 
             // let player_rect = sdl2::rect::Rect::new(player.rect.x(), player.rect.y(), constants::TILE_SIZE, constants::TILE_SIZE);
@@ -88,6 +88,7 @@ fn game_loop (
             //
             // game.canvas.set_draw_color(constants::COLOR_OUTLINE);
             // game.canvas.fill_rect(player_pos_rect);
+            //
 
             game.canvas.present();
 
@@ -109,42 +110,43 @@ fn game_loop (
         }
         else if game.saving {
             println!("SAVING");
-            save_game(game, tex_man, events, player, level, towers, buildings, enemies, projectiles, seed_buttons, build_buttons, health_bars);
+            save_game(game, tex_man, events, player, level, towers, buildings, enemies, projectiles, seed_buttons, build_buttons, gui_manager);
             game.saving = false;
         }
         else if game.loading {
             println!("LOADING");
-            load_game(game, tex_man, events, player, level, towers, buildings, enemies, projectiles, seed_buttons, build_buttons, health_bars);
+            load_game(game, tex_man, events, player, level, towers, buildings, enemies, projectiles, seed_buttons, build_buttons, gui_manager);
             game.loading = false;
         }
     }
+    Ok(())
 }
 
 fn main() -> Result<(), String> {
     let sdl_context = sdl2::init()?;
     let mixer_context = sdl2::mixer::init(sdl2::mixer::InitFlag::MP3).unwrap();
+    let ttf_context = sdl2::ttf::init().map_err(|e| e.to_string())?; 
 
     let mut game = game_manager::GameManager::new(&sdl_context);
     let texture_creator = game.canvas.texture_creator();
     let mut tex_man = texture_manager::TextureManager::new(&texture_creator);
     let mut events = event_manager::EventManager::new(&sdl_context);
-    let mut player = player_manager::PlayerManager::new();
+    let mut player = player_manager::PlayerManager::new(&mut game);
     let mut level = level_manager::LevelManager::new();
     let mut towers = tower_manager::TowerManager::new();
     let mut buildings = building_manager::BuildingManager::new();
     let mut enemies = enemy_manager::EnemyManager::new();
     let mut projectiles = projectile_manager::ProjectileManager::new();
-
     let mut seed_buttons = button_manager::ButtonManager::new(constants::SEED_BUTTON_AMT, button_manager::ButtonType::Seed, &player);
     let mut build_buttons = button_manager::ButtonManager::new(constants::BUILD_BUTTON_AMT, button_manager::ButtonType::Build, &player);
-    let mut health_bars = gui_manager::GUIManager::new();
-
+    let mut gui_manager = gui_manager::GUIManager::new(&mut game, ttf_context);
+    gui_manager.create_inventory_hud(&mut game);
 
     // music
     sdl2::mixer::open_audio(44100, sdl2::mixer::DEFAULT_FORMAT, 2, 2048)?;
     sdl2::mixer::allocate_channels(2);
 
-    let audio_chunk = sdl2::mixer::Music::from_file("assets/music/song4.mp3")?;
+    let audio_chunk = sdl2::mixer::Music::from_file("assets/music/song5.mp3")?;
 
     sdl2::mixer::Music::play(&audio_chunk, -1);
     sdl2::mixer::Music::set_volume(50);
@@ -158,15 +160,6 @@ fn main() -> Result<(), String> {
     //~!~!~!~TODO: LOAD IMAGES BEFORE LOOP~!~!~!~
 
     /*     Prepare fonts */
-    // let ttf_context = sdl2::ttf::init().map_err(|e| e.to_string())?; 
-    // let font_path: &std::path::Path = std::path::Path::new(&"assets/font/slkscr.ttf");
-    // let mut font = ttf_context.load_font(font_path, 128)?;
-    // let surface = font.render("FPS: ").unwrap();
-    // let texture_creator = sdl_context.video()?.texture_creator();
-    // let texture = texture_creator.create_texture_from_surface(&surface)?;
-
-    // font.set_style(sdl2::ttf::FontStyle::BOLD);
-    //
 
     //Add game loop error handling
     //
@@ -177,7 +170,7 @@ fn main() -> Result<(), String> {
     //     }
     // });
 
-    game_loop(&mut game, &mut tex_man, &mut events, &mut player, &mut level, &mut towers, &mut buildings, &mut enemies, &mut projectiles, &mut seed_buttons, &mut build_buttons, &mut health_bars);
+    game_loop(&mut game, &mut tex_man, &mut events, &mut player, &mut level, &mut towers, &mut buildings, &mut enemies, &mut projectiles, &mut seed_buttons, &mut build_buttons, &mut gui_manager);
 
     Ok(())
 }

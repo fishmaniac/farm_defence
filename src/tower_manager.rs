@@ -66,6 +66,28 @@ impl TowerManager {
                 game.target_vec.push((tower_tile.bottom_index.0, tower_tile.bottom_index.1));
                 self.tower_vec.push(tower_tile);
             },
+            TileData::FireballTowerBottom => {
+                let tower_tile = self::Tower {
+                    bottom_index: (index.0, index.1),
+                    bottom_rect: sdl2::rect::Rect::new(temp_tile.rect.x(), temp_tile.rect.y(), constants::TILE_SIZE, constants::TILE_SIZE),
+                    bottom_texture_path: constants::TEXTURE_TOWER_FIREBALL_BOTTOM.to_string(),
+                    top_index: (index.0, index.1 - 1),
+                    top_rect: sdl2::rect::Rect::new(temp_tile.rect.x(), temp_tile.rect.y() - constants::TILE_SIZE as i32, constants::TILE_SIZE, constants::TILE_SIZE),
+                    top_texture_path: constants::TEXTURE_TOWER_FIREBALL_LEFT.to_string(),
+                    attack_radius: constants::TOWER_FIREBALL_RADIUS,
+                    attack_speed: constants::TOWER_FIREBALL_ATTACK_SPEED,
+                    max_health: constants::TOWER_FIREBALL_HEALTH,
+                    health: constants::TOWER_FIREBALL_HEALTH,
+                    is_attacking: false,
+                    projectile_texture: constants::TEXTURE_PROJECTILE_FIREBALL.to_string(),
+                    projectile_speed: constants::PROJECTILE_FIREBALL_SPEED,
+                    projectile_radius: constants::PROJECTILE_FIREBALL_RADIUS,
+                    projectile_damage: constants::TOWER_FIREBALL_DAMAGE,
+
+                };
+                game.target_vec.push((tower_tile.bottom_index.0, tower_tile.bottom_index.1));
+                self.tower_vec.push(tower_tile);
+            },
             _=> {
                 let tower_tile = self::Tower {
                     bottom_index: (index.0, index.1),
@@ -103,13 +125,13 @@ impl TowerManager {
 
             let bottom_texture = tex_man.load(&tower_bottom.bottom_texture_path)?;
             game.canvas.copy_ex(
-                &bottom_texture, // Texture object
-                None,      // source rect
-                tower_bottom.bottom_rect,     // destination rect
-                0.0,      // angle (degrees)
-                None,   // center
-                false,    // flip horizontal
-                false,     // flip vertical
+                &bottom_texture,
+                None,
+                tower_bottom.bottom_rect,
+                0.0,
+                None,
+                false,
+                false,
             )?;
 
         }
@@ -121,13 +143,13 @@ impl TowerManager {
 
             let top_texture = tex_man.load(&tower_top.top_texture_path)?;
             game.canvas.copy_ex(
-                &top_texture, // Texture object
-                None,      // source rect
-                tower_top.top_rect,     // destination rect
-                0.0,      // angle (degrees)
-                None,   // center
-                false,    // flip horizontal
-                false,     // flip vertical
+                &top_texture,
+                None,
+                tower_top.top_rect,
+                0.0,
+                None,
+                false,
+                false,
             )?;
             if tower_top.health < tower_top.max_health {
                 health_bars.render_health_bar_tower(game, tower_top);

@@ -4,6 +4,7 @@ use sdl2::mouse::MouseButton;
 
 use crate::game_manager;
 use crate::button_manager;
+use crate::gui_manager;
 use crate::tower_manager;
 
 pub struct EventManager {
@@ -22,9 +23,10 @@ impl EventManager {
     pub fn do_event(
         &mut self, 
         game: &mut game_manager::GameManager, 
+        towers: &mut tower_manager::TowerManager,
         seed_buttons: &mut button_manager::ButtonManager, 
         build_buttons: &mut button_manager::ButtonManager,
-        towers: &mut tower_manager::TowerManager,
+        gui_manager: &mut gui_manager::GUIManager,
     ) {
         for event in self.event_pump.poll_iter() {
             match event {
@@ -33,7 +35,7 @@ impl EventManager {
                     break
                 }
                 Event::KeyDown { keycode: Some(keycode), .. } => {
-                    self.do_key_down(game, towers, seed_buttons, build_buttons, keycode);
+                    self.do_key_down(game, towers, seed_buttons, build_buttons, gui_manager, keycode);
                     break
                 }, 
                 Event::KeyUp {keycode: Some(keycode), .. } => {
@@ -61,6 +63,7 @@ impl EventManager {
         towers: &mut tower_manager::TowerManager,
         seed_buttons: &mut button_manager::ButtonManager, 
         build_buttons: &mut button_manager::ButtonManager,
+        gui_manager: &mut gui_manager::GUIManager,
         keycode: sdl2::keyboard::Keycode,
     ) {
         match keycode {
@@ -192,7 +195,30 @@ impl EventManager {
                     build_buttons.update_buttons(3, game);
                 }
             },
-            _ => println!("INVALID INPUT"),
+            sdl2::keyboard::Keycode::Num5 => {
+                if game.seed_mode {
+                    game.current_seed = 4;
+                    if !seed_buttons.button_vec[4].outline_visible {
+                        seed_buttons.button_vec[4].outline_visible = true;
+                    }
+                    else {
+                        seed_buttons.button_vec[4].outline_visible = false;
+
+                    }
+                    seed_buttons.update_buttons(4, game);
+                }
+                if game.build_mode {
+                    game.current_build = 4;
+                    if !build_buttons.button_vec[4].outline_visible {
+                        build_buttons.button_vec[4].outline_visible = true;
+                    }
+                    else {
+                        build_buttons.button_vec[4].outline_visible = false;
+                    }
+                    build_buttons.update_buttons(4, game);
+                }
+            },
+            _ => gui_manager.create_message("invalid input".to_string(), 128),
         }
     }
 
