@@ -2,10 +2,9 @@ use sdl2::EventPump;
 use sdl2::event::Event;
 use sdl2::mouse::MouseButton;
 
-use crate::game_manager::GameManager;
-use crate::button_manager::ButtonManager;
+use crate::game_manager;
 use crate::button_manager;
-use crate::tower_manager::TowerManager;
+use crate::tower_manager;
 
 pub struct EventManager {
     event_pump: EventPump,
@@ -22,10 +21,10 @@ impl EventManager {
 
     pub fn do_event(
         &mut self, 
-        game: &mut GameManager, 
-        seed_buttons: &mut ButtonManager, 
-        build_buttons: &mut ButtonManager,
-        towers: &mut TowerManager,
+        game: &mut game_manager::GameManager, 
+        seed_buttons: &mut button_manager::ButtonManager, 
+        build_buttons: &mut button_manager::ButtonManager,
+        towers: &mut tower_manager::TowerManager,
     ) {
         for event in self.event_pump.poll_iter() {
             match event {
@@ -34,7 +33,7 @@ impl EventManager {
                     break
                 }
                 Event::KeyDown { keycode: Some(keycode), .. } => {
-                    self.do_key_down(game, towers, keycode);
+                    self.do_key_down(game, towers, seed_buttons, build_buttons, keycode);
                     break
                 }, 
                 Event::KeyUp {keycode: Some(keycode), .. } => {
@@ -50,6 +49,7 @@ impl EventManager {
                 }
                 Event::MouseButtonUp { .. } => {
                     game.mouse_button = MouseButton::Unknown;
+                    game.placed = false;
                 },
                 _ => {}
             }
@@ -57,15 +57,24 @@ impl EventManager {
     }
 
     fn do_key_down(&mut self, 
-        game: &mut GameManager, 
-        towers: &mut TowerManager,
+        game: &mut game_manager::GameManager, 
+        towers: &mut tower_manager::TowerManager,
+        seed_buttons: &mut button_manager::ButtonManager, 
+        build_buttons: &mut button_manager::ButtonManager,
         keycode: sdl2::keyboard::Keycode,
     ) {
         match keycode {
-            sdl2::keyboard::Keycode::P => { 
-                towers.tower_vec.clear();
-                game.target_vec.clear();
-            },
+            sdl2::keyboard::Keycode::P => game.paused = !game.paused,
+            sdl2::keyboard::Keycode::O => {
+                if game.paused {
+                    game.saving = true;
+                }
+            }
+            sdl2::keyboard::Keycode::I => {
+                if game.paused && !game.saving {
+                    game.loading = true;
+                }
+            }
             sdl2::keyboard::Keycode::Escape => game.quit = true,
             sdl2::keyboard::Keycode::Q => game.quit = true,
             sdl2::keyboard::Keycode::W => game.up = true,
@@ -79,10 +88,8 @@ impl EventManager {
                 else {
                     game.build_mode = true;
                     game.seed_mode = false;
-                    println!("BUILD MODE: {}", game.build_mode);
                     return
                 }
-                println!("BUILD MODE: {}", game.build_mode);
             }
             sdl2::keyboard::Keycode::Y => {
                 if game.seed_mode {
@@ -91,23 +98,106 @@ impl EventManager {
                 else {
                     game.seed_mode = true;
                     game.build_mode = false;
-                    println!("SEED MODE: {}", game.seed_mode);
                     return
                 }
-                println!("SEED MODE: {}", game.seed_mode);
             }
             sdl2::keyboard::Keycode::Num1 => {
-                println!("1 pressed\tcurrent seed: {}", game.current_seed);
+                if game.seed_mode {
+                    game.current_seed = 0;
+                    if !seed_buttons.button_vec[0].outline_visible {
+                        seed_buttons.button_vec[0].outline_visible = true;
+                    }
+                    else {
+                        seed_buttons.button_vec[0].outline_visible = false;
+                    }
+                    seed_buttons.update_buttons(0, game);
+                }
+                if game.build_mode {
+                    game.current_build = 0;
+                    if !build_buttons.button_vec[0].outline_visible {
+                        build_buttons.button_vec[0].outline_visible = true;
+                    }
+                    else {
+                        build_buttons.button_vec[0].outline_visible = false;
+                    }
+                    build_buttons.update_buttons(0, game);
+                }
             },
             sdl2::keyboard::Keycode::Num2 => {
-                println!("2 pressed\tcurrent seed: {}", game.current_seed);
+                if game.seed_mode {
+                    game.current_seed = 1;
+                    if !seed_buttons.button_vec[1].outline_visible {
+                        seed_buttons.button_vec[1].outline_visible = true;
+                    }
+                    else {
+                        seed_buttons.button_vec[1].outline_visible = false;
+
+                    }
+                    seed_buttons.update_buttons(1, game);
+                }
+                if game.build_mode {
+                    game.current_build = 1;
+                    if !build_buttons.button_vec[1].outline_visible {
+                        build_buttons.button_vec[1].outline_visible = true;
+                    }
+                    else {
+                        build_buttons.button_vec[1].outline_visible = false;
+                    }
+                    build_buttons.update_buttons(1, game);
+                }
+            },
+            sdl2::keyboard::Keycode::Num3 => {
+                if game.seed_mode {
+                    game.current_seed = 2;
+                    if !seed_buttons.button_vec[2].outline_visible {
+                        seed_buttons.button_vec[2].outline_visible = true;
+                    }
+                    else {
+                        seed_buttons.button_vec[2].outline_visible = false;
+
+                    }
+                    seed_buttons.update_buttons(2, game);
+                }
+                if game.build_mode {
+                    game.current_build = 2;
+                    if !build_buttons.button_vec[2].outline_visible {
+                        build_buttons.button_vec[2].outline_visible = true;
+                    }
+                    else {
+                        build_buttons.button_vec[2].outline_visible = false;
+                    }
+                    build_buttons.update_buttons(2, game);
+                }
+            },
+            sdl2::keyboard::Keycode::Num4 => {
+                if game.seed_mode {
+                    game.current_seed = 3;
+                    if !seed_buttons.button_vec[3].outline_visible {
+                        seed_buttons.button_vec[3].outline_visible = true;
+                    }
+                    else {
+                        seed_buttons.button_vec[3].outline_visible = false;
+
+                    }
+                    seed_buttons.update_buttons(3, game);
+                }
+                if game.build_mode {
+                    game.current_build = 3;
+                    if !build_buttons.button_vec[3].outline_visible {
+                        build_buttons.button_vec[3].outline_visible = true;
+                    }
+                    else {
+                        build_buttons.button_vec[3].outline_visible = false;
+                    }
+                    build_buttons.update_buttons(3, game);
+                }
             },
             _ => println!("INVALID INPUT"),
         }
     }
 
     fn do_key_up(&mut self, 
-        game: &mut GameManager, 
+        game: &mut game_manager::GameManager, 
         keycode: sdl2::keyboard::Keycode
     ) {
         match keycode {

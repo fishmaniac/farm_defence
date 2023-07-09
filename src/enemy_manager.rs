@@ -33,7 +33,7 @@ impl PartialOrd for PathState {
 pub struct Enemy {
     pub cost_total: f32,
     pub final_path: Option<Vec<(usize, usize)>>,
-    pub index: (usize, usize),
+    pub grid_index: (usize, usize),
     pub max_health: u16,
     pub health: u16,
     pub movement_speed: u8,
@@ -75,7 +75,7 @@ impl EnemyManager {
                     max_health: constants::ENEMY_GOBLIN_HEALTH,
                     health: constants::ENEMY_GOBLIN_HEALTH,
                     found_target: false,
-                    index,
+                    grid_index: index,
                     direction: player_manager::Direction::Down,
                     rect: sdl2::rect::Rect::new(temp_tile.rect.x(), temp_tile.rect.y(), constants::TILE_SIZE, constants::TILE_SIZE),
                     texture_path: constants::TEXTURE_GOBLIN_ENEMY_FRONT.to_string(),
@@ -93,7 +93,7 @@ impl EnemyManager {
                     max_health: 1,
                     health: 1,
                     found_target: false,
-                    index,
+                    grid_index: index,
                     direction: player_manager::Direction::Down,
                     rect: sdl2::rect::Rect::new(temp_tile.rect.x(), temp_tile.rect.y(), constants::TILE_SIZE, constants::TILE_SIZE),
                     texture_path: constants::TEXTURE_DEFAULT.to_string(),
@@ -111,7 +111,7 @@ impl EnemyManager {
         health_bars: &mut gui_manager::GUIManager,
     ) -> Result<(), String> {
         for enemy in &mut self.enemy_vec {
-            let pixel_index: (i32, i32) = (enemy.index.0 as i32 * constants::TILE_SIZE as i32, enemy.index.1 as i32 * constants::TILE_SIZE as i32);
+            let pixel_index: (i32, i32) = (enemy.grid_index.0 as i32 * constants::TILE_SIZE as i32, enemy.grid_index.1 as i32 * constants::TILE_SIZE as i32);
 
             enemy.rect.set_x(pixel_index.0 as i32 - game.cam_x);
             enemy.rect.set_y(pixel_index.1 as i32 - game.cam_y);
@@ -142,18 +142,19 @@ impl EnemyManager {
     ) {
         let has_no_targets: bool = !game.target_vec.is_empty() && enemy.final_path.is_none() && !enemy.found_target;
         let can_move: bool = !enemy.found_target && game.frame_time % enemy.movement_speed as u32 == 0;
-        let enemy_tuple_index = (enemy.index.0 as i32, enemy.index.1 as i32);
+        let enemy_tuple_index = (enemy.grid_index.0 as i32, enemy.grid_index.1 as i32);
 
         if can_move {
             if let Some(mut path) = enemy.final_path.take() {
                 if let Some((col, row)) = path.first() {
-                    if level.level_vec[enemy.index.0][enemy.index.1].tile_type == constants::TILE_TYPE_GOBLIN {
-                        level.level_vec[enemy.index.0][enemy.index.1].tile_type = level.level_vec[enemy.index.0][enemy.index.1].original_type;
+                    if level.level_vec[enemy.grid_index.0][enemy.grid_index.1].tile_type == constants::TILE_TYPE_GOBLIN {
+                        level.level_vec[enemy.grid_index.0][enemy.grid_index.1].tile_type = level.level_vec[enemy.grid_index.0][enemy.grid_index.1].original_type;
+                        level.level_vec[enemy.grid_index.0][enemy.grid_index.1].tile_data = TileData::None;
                     }
-                    level.level_vec[enemy.index.0][enemy.index.1].is_occupied = false;
-                    enemy.index.0 = *col;
-                    enemy.index.1 = *row;
-                    level.level_vec[enemy.index.0][enemy.index.1].is_occupied = true;
+                    level.level_vec[enemy.grid_index.0][enemy.grid_index.1].is_occupied = false;
+                    enemy.grid_index.0 = *col;
+                    enemy.grid_index.1 = *row;
+                    level.level_vec[enemy.grid_index.0][enemy.grid_index.1].is_occupied = true;
                     path.remove(0);
                     enemy.final_path = Some(path);
                 }
@@ -161,7 +162,14 @@ impl EnemyManager {
         }
         else if has_no_targets{
             let random_index = game.frame_time as usize % game.target_vec.len();
-            if level.level_vec[game.target_vec[random_index].0][game.target_vec[random_index].1].is_occupied {
+            let random_tile = &mut level.level_vec[game.target_vec[random_index].0][game.target_vec[random_index].1];
+            //BUG: MIGHT NEED TO CHECK FOR GOBLIN TILE TYPE AND SET TO DEFAULT TILE
+            // if random_tile.tile_type == constants::TILE_TYPE_GOBLIN {
+            //     random_tile.tile_type = random_tile.original_type;
+            // }
+            if random_tile.is_occupied {
+
+                //THIS MAY DO NOTHING
                 let rand_direction = game.frame_time % 4;
                 println!("rand direction: {}", rand_direction);
                 match rand_direction {
@@ -205,15 +213,15 @@ impl EnemyManager {
     pub fn astar(enemy: &mut Enemy, target: (usize, usize), level_vec: &[Vec<LevelTile>]) {
         println!("EXECUTING A*");
         let initial_state = PathState {
-            position: enemy.index,
-            priority: heuristic(enemy.index, target),
+            position: enemy.grid_index,
+            priority: heuristic(enemy.grid_index, target),
         };
 
         let mut frontier: std::collections::BinaryHeap<PathState> = [initial_state].into();
         let mut priorities: std::collections::HashMap<(usize, usize), usize> = std::collections::HashMap::new();
         let mut came_from: std::collections::HashMap<(usize, usize), (usize, usize)> = std::collections::HashMap::new();
 
-        priorities.insert(enemy.index, initial_state.priority);
+        priorities.insert(enemy.grid_index, initial_state.priority);
 
         while let Some(current_state) = frontier.pop() {
             let current = current_state.position;

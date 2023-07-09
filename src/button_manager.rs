@@ -62,6 +62,8 @@ impl ButtonManager {
                 texture_path: match button_index {
                     constants::CURRENT_BUILD_ARCHER_TOWER => constants::TEXTURE_BUTTON_ARCHER.to_string(),
                     constants::CURRENT_BUILD_GOBLIN => constants::TEXTURE_GOBLIN_ENEMY_FRONT.to_string(),
+                    constants::CURRENT_BUILD_WALL => constants::TEXTURE_TILE_WALL.to_string(),
+                    constants::CURRENT_BUILD_BASE => constants::TEXTURE_BUILDING_HOUSE.to_string(),
                     _ => constants::TEXTURE_DEFAULT.to_string(),
                 },
                 clicked: false,
@@ -80,7 +82,7 @@ impl ButtonManager {
         game.canvas.draw_line(rect.top_right(), rect.bottom_right()).unwrap();
     }
 
-    fn update_buttons (&mut self, button_index: usize, game: &mut game_manager::GameManager) {
+    pub fn update_buttons (&mut self, button_index: usize, game: &mut game_manager::GameManager) {
         let button = &mut self.button_vec[button_index];
         if sdl2::rect::Rect::contains_point(&button.rect, game.mouse_point) {
             button.hovering_button = true;

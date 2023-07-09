@@ -15,11 +15,14 @@ pub struct Tower {
     pub top_rect: sdl2::rect::Rect, 
     pub top_texture_path: String,
     pub attack_radius: i32,
-    pub attack_damage: u8,
+    pub projectile_damage: u8,
     pub attack_speed: u8,
     pub max_health: u16,
     pub health: u16,
     pub is_attacking: bool,
+    pub projectile_texture: String,
+    pub projectile_radius: u8,
+    pub projectile_speed: u8,
 }
 
 pub struct TowerManager {
@@ -50,11 +53,15 @@ impl TowerManager {
                     top_rect: sdl2::rect::Rect::new(temp_tile.rect.x(), temp_tile.rect.y() - constants::TILE_SIZE as i32, constants::TILE_SIZE, constants::TILE_SIZE),
                     top_texture_path: constants::TEXTURE_TOWER_ARCHER_FRONT.to_string(),
                     attack_radius: constants::TOWER_ARCHER_RADIUS,
-                    attack_damage: constants::TOWER_ARCHER_DAMAGE,
                     attack_speed: constants::TOWER_ARCHER_ATTACK_SPEED,
                     max_health: constants::TOWER_ARCHER_HEALTH,
                     health: constants::TOWER_ARCHER_HEALTH,
                     is_attacking: false,
+                    projectile_texture: constants::TEXTURE_PROJECTILE_ARROW.to_string(),
+                    projectile_speed: constants::PROJECTILE_ARROW_SPEED,
+                    projectile_radius: constants::PROJECTILE_ARROW_RADIUS,
+                    projectile_damage: constants::TOWER_ARCHER_DAMAGE,
+
                 };
                 game.target_vec.push((tower_tile.bottom_index.0, tower_tile.bottom_index.1));
                 self.tower_vec.push(tower_tile);
@@ -68,11 +75,15 @@ impl TowerManager {
                     top_rect: sdl2::rect::Rect::new(temp_tile.rect.x(), temp_tile.rect.y() - constants::TILE_SIZE as i32, constants::TILE_SIZE, constants::TILE_SIZE),
                     top_texture_path: constants::TEXTURE_DEFAULT.to_string(),
                     attack_radius: 0,
-                    attack_damage: 0,
                     attack_speed: 0,
                     max_health: 0,
                     health: 0,
                     is_attacking: false,
+                    projectile_texture: constants::TEXTURE_DEFAULT.to_string(),
+                    projectile_speed: 0,
+                    projectile_radius: 0,
+                    projectile_damage: 0,
+
                 };
                 game.target_vec.push((tower_tile.bottom_index.0, tower_tile.bottom_index.1));
                 self.tower_vec.push(tower_tile);

@@ -56,7 +56,6 @@ pub static TEXTURE_PLAYER_MOVING_FRONT_RIGHT: &str = "assets/player1-front-right
 pub static TEXTURE_PLAYER_MOVING_BACK_LEFT: &str = "assets/player1-back-left.png";
 pub static TEXTURE_PLAYER_MOVING_BACK_RIGHT: &str = "assets/player1-back-right.png";
 
-
 pub static TEXTURE_FIELD_EMPTY: &str = "assets/field-empty.png";
 pub static TEXTURE_FIELD_SEEDS: &str = "assets/field-seeds.png";
 pub static TEXTURE_FIELD_GROWING: &str = "assets/field1.png";
@@ -68,23 +67,31 @@ pub static TEXTURE_BUTTON_HO: &str = "assets/ho-button.png";
 pub static TEXTURE_BUTTON_CARROT: &str = "assets/carrot-button.png";
 pub static TEXTURE_BUTTON_TOMATO: &str = "assets/tomato-button.png";
 pub static TEXTURE_BUTTON_ARCHER: &str = "assets/archer-button.png";
+pub static TEXTURE_BUILDING_HOUSE: &str = "assets/house.png";
+pub static TEXTURE_PREVIEW_HOUSE: &str = "assets/preview-house.png";
 
 pub static TEXTURE_TILE_GRASS: &str = "assets/grass-0.png";
 pub static TEXTURE_TILE_WALL: &str = "assets/cobblestone-dark.png";
 pub static TEXTURE_TILE_FLOOR: &str = "assets/tile3.png";
+pub static TEXTURE_PREVIEW_COBBLESTONE: &str = "assets/preview-cobblestone-dark.png";
 
 pub static TEXTURE_TOWER_ARCHER_FRONT: &str = "assets/archer-tower-front-top.png";
 pub static TEXTURE_TOWER_ARCHER_BACK: &str = "assets/archer-tower-back-top.png";
 pub static TEXTURE_TOWER_ARCHER_LEFT: &str = "assets/archer-tower-left-top.png";
 pub static TEXTURE_TOWER_ARCHER_RIGHT: &str = "assets/archer-tower-right-top.png";
 pub static TEXTURE_TOWER_ARCHER_BOTTOM: &str = "assets/archer-tower-bottom.png";
+pub static TEXTURE_PREVIEW_TOWER_ARCHER_BOTTOM: &str = "assets/preview-archer-tower-bottom.png";
+pub static TEXTURE_PREVIEW_TOWER_ARCHER_TOP: &str = "assets/preview-archer-tower-top.png";
 
 pub static TEXTURE_GOBLIN_ENEMY_FRONT: &str = "assets/goblin-enemy-front.png";
+pub static TEXTURE_PREVIEW_GOBLIN_ENEMY: &str = "assets/preview-goblin-enemy.png";
 
 pub static TEXTURE_PROJECTILE_ARROW: &str = "assets/archer-arrow-large.png";
 
 pub const CURRENT_BUILD_ARCHER_TOWER: usize = 0;
 pub const CURRENT_BUILD_GOBLIN: usize = 1;
+pub const CURRENT_BUILD_WALL: usize = 2;
+pub const CURRENT_BUILD_BASE: usize = 3;
 
 pub const CURRENT_SEED_SHOVEL: usize = 0;
 pub const CURRENT_SEED_HO: usize = 1;
@@ -94,15 +101,13 @@ pub const CURRENT_SEED_TOMATO: usize = 3;
 pub const TILE_TYPE_GRASS: char = '0';
 pub const TILE_TYPE_WALL: char = '2';
 pub const TILE_TYPE_FLOOR: char = '3';
-
 pub const TILE_TYPE_FIELD_EMPTY: char = 'F';
 pub const TILE_TYPE_FIELD_GROWING: char = 'G';
 pub const TILE_TYPE_FIELD_HARVESTABLE: char = 'H';
-
 pub const TILE_TYPE_ARCHER_TOP: char = 'A';
 pub const TILE_TYPE_ARCHER_BOTTOM: char = 'a';
-
 pub const TILE_TYPE_GOBLIN: char = 'G';
+pub const TILE_TYPE_BASE: char = 'B';
 
 pub const ENEMY_GOBLIN_HEALTH: u16 = 100;
 pub const ENEMY_GOBLIN_RADIUS: u8 = 1;
@@ -112,7 +117,7 @@ pub const ENEMY_GOBLIN_ATTACK_SPEED: u8 = 16;
 pub const ENEMY_GOBLIN_HEALTH_BAR_WIDTH: u32 = 24;
 pub const ENEMY_GOBLIN_HEALTH_BAR_HEIGHT: u32 = 4;
 
-pub const TOWER_ARCHER_DAMAGE: u8 = 5;
+pub const TOWER_ARCHER_DAMAGE: u8 = 10;
 pub const TOWER_ARCHER_ATTACK_SPEED: u8 = 16;
 pub const TOWER_ARCHER_RADIUS: i32 = 10;
 pub const TOWER_ARCHER_HEALTH: u16 = 1000;
@@ -125,3 +130,4 @@ pub const PROJECTILE_HIT_DESPAWN_DURATION: u8 = 2;
 pub const PROJECTILE_ARROW_SPEED: u8 = 8;
 pub const PROJECTILE_ARROW_RADIUS: u8 = 32;
 
+pub const BUILDING_BASE_HEALTH: u16 = 2000;

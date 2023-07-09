@@ -1,4 +1,4 @@
-use crate::{level_manager, button_manager, player_manager, texture_manager, constants, tower_manager, enemy_manager, gui_manager, projectile_manager};
+use crate::{level_manager, button_manager, player_manager, texture_manager, constants, tower_manager, enemy_manager, gui_manager, projectile_manager, building_manager};
 
 pub enum Movement {
     Up,
@@ -10,6 +10,10 @@ pub enum Movement {
 
 pub struct GameManager {
     pub quit: bool,
+    pub paused: bool,
+    pub saving: bool,
+    pub loading: bool,
+    pub placed: bool,
     pub is_pathfinding: bool,
     pub up: bool,
     pub down: bool,
@@ -17,6 +21,7 @@ pub struct GameManager {
     pub right: bool,
     pub build_mode: bool,
     pub seed_mode: bool,
+    pub preview_mode: bool,
     pub hovering_button: bool,
     pub current_seed: usize,
     pub current_build: usize,
@@ -32,6 +37,7 @@ pub struct GameManager {
     pub mouse_point: sdl2::rect::Point,
     pub mouse_button: sdl2::mouse::MouseButton,
     pub target_vec: Vec<(usize, usize)>,
+    pub base_location: Option<(usize, usize)>,
 }
 
 impl GameManager {
@@ -66,6 +72,10 @@ impl GameManager {
 
         let game = GameManager {  
             quit: false,
+            paused: false,
+            saving: false,
+            loading: false,
+            placed: false,
             is_pathfinding: false,
             up: false,
             down: false,
@@ -73,6 +83,7 @@ impl GameManager {
             right: false,
             seed_mode: false,
             build_mode: false,
+            preview_mode: false,
             hovering_button: false,
             current_seed: usize::MAX,
             current_build: usize::MAX,
@@ -88,6 +99,7 @@ impl GameManager {
             mouse_point: sdl2::rect::Point::new(0, 0),
             mouse_button: sdl2::mouse::MouseButton::Unknown,
             target_vec: Vec::new(),
+            base_location: None,
         };
         game
     }
@@ -107,9 +119,12 @@ impl GameManager {
         player: &mut player_manager::PlayerManager, 
         level: &mut level_manager::LevelManager, 
         towers: &mut tower_manager::TowerManager, 
+        buildings: &mut building_manager::BuildingManager,
         enemies: &mut enemy_manager::EnemyManager, 
         projectiles: &mut projectile_manager::ProjectileManager,
-        health_bars: &mut gui_manager::GUIManager,
+        gui_manager: &mut gui_manager::GUIManager,
+        seed_buttons: &mut button_manager::ButtonManager, 
+        build_buttons: &mut button_manager::ButtonManager,
     ) {
         player.update_player(self, level);
         self.update_camera(player);
@@ -118,12 +133,12 @@ impl GameManager {
             for row_index in 0..level.level_vec[col_index].len() {
                 let temp_tile = &mut level.level_vec[col_index][row_index];
 
-                level_manager::LevelManager::update_buildings(self, towers, enemies, temp_tile, col_index, row_index);      
+                buildings.update_buildings(self, towers, enemies, gui_manager, seed_buttons, build_buttons, temp_tile, col_index, row_index);      
 
             }
         }
-        level_manager::LevelManager::check_attacks(self, enemies, towers, projectiles, health_bars);
-        level.delete_all_dead(self, enemies, towers, projectiles);
+        level_manager::LevelManager::check_attacks(self, enemies, towers, buildings, projectiles);
+        level.delete_all_dead(self, enemies, towers, buildings, projectiles);
     }
 
 
@@ -133,19 +148,21 @@ impl GameManager {
         player: &mut player_manager::PlayerManager, 
         level: &mut level_manager::LevelManager, 
         towers: &mut tower_manager::TowerManager, 
+        buildings: &mut building_manager::BuildingManager,
         enemies: &mut enemy_manager::EnemyManager, 
         projectiles: &mut projectile_manager::ProjectileManager,
-        health_bars: &mut gui_manager::GUIManager,
+        gui_manager: &mut gui_manager::GUIManager,
         seed_buttons: &mut button_manager::ButtonManager, 
         build_buttons: &mut button_manager::ButtonManager,
     ) {
 
 
-        level.render_level(self, tex_man, player).unwrap();
-        enemy_manager::EnemyManager::render_enemies(enemies, self, tex_man, level, health_bars).unwrap(); 
+        level.render_level(self, tex_man).unwrap();
+        enemy_manager::EnemyManager::render_enemies(enemies, self, tex_man, level, gui_manager).unwrap(); 
         projectile_manager::ProjectileManager::render_projectiles(projectiles, self, tex_man).unwrap();
-        tower_manager::TowerManager::render_towers(towers, self, tex_man, health_bars).unwrap();
-
+        tower_manager::TowerManager::render_towers(towers, self, tex_man, gui_manager).unwrap();
+        buildings.render_buildings(self, tex_man);
+        gui_manager.render_preview(self, tex_man);
         player.render_player(self, tex_man).unwrap();
         seed_buttons.render_seed_buttons(player, tex_man, self).unwrap();
         build_buttons.render_build_buttons(player, tex_man, self).unwrap();  

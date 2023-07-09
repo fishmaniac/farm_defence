@@ -16,7 +16,7 @@ pub struct Projectile {
     pub hit_target: bool,
     angle: f64,
     speed: u8,
-    pub radius: u16,
+    pub radius: u8,
     pub damage: u8,
 }
 
@@ -35,21 +35,21 @@ impl ProjectileManager {
         let projectile = self::Projectile {
             time: 0,
             rect: sdl2::rect::Rect::new(position.0, position.1, constants::TILE_SIZE, constants::TILE_SIZE),
-            texture_path: constants::TEXTURE_PROJECTILE_ARROW.to_string(),
+            texture_path: tower.projectile_texture.clone(),
             start,
             position,
             target,
             hit_target: false,
             angle: Self::calculate_angle(start, target),
-            speed: constants::PROJECTILE_ARROW_SPEED,
-            radius: 128,
-            damage: tower.attack_damage,
+            speed: tower.projectile_speed,
+            radius: tower.projectile_radius,
+            damage: tower.projectile_damage,
         };
 
         self.projectile_vec.push(projectile);
     }
 
-    fn move_projectile (projectile: &mut Projectile, game: &mut game_manager::GameManager) {
+    fn move_projectile (projectile: &mut Projectile) {
         let dx = projectile.target.0 - projectile.position.0;
         let dy = projectile.target.1 - projectile.position.1 ;
         let distance = (((dx * dx) + (dy * dy)) as f32).sqrt();
@@ -77,7 +77,7 @@ impl ProjectileManager {
             )?;
 
             if !tower_manager::TowerManager::is_within_area(projectile.position, projectile.target, projectile.speed as i32) {
-                Self::move_projectile(projectile, game);
+                Self::move_projectile(projectile);
             }
             else {
                 projectile.time += 1;
