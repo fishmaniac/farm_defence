@@ -57,6 +57,8 @@ impl BuildingManager {
         match building_type {
             BuildingType::Base => {
                 temp_tile.tile_type = constants::TILE_TYPE_BASE;
+                temp_tile.tile_data = TileData::Base;
+
                 let building = self::Building {
                     bottom_left_rect: sdl2::rect::Rect::new(temp_tile.rect.x(), temp_tile.rect.y(), constants::TILE_SIZE, constants::TILE_SIZE),
                     bottom_right_rect: sdl2::rect::Rect::new(temp_tile.rect.x() + constants::TILE_SIZE as i32, temp_tile.rect.y(), constants::TILE_SIZE, constants::TILE_SIZE),
@@ -211,9 +213,10 @@ impl BuildingManager {
         col_index: usize,
         row_index: usize,
     ) {
+        let is_not_a_tower: bool = temp_tile.tile_type != constants::TILE_TYPE_ARCHER_BOTTOM && temp_tile.tile_type != constants::TILE_TYPE_FIREBALL_BOTTOM;
         match game.current_build {
             constants::CURRENT_BUILD_ARCHER_TOWER => {
-                if !game.placed && temp_tile.tile_type == constants::TILE_TYPE_GRASS && temp_tile.tile_type != constants::TILE_TYPE_ARCHER_BOTTOM {
+                if !game.placed && temp_tile.tile_type == constants::TILE_TYPE_GRASS && is_not_a_tower {
                     if game.preview_mode && game.mouse_button == sdl2::mouse::MouseButton::Left {
                         game.placed = true;
                         temp_tile.tile_type = constants::TILE_TYPE_ARCHER_BOTTOM;
@@ -234,7 +237,7 @@ impl BuildingManager {
                 }
             }
             constants::CURRENT_BUILD_FIREBALL_TOWER => {
-                if !game.placed && temp_tile.tile_type == constants::TILE_TYPE_GRASS && temp_tile.tile_type != constants::TILE_TYPE_FIREBALL_BOTTOM {
+                if !game.placed && temp_tile.tile_type == constants::TILE_TYPE_GRASS && is_not_a_tower {
                     if game.preview_mode && game.mouse_button == sdl2::mouse::MouseButton::Left {
                         game.placed = true;
                         temp_tile.tile_type = constants::TILE_TYPE_FIREBALL_BOTTOM;
@@ -302,7 +305,7 @@ impl BuildingManager {
                 if !game.placed && !temp_tile.is_occupied && temp_tile.tile_type == constants::TILE_TYPE_GRASS && temp_tile.tile_type != constants::TILE_TYPE_BASE {
                     if game.preview_mode && game.mouse_button == sdl2::mouse::MouseButton::Left {
                         game.placed = true;
-                        self.create_building(game, gui_manager, BuildingType::Base, temp_tile, col_index, row_index)
+                        self.create_building(game, gui_manager, BuildingType::Base, temp_tile, col_index, row_index);
                     } else if game.build_mode && build_buttons.button_vec[constants::CURRENT_BUILD_BASE].outline_visible {
                         game.preview_mode = true;
                         gui_manager.preview.texture_path_bottom_left = constants::TEXTURE_PREVIEW_HOUSE_BOTTOM_LEFT.to_string();

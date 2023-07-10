@@ -26,11 +26,11 @@ fn save_game (
     build_buttons: &mut button_manager::ButtonManager,
     health_bars: &mut gui_manager::GUIManager,
 ) {
-    let save_path = "saves/save.bin";
-    match level.save_to_file(&save_path) {
-        Ok(()) => println!("Data saved successfully."),
-        Err(error) => eprintln!("Failed to save data: {}", error),
-    }
+    // let save_path = "saves/save.bin";
+    // match level.save_to_file(&save_path) {
+    //     Ok(()) => println!("Data saved successfully."),
+    //     Err(error) => eprintln!("Failed to save data: {}", error),
+    // }
 }
 
 fn load_game (
@@ -47,14 +47,32 @@ fn load_game (
     build_buttons: &mut button_manager::ButtonManager,
     health_bars: &mut gui_manager::GUIManager,
 ) {
-    let load_path = "saves/save.bin";
-    match level_manager::LevelManager::load_from_file(&load_path) {
-        Ok(loaded_level) => {
-            *level = loaded_level;
-            println!("Data loaded successfully.");
-        }
-        Err(error) => eprintln!("Failed to load data: {}", error),
-    }
+    // let load_path = "saves/save.bin";
+    // match level_manager::LevelManager::load_from_file(&load_path) {
+    //     Ok(loaded_level) => {
+    //         *level = loaded_level;
+    //         println!("Data loaded successfully.");
+    //     }
+    //     Err(error) => eprintln!("Failed to load data: {}", error),
+    // }
+}
+
+fn update_main_menu (
+    menu_manager: &mut menu_manager::MenuManager,
+game: &mut game_manager::GameManager, 
+    events: &mut event_manager::EventManager, 
+    player: &mut player_manager::PlayerManager,
+    level: &mut level_manager::LevelManager,
+    towers: &mut tower_manager::TowerManager,
+    buildings: &mut building_manager::BuildingManager,
+    enemies: &mut enemy_manager::EnemyManager,
+    projectiles: &mut projectile_manager::ProjectileManager,
+    seed_buttons: &mut button_manager::ButtonManager,
+    build_buttons: &mut button_manager::ButtonManager,
+    gui_manager: &mut gui_manager::GUIManager,
+
+) {
+
 }
 
 fn game_loop (
@@ -70,36 +88,35 @@ fn game_loop (
     seed_buttons: &mut button_manager::ButtonManager,
     build_buttons: &mut button_manager::ButtonManager,
     gui_manager: &mut gui_manager::GUIManager,
+    menu_manager: &mut menu_manager::MenuManager,
 ) -> Result<(), String> {
     let mut frame_count: u32 = 0;
     let mut last_fps_time = std::time::Instant::now();
+    events.current_performance_counter = events.timer_subsystem.performance_counter();
 
+    while !events.game_quit {
+        events.last_performance_counter = events.current_performance_counter;
+        events.current_performance_counter = events.timer_subsystem.performance_counter();
+        events.performance_frequency = events.timer_subsystem.performance_frequency();
+        events.delta_time = (events.current_performance_counter - events.last_performance_counter) as f64 / events.performance_frequency as f64;
 
-    while !game.quit {
+        game.prepare_background();
         events.do_event(game, towers, seed_buttons, build_buttons, gui_manager);
-        if !game.paused {
-            game.prepare_background();
-            game.update_game(player, level, towers, buildings, enemies, projectiles, gui_manager, seed_buttons, build_buttons);
-            game.render_game(tex_man, player, level, towers, buildings, enemies, projectiles, gui_manager, seed_buttons, build_buttons);
+        if !events.menu_quit {
+            menu_manager.render_menu(game);
+        }
+        else if !game.paused_state {
+            game.update_game(events, player, level, towers, buildings, enemies, projectiles, gui_manager, seed_buttons, build_buttons);
+            game.render_game(tex_man, events, player, level, towers, buildings, enemies, projectiles, gui_manager, seed_buttons, build_buttons);
 
-
-            // let player_rect = sdl2::rect::Rect::new(player.rect.x(), player.rect.y(), constants::TILE_SIZE, constants::TILE_SIZE);
-            // let player_pos_rect = sdl2::rect::Rect::new(constants::SCREEN_WIDTH as i32 / 2, constants::SCREEN_HEIGHT as i32 / 2, constants::TILE_SIZE, constants::TILE_SIZE);
-            //
-            // game.canvas.set_draw_color(constants::COLOR_OUTLINE);
-            // game.canvas.fill_rect(player_pos_rect);
-            //
-
-            game.canvas.present();
 
             game.frame_time += 1;
             frame_count += 1;
-
             if game.frame_time % 16 == 0 {
                 let elapsed_fps_time = last_fps_time.elapsed();
                 game.elapsed_seconds = elapsed_fps_time.as_secs_f64();
                 game.fps = (frame_count as f64 / game.elapsed_seconds) as u32;
-                println!("\nFPS: {}\tELAPSED: {:.4}\tFRAME TIME: {}\tPLAYER POS: X: {}\tY: {}\nCARROTS: {}\tTOMATOES: {}\tPLACED: {}\t", game.fps, game.elapsed_seconds, game.frame_time, player.x, player.y, game.carrot_amount, game.tomato_amount, game.placed);
+                println!("\nFPS: {}\tELAPSED: {:.4}\tFRAME TIME: {}\tPLAYER POS: X: {}\tY: {}\nCARROTS: {}\tTOMATOES: {}\tDELTA TIME: {}\tPATHING: {}\n", game.fps, game.elapsed_seconds, game.frame_time, player.x, player.y, game.carrot_amount, game.tomato_amount, events.delta_time, game.is_pathfinding);
                 frame_count = 0;
                 last_fps_time = std::time::Instant::now();
             }
@@ -118,14 +135,19 @@ fn game_loop (
             load_game(game, tex_man, events, player, level, towers, buildings, enemies, projectiles, seed_buttons, build_buttons, gui_manager);
             game.loading = false;
         }
+        game.canvas.present();
     }
     Ok(())
 }
 
 fn main() -> Result<(), String> {
     let sdl_context = sdl2::init()?;
+
     let mixer_context = sdl2::mixer::init(sdl2::mixer::InitFlag::MP3).unwrap();
+
     let ttf_context = sdl2::ttf::init().map_err(|e| e.to_string())?; 
+    let font_path = std::path::Path::new(&constants::FONT_PATH);
+    let font = ttf_context.load_font(font_path, 16)?;
 
     let mut game = game_manager::GameManager::new(&sdl_context);
     let texture_creator = game.canvas.texture_creator();
@@ -139,8 +161,11 @@ fn main() -> Result<(), String> {
     let mut projectiles = projectile_manager::ProjectileManager::new();
     let mut seed_buttons = button_manager::ButtonManager::new(constants::SEED_BUTTON_AMT, button_manager::ButtonType::Seed, &player);
     let mut build_buttons = button_manager::ButtonManager::new(constants::BUILD_BUTTON_AMT, button_manager::ButtonType::Build, &player);
-    let mut gui_manager = gui_manager::GUIManager::new(&mut game, ttf_context);
+    let mut gui_manager = gui_manager::GUIManager::new(&mut game, &font);
     gui_manager.create_inventory_hud(&mut game);
+
+    let mut menu_manager = menu_manager::MenuManager::new(&mut game, &font);
+    menu_manager.create_menu();
 
     // music
     sdl2::mixer::open_audio(44100, sdl2::mixer::DEFAULT_FORMAT, 2, 2048)?;
@@ -151,26 +176,10 @@ fn main() -> Result<(), String> {
     sdl2::mixer::Music::play(&audio_chunk, -1);
     sdl2::mixer::Music::set_volume(50);
 
-
-
     level.create_level(); 
     level.read_file("farm.txt").unwrap();
 
-
-    //~!~!~!~TODO: LOAD IMAGES BEFORE LOOP~!~!~!~
-
-    /*     Prepare fonts */
-
-    //Add game loop error handling
-    //
-    // std::thread::spawn(|| {
-    //     for i in 1..10 {
-    //         println!("hi number {} from the spawned thread!", i);
-    //         std::thread::sleep(Duration::from_millis(1));
-    //     }
-    // });
-
-    game_loop(&mut game, &mut tex_man, &mut events, &mut player, &mut level, &mut towers, &mut buildings, &mut enemies, &mut projectiles, &mut seed_buttons, &mut build_buttons, &mut gui_manager);
+    game_loop(&mut game, &mut tex_man, &mut events, &mut player, &mut level, &mut towers, &mut buildings, &mut enemies, &mut projectiles, &mut seed_buttons, &mut build_buttons, &mut gui_manager, &mut menu_manager);
 
     Ok(())
 }

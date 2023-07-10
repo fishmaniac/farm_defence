@@ -1,5 +1,6 @@
 use crate::building_manager;
 use crate::constants;
+use crate::event_manager;
 use crate::game_manager;
 use crate::enemy_manager;
 use crate::texture_manager;
@@ -42,13 +43,14 @@ pub struct GUIManager <'a> {
     pub inventory_vec: Vec<HUD>,
     pub message_vec: Vec<Message>,
     pub preview: PreviewGUI,
-    pub ttf_context: sdl2::ttf::Sdl2TtfContext,
+    pub font: &'a sdl2::ttf::Font<'a, 'a>,
     pub texture_creator: sdl2::render::TextureCreator<sdl2::video::WindowContext>,
     font_path: &'a std::path::Path,
 }
 
 impl<'a> GUIManager<'a> {
-    pub fn new (game: &mut game_manager::GameManager, ttf_context: sdl2::ttf::Sdl2TtfContext) -> Self {
+    pub fn new (game: &mut game_manager::GameManager, font: &'a sdl2::ttf::Font<'a, 'a>,
+) -> Self {
         let preview = PreviewGUI {
             index: (0, 0),
             bottom_left_rect: sdl2::rect::Rect::new(0, 0, constants::TILE_SIZE, constants::TILE_SIZE),
@@ -65,7 +67,7 @@ impl<'a> GUIManager<'a> {
             inventory_vec: Vec::new(),
             message_vec: Vec::new(),
             preview,
-            ttf_context,
+            font,
             texture_creator: game.canvas.texture_creator(),
             font_path: std::path::Path::new(&constants::FONT_PATH),
         };
@@ -126,6 +128,14 @@ impl<'a> GUIManager<'a> {
 
         };
         self.inventory_vec.push(fps);
+        let delta_time = HUD {
+            index: (0, 0),
+            rect: sdl2::rect::Rect::new(0, 0, constants::TILE_SIZE, constants::TILE_SIZE),
+            texture_path: constants::TEXTURE_DEFAULT.to_string(),
+
+        };
+        self.inventory_vec.push(delta_time);
+
     }
     pub fn render_preview (&mut self, game: &mut game_manager::GameManager, tex_man: &mut texture_manager::TextureManager<sdl2::video::WindowContext>) -> Result<(), String> {
         if game.preview_mode && (game.build_mode || game.seed_mode) {
@@ -244,37 +254,41 @@ impl<'a> GUIManager<'a> {
         game.canvas.set_draw_color(constants::COLOR_GREEN);
         game.canvas.fill_rect(current_health.rect);
     }
-    pub fn render_inventory_hud (&mut self, game: &mut game_manager::GameManager, tex_man: &mut texture_manager::TextureManager<sdl2::video::WindowContext>) -> Result<(), String> {
+    pub fn render_inventory_hud (&mut self, events: &mut event_manager::EventManager, game: &mut game_manager::GameManager, tex_man: &mut texture_manager::TextureManager<sdl2::video::WindowContext>) -> Result<(), String> {
         for gui_index in 0..self.inventory_vec.len() {
             let gui = &mut self.inventory_vec[gui_index];
             gui.rect.set_x(game.screen_size.0 - 4 * constants::TILE_SIZE as i32);
             gui.rect.set_y(2 * constants::TILE_SIZE as i32 + (constants::TILE_SIZE as i32 * gui_index as i32));
 
-            let font = self.ttf_context.load_font(self.font_path, 32)?;
             let text_surface: sdl2::surface::Surface;
             match gui_index {
                 0 => {
-                    text_surface = font.render(&game.gold_amount.to_string())
+                    text_surface = self.font.render(&game.gold_amount.to_string())
                         .blended(constants::COLOR_WHITE)
                         .map_err(|e| e.to_string())?;
                 },
                 1 => {
-                    text_surface = font.render(&game.tomato_amount.to_string())
+                    text_surface = self.font.render(&game.tomato_amount.to_string())
                         .blended(constants::COLOR_WHITE)
                         .map_err(|e| e.to_string())?;
                 },
                 2 => {
-                    text_surface = font.render(&game.carrot_amount.to_string())
+                    text_surface = self.font.render(&game.carrot_amount.to_string())
                         .blended(constants::COLOR_WHITE)
                         .map_err(|e| e.to_string())?;
                 },
                 3 => {
-                    text_surface = font.render(&format!("FPS: {}", game.fps).to_string())
+                    text_surface = self.font.render(&format!("FPS: {}", game.fps).to_string())
+                        .blended(constants::COLOR_WHITE)
+                        .map_err(|e| e.to_string())?;
+                }
+                4 => {
+                    text_surface = self.font.render(&format!("dt: {}", events.delta_time).to_string())
                         .blended(constants::COLOR_WHITE)
                         .map_err(|e| e.to_string())?;
                 }
                 _ => {
-                    text_surface = font.render(&"ERR".to_string())
+                    text_surface = self.font.render(&"ERR".to_string())
                         .blended(constants::COLOR_WHITE)
                         .map_err(|e| e.to_string())?;
                 },
@@ -297,11 +311,10 @@ impl<'a> GUIManager<'a> {
                         false,     // flip vertical
                     )?;
                 },
-                3 => {
+                3 | 4 => {
                     let texture = self.texture_creator.create_texture_from_surface(&text_surface).unwrap();
                     let dest = sdl2::rect::Rect::new(game.screen_size.0 - text_surface.width() as i32 - constants::TILE_SIZE as i32, 2 * constants::TILE_SIZE as i32 + (constants::TILE_SIZE as i32 * gui_index as i32), text_surface.width(), text_surface.height());   
                     game.canvas.copy(&texture, None, Some(dest)).unwrap(); 
-
                 },
                 _ => {},
             }
@@ -314,8 +327,7 @@ impl<'a> GUIManager<'a> {
             message.rect.set_x(game.screen_size.0 / 2);
             message.rect.set_y(2 * constants::TILE_SIZE as i32 + (constants::TILE_SIZE as i32 * message_index as i32));
 
-            let font = self.ttf_context.load_font(self.font_path, 16)?;
-            let text_surface = font.render(&message.message_text)
+            let text_surface = self.font.render(&message.message_text)
                 .blended(constants::COLOR_WHITE)
                 .map_err(|e| e.to_string())?;
             let texture = self.texture_creator.create_texture_from_surface(&text_surface).unwrap();

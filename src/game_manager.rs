@@ -1,4 +1,4 @@
-use crate::{level_manager, button_manager, player_manager, texture_manager, constants, tower_manager, enemy_manager, gui_manager, projectile_manager, building_manager};
+use crate::{level_manager, button_manager, player_manager, event_manager, texture_manager, constants, tower_manager, enemy_manager, gui_manager, projectile_manager, building_manager};
 
 pub enum Movement {
     Up,
@@ -9,16 +9,11 @@ pub enum Movement {
 }
 
 pub struct GameManager {
-    pub quit: bool,
-    pub paused: bool,
+    pub paused_state: bool,
     pub saving: bool,
     pub loading: bool,
     pub placed: bool,
     pub is_pathfinding: bool,
-    pub up: bool,
-    pub down: bool,
-    pub left: bool,
-    pub right: bool,
     pub build_mode: bool,
     pub seed_mode: bool,
     pub preview_mode: bool,
@@ -66,23 +61,18 @@ impl GameManager {
         // assert_eq!(gl_attr.context_version(), (3, 2));
 
         let mut canvas = window.into_canvas()
-            .present_vsync() 
+/*             .present_vsync()  */
             .accelerated()
             .build()
             .expect("Failed to initialize canvas");
         canvas.set_blend_mode(sdl2::render::BlendMode::Blend);
 
         let game = GameManager {  
-            quit: false,
-            paused: false,
+            paused_state: false,
             saving: false,
             loading: false,
             placed: false,
             is_pathfinding: false,
-            up: false,
-            down: false,
-            left: false,
-            right: false,
             seed_mode: false,
             build_mode: false,
             preview_mode: false,
@@ -120,6 +110,7 @@ impl GameManager {
 
     pub fn update_game(
         &mut self, 
+        events: &mut event_manager::EventManager,
         player: &mut player_manager::PlayerManager, 
         level: &mut level_manager::LevelManager, 
         towers: &mut tower_manager::TowerManager, 
@@ -131,9 +122,11 @@ impl GameManager {
         build_buttons: &mut button_manager::ButtonManager,
     ) {
         self.screen_size = (self.canvas.window().display_mode().unwrap().w, self.canvas.window().display_mode().unwrap().h);
-        player.update_player(self, level);
+        player.update_player(events, self, level);
         self.update_camera(player);
 
+
+        //MOVE LOOP INTO UPDATE_BUILDINGS
         for col_index in 0..level.level_vec.len() {
             for row_index in 0..level.level_vec[col_index].len() {
                 let temp_tile = &mut level.level_vec[col_index][row_index];
@@ -150,6 +143,7 @@ impl GameManager {
     pub fn render_game(
         &mut self, 
         tex_man: &mut texture_manager::TextureManager<sdl2::video::WindowContext>, 
+        events: &mut event_manager::EventManager,
         player: &mut player_manager::PlayerManager, 
         level: &mut level_manager::LevelManager, 
         towers: &mut tower_manager::TowerManager, 
@@ -163,15 +157,15 @@ impl GameManager {
 
 
         level.render_level(self, tex_man).unwrap();
-        enemy_manager::EnemyManager::render_enemies(enemies, self, tex_man, level, gui_manager).unwrap(); 
+        enemy_manager::EnemyManager::render_enemies(enemies, self, events, tex_man, level, gui_manager).unwrap(); 
         projectile_manager::ProjectileManager::render_projectiles(projectiles, self, tex_man).unwrap();
         tower_manager::TowerManager::render_towers(towers, self, tex_man, gui_manager).unwrap();
         buildings.render_buildings(self, tex_man, gui_manager);
         gui_manager.render_preview(self, tex_man);
-        player.render_player(self, tex_man).unwrap();
+        player.render_player(events, self, tex_man).unwrap();
         seed_buttons.render_seed_buttons(player, tex_man, self).unwrap();
         build_buttons.render_build_buttons(player, tex_man, self).unwrap();
-        gui_manager.render_inventory_hud(self, tex_man);
+        gui_manager.render_inventory_hud(events, self, tex_man);
         gui_manager.render_messages(self, tex_man);
     }
 }

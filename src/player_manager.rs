@@ -1,4 +1,5 @@
 use crate::constants;
+use crate::event_manager;
 use crate::level_manager;
 use crate::texture_manager;
 use crate::game_manager;
@@ -40,7 +41,7 @@ impl PlayerManager {
             x: 0,
             y: 0,
             texture_path: "".to_string(),
-            rect: sdl2::rect::Rect::new(game.screen_size.0 / 2, game.screen_size.1 / 2, constants::OUTPUT_WIDTH as u32, constants::OUTPUT_HEIGHT as u32),
+            rect: sdl2::rect::Rect::new(game.screen_size.0 / 2, game.screen_size.1 / 2, constants::TILE_SIZE, constants::TILE_SIZE),
             direction: Direction::Up,
             menu_selection: 0,
         };
@@ -48,54 +49,58 @@ impl PlayerManager {
     }
 
     pub fn update_player(&mut self, 
+        events: &mut event_manager::EventManager,
         game: &mut game_manager::GameManager,
         level: &mut level_manager::LevelManager,
     ) {
         let mut new_x: i32 = self.x;
         let mut new_y: i32 = self.y; 
+        let mut speed: i32 = (constants::PLAYER_SPEED as f64 * events.delta_time) as i32;
+        let max: i32 = constants::TILE_SIZE as i32;
+        speed = speed.min(max);
 
-        if game.up {
-            new_y -= constants::PLAYER_SPEED as i32;
-            if game.left && !game.right {
+        if events.up {
+            new_y -= speed;
+            if events.left && !events.right {
                 self.direction = Direction::UpLeft;
             }
-            else if game.right && !game.left {
+            else if events.right && !events.left {
                 self.direction = Direction::UpRight;
             }
             else {
                 self.direction = Direction::Up;
             }
         } 
-        if game.down {
-            new_y += constants::PLAYER_SPEED as i32;
-            if game.left && !game.right {
+        if events.down {
+            new_y += speed;
+            if events.left && !events.right {
                 self.direction = Direction::DownLeft;
             }
-            else if game.right && !game.left {
+            else if events.right && !events.left {
                 self.direction = Direction::DownRight;
             }
             else {
                 self.direction = Direction::Down;
             }
         }
-        if game.left {
-            new_x -= constants::PLAYER_SPEED as i32;
-            if game.up && !game.down {
+        if events.left {
+            new_x -= speed;
+            if events.up && !events.down {
                 self.direction = Direction::UpLeft;
             }
-            else if game.down && !game.up {
+            else if events.down && !events.up {
                 self.direction = Direction::DownLeft;
             }
             else {
                 self.direction = Direction::Left;
             }
         }
-        if game.right {
-            new_x += constants::PLAYER_SPEED as i32;
-            if game.up && !game.down {
+        if events.right {
+            new_x += speed;
+            if events.up && !events.down {
                 self.direction = Direction::UpRight;
             }
-            else if game.down && !game.up {
+            else if events.down && !events.up {
                 self.direction = Direction::DownRight;
             }
             else {
@@ -132,10 +137,11 @@ impl PlayerManager {
     }
     pub fn render_player(
         &mut self, 
+        events: &mut event_manager::EventManager,
         game: &mut game_manager::GameManager, 
         tex_man: &mut texture_manager::TextureManager<sdl2::video::WindowContext>
     ) -> Result<(), String> {
-        if (game.up || game.down || game.left || game.right) && game.frame_time % constants::PLAYER_SPEED as u32 == 0 {
+        if (events.up || events.down || events.left || events.right) && game.frame_time % constants::PLAYER_SPEED as u32 == 0 {
             match self.direction {
                 Direction::Up => self.texture_path = constants::TEXTURE_PLAYER_MOVING_BACK.to_string(),
                 Direction::Down => self.texture_path = constants::TEXTURE_PLAYER_MOVING_FRONT.to_string(),

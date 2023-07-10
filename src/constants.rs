@@ -8,17 +8,6 @@
 // say that vec has 100k elements
 // you'd save 3*1e5 bytes of stack/heap space by storing them as i8s over i32s
 // (will your values overflow/underflow an i8?)
-pub const TIMEOUT_DURATION: u128 = 10;
-
-// pub const SCREEN_WIDTH: u16 = 1920;
-// pub const SCREEN_HEIGHT: u16 = 1080;
-
-pub const IMAGE_WIDTH:u8 = 32;
-pub const IMAGE_HEIGHT:u8 = 32;
-pub const IMAGE_SCALING:u8 = 1;
-
-pub const OUTPUT_WIDTH: u8 = IMAGE_WIDTH * IMAGE_SCALING;
-pub const OUTPUT_HEIGHT: u8 = IMAGE_HEIGHT * IMAGE_SCALING;
 
 pub const COLOR_BACKGROUND: sdl2::pixels::Color = sdl2::pixels::Color::RGBA(50, 50, 50, 255);
 pub const COLOR_OUTLINE: sdl2::pixels::Color = sdl2::pixels::Color::RGBA(252, 186, 3, 255);
@@ -30,9 +19,7 @@ pub const TILE_SIZE: u32 = 32;
 pub const MAX_HEIGHT: u16 = 150;
 pub const MAX_WIDTH: u16 = 300;
 
-
-pub const PLAYER_SPEED: u8 = 16;
-pub const PLAYER_SPEED_DIAGONAL: u8 = 4; //SQUARE ROOT OF PLAYER_SPEED
+pub const PLAYER_SPEED: u16 = 800;
 pub const CROP_TIME: u16 = 100;
 
 pub const SEED_BUTTON_AMT: usize = 8;

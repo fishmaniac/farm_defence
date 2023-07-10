@@ -5,17 +5,42 @@ use sdl2::mouse::MouseButton;
 use crate::game_manager;
 use crate::button_manager;
 use crate::gui_manager;
+use crate::player_manager;
 use crate::tower_manager;
 
 pub struct EventManager {
     event_pump: EventPump,
+    pub timer_subsystem: sdl2::TimerSubsystem,
+    pub current_performance_counter: u64,
+    pub last_performance_counter: u64,
+    pub performance_frequency: u64,
+    pub delta_time: f64,
+    pub mouse_point: sdl2::rect::Point,
+    pub menu_quit: bool,
+    pub game_quit: bool,
+    pub up: bool,
+    pub down: bool,
+    pub left: bool,
+    pub right: bool,
+
 }
 
 impl EventManager {
     pub fn new(sdl_context: &sdl2::Sdl) -> EventManager {
-        let event_pump = sdl_context.event_pump().unwrap(); 
         let event = EventManager {  
-            event_pump,
+            event_pump: sdl_context.event_pump().unwrap(),
+            timer_subsystem: sdl_context.timer().unwrap(),
+            current_performance_counter: 0,
+            last_performance_counter: 0,
+            performance_frequency: 0,
+            delta_time: 0.0,
+            mouse_point: sdl2::rect::Point::new(0, 0),
+            menu_quit: false,
+            game_quit: false,
+            up: false,
+            down: false,
+            left: false,
+            right: false,
         };
         event
     }
@@ -31,7 +56,7 @@ impl EventManager {
         for event in self.event_pump.poll_iter() {
             match event {
                 Event::Quit {..} => {
-                    game.quit = true;
+                    self.game_quit = true;
                     break
                 }
                 Event::KeyDown { keycode: Some(keycode), .. } => {
@@ -45,6 +70,8 @@ impl EventManager {
                 Event::MouseMotion { x, y, .. } => {
                     game.mouse_point.x = x;
                     game.mouse_point.y = y;
+                    self.mouse_point.x = x;
+                    self.mouse_point.y = y;
                 }
                 Event::MouseButtonDown { mouse_btn, .. } => {
                     game.mouse_button = mouse_btn;
@@ -67,23 +94,32 @@ impl EventManager {
         keycode: sdl2::keyboard::Keycode,
     ) {
         match keycode {
-            sdl2::keyboard::Keycode::P => game.paused = !game.paused,
+            sdl2::keyboard::Keycode::L => {
+                self.menu_quit = !self.menu_quit;
+                if !self.menu_quit {
+                    game.paused_state = true;
+                }
+                else {
+                    game.paused_state = false;
+                }
+            }
+            sdl2::keyboard::Keycode::P => game.paused_state = !game.paused_state,
             sdl2::keyboard::Keycode::O => {
-                if game.paused {
+                if game.paused_state {
                     game.saving = true;
                 }
             }
             sdl2::keyboard::Keycode::I => {
-                if game.paused && !game.saving {
+                if game.paused_state && !game.saving {
                     game.loading = true;
                 }
             }
-            sdl2::keyboard::Keycode::Escape => game.quit = true,
-            sdl2::keyboard::Keycode::Q => game.quit = true,
-            sdl2::keyboard::Keycode::W => game.up = true,
-            sdl2::keyboard::Keycode::S => game.down = true,
-            sdl2::keyboard::Keycode::A => game.left = true,
-            sdl2::keyboard::Keycode::D => game.right = true,
+            sdl2::keyboard::Keycode::Escape => self.game_quit = true,
+            /*             sdl2::keyboard::Keycode::Q => game.quit = true, */
+            sdl2::keyboard::Keycode::W => self.up = true,
+            sdl2::keyboard::Keycode::S => self.down = true,
+            sdl2::keyboard::Keycode::A => self.left = true,
+            sdl2::keyboard::Keycode::D => self.right = true,
             sdl2::keyboard::Keycode::T => {
                 if game.build_mode {
                     game.build_mode = false;
@@ -227,10 +263,10 @@ impl EventManager {
         keycode: sdl2::keyboard::Keycode
     ) {
         match keycode {
-            sdl2::keyboard::Keycode::W => game.up = false,
-            sdl2::keyboard::Keycode::S => game.down = false,
-            sdl2::keyboard::Keycode::A => game.left = false,
-            sdl2::keyboard::Keycode::D => game.right = false,
+            sdl2::keyboard::Keycode::W => self.up = false,
+            sdl2::keyboard::Keycode::S => self.down = false,
+            sdl2::keyboard::Keycode::A => self.left = false,
+            sdl2::keyboard::Keycode::D => self.right = false,
             _ => {}
         }
     }
