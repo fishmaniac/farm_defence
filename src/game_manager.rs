@@ -49,10 +49,11 @@ impl GameManager {
         // gl_attr.set_multisample_samples(4);
 
         let window = video_subsystem
-            .window("Farm Defense", 640, 480)
+            .window("Farm Defense", 1280, 720)
             .opengl()
             .resizable()
-            .fullscreen_desktop()
+/*             .fullscreen_desktop()  */
+/*             .fullscreen() */
             .position_centered()
             .build()
             .expect("Failed to initialize window");
@@ -61,7 +62,7 @@ impl GameManager {
         // assert_eq!(gl_attr.context_version(), (3, 2));
 
         let mut canvas = window.into_canvas()
-/*             .present_vsync()  */
+            .present_vsync() 
             .accelerated()
             .build()
             .expect("Failed to initialize canvas");
@@ -121,7 +122,6 @@ impl GameManager {
         seed_buttons: &mut button_manager::ButtonManager, 
         build_buttons: &mut button_manager::ButtonManager,
     ) {
-        self.screen_size = (self.canvas.window().display_mode().unwrap().w, self.canvas.window().display_mode().unwrap().h);
         player.update_player(events, self, level);
         self.update_camera(player);
 
@@ -132,7 +132,6 @@ impl GameManager {
                 let temp_tile = &mut level.level_vec[col_index][row_index];
 
                 buildings.update_buildings(self, towers, enemies, gui_manager, seed_buttons, build_buttons, temp_tile, col_index, row_index);      
-
             }
         }
         level_manager::LevelManager::check_attacks(self, enemies, towers, buildings, projectiles, gui_manager);

@@ -103,7 +103,7 @@ fn game_loop (
         game.prepare_background();
         events.do_event(game, towers, seed_buttons, build_buttons, gui_manager);
         if !events.menu_quit {
-            menu_manager.render_menu(game);
+            menu_manager.render_menu(events, game, player);
         }
         else if !game.paused_state {
             game.update_game(events, player, level, towers, buildings, enemies, projectiles, gui_manager, seed_buttons, build_buttons);
@@ -147,12 +147,14 @@ fn main() -> Result<(), String> {
 
     let ttf_context = sdl2::ttf::init().map_err(|e| e.to_string())?; 
     let font_path = std::path::Path::new(&constants::FONT_PATH);
-    let font = ttf_context.load_font(font_path, 16)?;
+    let small_font = ttf_context.load_font(font_path, 16)?;
+    let large_font = ttf_context.load_font(font_path, 64)?;
+
 
     let mut game = game_manager::GameManager::new(&sdl_context);
     let texture_creator = game.canvas.texture_creator();
     let mut tex_man = texture_manager::TextureManager::new(&texture_creator);
-    let mut events = event_manager::EventManager::new(&sdl_context);
+    let mut events = event_manager::EventManager::new(&sdl_context, &mut game);
     let mut player = player_manager::PlayerManager::new(&mut game);
     let mut level = level_manager::LevelManager::new();
     let mut towers = tower_manager::TowerManager::new();
@@ -161,11 +163,11 @@ fn main() -> Result<(), String> {
     let mut projectiles = projectile_manager::ProjectileManager::new();
     let mut seed_buttons = button_manager::ButtonManager::new(constants::SEED_BUTTON_AMT, button_manager::ButtonType::Seed, &player);
     let mut build_buttons = button_manager::ButtonManager::new(constants::BUILD_BUTTON_AMT, button_manager::ButtonType::Build, &player);
-    let mut gui_manager = gui_manager::GUIManager::new(&mut game, &font);
+    let mut gui_manager = gui_manager::GUIManager::new(&mut game, &small_font);
     gui_manager.create_inventory_hud(&mut game);
 
-    let mut menu_manager = menu_manager::MenuManager::new(&mut game, &font);
-    menu_manager.create_menu();
+    let mut menu_manager = menu_manager::MenuManager::new(&mut game, &small_font, &large_font);
+    menu_manager.create_menu(&mut game);
 
     // music
     sdl2::mixer::open_audio(44100, sdl2::mixer::DEFAULT_FORMAT, 2, 2048)?;

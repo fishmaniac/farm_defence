@@ -98,6 +98,18 @@ pub static TEXTURE_PREVIEW_GOBLIN_ENEMY: &str = "assets/preview-goblin-enemy.png
 pub static TEXTURE_PROJECTILE_ARROW: &str = "assets/archer-arrow-large.png";
 pub static TEXTURE_PROJECTILE_FIREBALL: &str = "assets/projectile-fireball.png";
 
+pub const CURRENT_BUTTON_MENU_TITLE: usize = 0;
+pub const CURRENT_BUTTON_MENU_PLAY: usize = 1;
+pub const CURRENT_BUTTON_MENU_SETTINGS: usize = 2;
+
+pub const CURRENT_BUTTON_SETTINGS_RESOLUTION_TITLE: usize = 0;
+pub const CURRENT_BUTTON_SETTINGS_RESOLUTION_STRING: usize = 1;
+pub const CURRENT_BUTTON_SETTINGS_FULLSCREEN: usize = 2;
+pub const CURRENT_BUTTON_SETTINGS_BACK: usize = 3;
+pub const CURRENT_BUTTON_SETTINGS_RESOLUTION_MINUS: usize = 4;
+pub const CURRENT_BUTTON_SETTINGS_RESOLUTION_PLUS: usize = 5;
+
+
 pub const CURRENT_BUILD_ARCHER_TOWER: usize = 0;
 pub const CURRENT_BUILD_FIREBALL_TOWER: usize = 1;
 pub const CURRENT_BUILD_GOBLIN: usize = 2;

@@ -15,7 +15,9 @@ pub struct EventManager {
     pub last_performance_counter: u64,
     pub performance_frequency: u64,
     pub delta_time: f64,
+    pub screen_size: (i32, i32),
     pub mouse_point: sdl2::rect::Point,
+    pub menu_settings: bool,
     pub menu_quit: bool,
     pub game_quit: bool,
     pub up: bool,
@@ -26,7 +28,7 @@ pub struct EventManager {
 }
 
 impl EventManager {
-    pub fn new(sdl_context: &sdl2::Sdl) -> EventManager {
+    pub fn new(sdl_context: &sdl2::Sdl, game: &mut game_manager::GameManager) -> EventManager {
         let event = EventManager {  
             event_pump: sdl_context.event_pump().unwrap(),
             timer_subsystem: sdl_context.timer().unwrap(),
@@ -34,7 +36,9 @@ impl EventManager {
             last_performance_counter: 0,
             performance_frequency: 0,
             delta_time: 0.0,
+            screen_size: (game.canvas.window().display_mode().unwrap().w, game.canvas.window().display_mode().unwrap().h),
             mouse_point: sdl2::rect::Point::new(0, 0),
+            menu_settings: false,
             menu_quit: false,
             game_quit: false,
             up: false,
@@ -53,33 +57,37 @@ impl EventManager {
         build_buttons: &mut button_manager::ButtonManager,
         gui_manager: &mut gui_manager::GUIManager,
     ) {
+
         for event in self.event_pump.poll_iter() {
             match event {
-                Event::Quit {..} => {
+                sdl2::event::Event::Quit {..} => {
                     self.game_quit = true;
                     break
                 }
-                Event::KeyDown { keycode: Some(keycode), .. } => {
+                sdl2::event::Event::KeyDown { keycode: Some(keycode), .. } => {
                     self.do_key_down(game, towers, seed_buttons, build_buttons, gui_manager, keycode);
                     break
                 }, 
-                Event::KeyUp {keycode: Some(keycode), .. } => {
+                sdl2::event::Event::KeyUp {keycode: Some(keycode), .. } => {
                     self.do_key_up(game, keycode);
                     break
                 },
-                Event::MouseMotion { x, y, .. } => {
+                sdl2::event::Event::MouseMotion { x, y, .. } => {
                     game.mouse_point.x = x;
                     game.mouse_point.y = y;
                     self.mouse_point.x = x;
                     self.mouse_point.y = y;
-                }
-                Event::MouseButtonDown { mouse_btn, .. } => {
+                },
+                sdl2::event::Event::MouseButtonDown { mouse_btn, .. } => {
                     game.mouse_button = mouse_btn;
-                }
-                Event::MouseButtonUp { .. } => {
+                },
+                sdl2::event::Event::MouseButtonUp { .. } => {
                     game.mouse_button = MouseButton::Unknown;
                     game.placed = false;
                 },
+                sdl2::event::Event::Window { win_event: sdl2::event::WindowEvent::Resized(width, height), .. } => {
+                    self.screen_size = (game.canvas.window().display_mode().unwrap().w, game.canvas.window().display_mode().unwrap().h);
+                }
                 _ => {}
             }
         }
