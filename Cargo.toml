@@ -13,3 +13,7 @@ debug = true
 version = "0.35"
 default-features = false
 features = ["ttf", "image", "mixer"]
+
+[[test]]
+name = "integration"
+path = "tests/integration/astar.rs"

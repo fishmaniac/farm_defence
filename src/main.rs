@@ -105,7 +105,7 @@ fn game_loop (
         if !events.menu_quit {
             menu_manager.render_menu(events, game, player);
         }
-        else if !game.paused_state {
+        else if !events.game_paused {
             game.update_game(events, player, level, towers, buildings, enemies, projectiles, gui_manager, seed_buttons, build_buttons);
             game.render_game(tex_man, events, player, level, towers, buildings, enemies, projectiles, gui_manager, seed_buttons, build_buttons);
 
@@ -125,15 +125,15 @@ fn game_loop (
                 game.is_pathfinding = false;
             }
         }
-        else if game.saving {
+        if events.game_saving {
             println!("SAVING");
             save_game(game, tex_man, events, player, level, towers, buildings, enemies, projectiles, seed_buttons, build_buttons, gui_manager);
-            game.saving = false;
+            events.game_saving = false;
         }
-        else if game.loading {
+        else if events.game_loading {
             println!("LOADING");
             load_game(game, tex_man, events, player, level, towers, buildings, enemies, projectiles, seed_buttons, build_buttons, gui_manager);
-            game.loading = false;
+            events.game_loading = false;
         }
         game.canvas.present();
     }
@@ -150,12 +150,11 @@ fn main() -> Result<(), String> {
     let small_font = ttf_context.load_font(font_path, 16)?;
     let large_font = ttf_context.load_font(font_path, 64)?;
 
-
     let mut game = game_manager::GameManager::new(&sdl_context);
     let texture_creator = game.canvas.texture_creator();
     let mut tex_man = texture_manager::TextureManager::new(&texture_creator);
     let mut events = event_manager::EventManager::new(&sdl_context, &mut game);
-    let mut player = player_manager::PlayerManager::new(&mut game);
+    let mut player = player_manager::PlayerManager::new(&mut game, &mut events);
     let mut level = level_manager::LevelManager::new();
     let mut towers = tower_manager::TowerManager::new();
     let mut buildings = building_manager::BuildingManager::new();
@@ -167,7 +166,7 @@ fn main() -> Result<(), String> {
     gui_manager.create_inventory_hud(&mut game);
 
     let mut menu_manager = menu_manager::MenuManager::new(&mut game, &small_font, &large_font);
-    menu_manager.create_menu(&mut game);
+    menu_manager.create_menu(&mut game, &mut events);
 
     // music
     sdl2::mixer::open_audio(44100, sdl2::mixer::DEFAULT_FORMAT, 2, 2048)?;

@@ -41,7 +41,7 @@ impl<'a> MenuManager<'a> {
         };
         menu
     }
-    pub fn create_menu (&mut self, game: &mut game_manager::GameManager) -> Result<(), String> {
+    pub fn create_menu (&mut self, game: &mut game_manager::GameManager, events: &mut event_manager::EventManager) -> Result<(), String> {
         let texture_surface = self.large_font.render(&"Farm Defense".to_string())
             .blended(constants::COLOR_WHITE)
             .map_err(|e| e.to_string())?;
@@ -91,7 +91,7 @@ impl<'a> MenuManager<'a> {
             outline_visible: false,
             last_clicked: 0,
         };
-        let texture_surface = self.large_font.render(&format!("{} x {}", game.screen_size.0, game.screen_size.1).to_string())
+        let texture_surface = self.large_font.render(&format!("{} x {}", events.screen_size.0, events.screen_size.1).to_string())
             .blended(constants::COLOR_WHITE)
             .map_err(|e| e.to_string())?;
         let resolution_string = self::MenuButton {
@@ -189,7 +189,7 @@ impl<'a> MenuManager<'a> {
 
                 let menu_button = &mut self.button_vec[menu_button_index];
 
-                menu_button.rect.set_x(game.screen_size.0 / 2 - menu_button.texture_surface.width() as i32 / 2);
+                menu_button.rect.set_x(events.screen_size.0 / 2 - menu_button.texture_surface.width() as i32 / 2);
                 menu_button.rect.set_y(menu_button.texture_surface.height() as i32 * menu_button_index as i32);
                 menu_button.rect.set_width(menu_button.texture_surface.width());
                 menu_button.rect.set_height(menu_button.texture_surface.height());
@@ -211,7 +211,7 @@ impl<'a> MenuManager<'a> {
                 if menu_button.clicked && menu_button.last_clicked > 32 {
                     if menu_button_index == constants::CURRENT_BUTTON_MENU_PLAY {
                         events.menu_quit = true;
-                        game.paused_state = false;
+                        events.game_paused = false;
                     }
                     else if menu_button_index == constants::CURRENT_BUTTON_MENU_SETTINGS
                     {
@@ -248,19 +248,19 @@ impl<'a> MenuManager<'a> {
                         settings_button.rect.set_y(resolution_rect_data.1);
                         settings_button.rect.set_width(settings_button.texture_surface.width());
                         settings_button.rect.set_height(settings_button.texture_surface.height());
-                        player.rect.set_x(game.screen_size.0 / 2);
-                        player.rect.set_y(game.screen_size.1 / 2);
+                        player.rect.set_x(events.screen_size.0 / 2);
+                        player.rect.set_y(events.screen_size.1 / 2);
                     }
                     constants::CURRENT_BUTTON_SETTINGS_RESOLUTION_PLUS => {
                         settings_button.rect.set_x(resolution_rect_data.0 + resolution_rect_data.2 as i32 + constants::TILE_SIZE as i32);
                         settings_button.rect.set_y(resolution_rect_data.1);
                         settings_button.rect.set_width(settings_button.texture_surface.width());
                         settings_button.rect.set_height(settings_button.texture_surface.height());
-                        player.rect.set_x(game.screen_size.0 / 2);
-                        player.rect.set_y(game.screen_size.1 / 2);
+                        player.rect.set_x(events.screen_size.0 / 2);
+                        player.rect.set_y(events.screen_size.1 / 2);
                     }
                     _ => {
-                        settings_button.rect.set_x(game.screen_size.0 / 2 - settings_button.texture_surface.width() as i32 / 2);
+                        settings_button.rect.set_x(events.screen_size.0 / 2 - settings_button.texture_surface.width() as i32 / 2);
                         settings_button.rect.set_y(bottom_of_menu + (settings_button.texture_surface.height() as i32 * settings_button_index as i32));
                         settings_button.rect.set_width(settings_button.texture_surface.width());
                         settings_button.rect.set_height(settings_button.texture_surface.height());
@@ -272,12 +272,10 @@ impl<'a> MenuManager<'a> {
                     eprintln!("Failed to copy texture to canvas:\t{}", err);
                 }
                 if settings_button_index == constants::CURRENT_BUTTON_SETTINGS_RESOLUTION_STRING { 
-                    game.screen_size = (game.canvas.window().display_mode().unwrap().w, game.canvas.window().display_mode().unwrap().h);
-                    println!("Screen size: {:?}", game.screen_size);
-                    let texture_surface = self.large_font.render(&format!("{} x {}", game.screen_size.0, game.screen_size.1).to_string())
+                    events.screen_size = (game.canvas.window().display_mode().unwrap().w, game.canvas.window().display_mode().unwrap().h);
+                    let texture_surface = self.large_font.render(&format!("{} x {}", events.screen_size.0, events.screen_size.1).to_string())
                         .blended(constants::COLOR_WHITE)
                         .map_err(|e| e.to_string())?;
-                    /*                         println!("Screen size: {:?}", game.screen_size); */
                     settings_button.texture_surface = texture_surface;
 
                 }

@@ -257,7 +257,7 @@ impl<'a> GUIManager<'a> {
     pub fn render_inventory_hud (&mut self, events: &mut event_manager::EventManager, game: &mut game_manager::GameManager, tex_man: &mut texture_manager::TextureManager<sdl2::video::WindowContext>) -> Result<(), String> {
         for gui_index in 0..self.inventory_vec.len() {
             let gui = &mut self.inventory_vec[gui_index];
-            gui.rect.set_x(game.screen_size.0 - 4 * constants::TILE_SIZE as i32);
+            gui.rect.set_x(events.screen_size.0 - 4 * constants::TILE_SIZE as i32);
             gui.rect.set_y(2 * constants::TILE_SIZE as i32 + (constants::TILE_SIZE as i32 * gui_index as i32));
 
             let text_surface: sdl2::surface::Surface;
@@ -282,11 +282,6 @@ impl<'a> GUIManager<'a> {
                         .blended(constants::COLOR_WHITE)
                         .map_err(|e| e.to_string())?;
                 }
-                4 => {
-                    text_surface = self.font.render(&format!("dt: {}", events.delta_time).to_string())
-                        .blended(constants::COLOR_WHITE)
-                        .map_err(|e| e.to_string())?;
-                }
                 _ => {
                     text_surface = self.font.render(&"ERR".to_string())
                         .blended(constants::COLOR_WHITE)
@@ -295,44 +290,56 @@ impl<'a> GUIManager<'a> {
             }
             match gui_index {
                 0 | 1 | 2 => {
-                    let texture = self.texture_creator.create_texture_from_surface(&text_surface).unwrap();
-                    let dest = sdl2::rect::Rect::new(game.screen_size.0 - text_surface.width() as i32 - constants::TILE_SIZE as i32, 2 * constants::TILE_SIZE as i32 + (constants::TILE_SIZE as i32 * gui_index as i32), text_surface.width(), text_surface.height());   
-                    game.canvas.copy(&texture, None, Some(dest)).unwrap(); 
+                    if let Ok(texture) = self.texture_creator.create_texture_from_surface(&text_surface) {
+                        let dest = sdl2::rect::Rect::new(events.screen_size.0 - text_surface.width() as i32 - constants::TILE_SIZE as i32, 2 * constants::TILE_SIZE as i32 + (constants::TILE_SIZE as i32 * gui_index as i32), text_surface.width(), text_surface.height());   
+                        game.canvas.copy(&texture, None, Some(dest)).unwrap(); 
+                    }
+                    else {
+                        eprintln!("Failed to create GUI texture");
+                    }
 
 
                     let texture = tex_man.load(&gui.texture_path)?;
                     game.canvas.copy_ex(
-                        &texture, // texture object
-                        None,      // source rect
-                        gui.rect,     // destination rect
-                        0.0,      // angle (degrees)
-                        None,   // center
-                        false,    // flip horizontal
-                        false,     // flip vertical
+                        &texture, 
+                        None,      
+                        gui.rect,     
+                        0.0,      
+                        None,   
+                        false,    
+                        false,     
                     )?;
                 },
-                3 | 4 => {
-                    let texture = self.texture_creator.create_texture_from_surface(&text_surface).unwrap();
-                    let dest = sdl2::rect::Rect::new(game.screen_size.0 - text_surface.width() as i32 - constants::TILE_SIZE as i32, 2 * constants::TILE_SIZE as i32 + (constants::TILE_SIZE as i32 * gui_index as i32), text_surface.width(), text_surface.height());   
-                    game.canvas.copy(&texture, None, Some(dest)).unwrap(); 
+                3 => {
+                    if let Ok(texture) = self.texture_creator.create_texture_from_surface(&text_surface) {
+                        let dest = sdl2::rect::Rect::new(events.screen_size.0 - text_surface.width() as i32 - constants::TILE_SIZE as i32, 2 * constants::TILE_SIZE as i32 + (constants::TILE_SIZE as i32 * gui_index as i32), text_surface.width(), text_surface.height());   
+                        game.canvas.copy(&texture, None, Some(dest)).unwrap(); 
+                    }
+                    else {
+                        eprintln!("Failed to create GUI texture");
+                    }
                 },
                 _ => {},
             }
         }
         Ok(())
     }
-    pub fn render_messages (&mut self, game: &mut game_manager::GameManager, tex_man: &mut texture_manager::TextureManager<sdl2::video::WindowContext>) -> Result<(), String> {
+    pub fn render_messages (&mut self, game: &mut game_manager::GameManager, events: &mut event_manager::EventManager, tex_man: &mut texture_manager::TextureManager<sdl2::video::WindowContext>) -> Result<(), String> {
         for message_index in (0..self.message_vec.len()).rev() {
             let message = &mut self.message_vec[message_index];
-            message.rect.set_x(game.screen_size.0 / 2);
+            message.rect.set_x(events.screen_size.0 / 2);
             message.rect.set_y(2 * constants::TILE_SIZE as i32 + (constants::TILE_SIZE as i32 * message_index as i32));
 
             let text_surface = self.font.render(&message.message_text)
                 .blended(constants::COLOR_WHITE)
                 .map_err(|e| e.to_string())?;
-            let texture = self.texture_creator.create_texture_from_surface(&text_surface).unwrap();
-            let dest = sdl2::rect::Rect::new(game.screen_size.0 / 2 - text_surface.width() as i32 / 2, 2 * constants::TILE_SIZE as i32 + (constants::TILE_SIZE as i32 * message_index as i32), text_surface.width(), text_surface.height());   
+            if let Ok(texture) = self.texture_creator.create_texture_from_surface(&text_surface) {
+            let dest = sdl2::rect::Rect::new(events.screen_size.0 / 2 - text_surface.width() as i32 / 2, 2 * constants::TILE_SIZE as i32 + (constants::TILE_SIZE as i32 * message_index as i32), text_surface.width(), text_surface.height());   
             game.canvas.copy(&texture, None, Some(dest)).unwrap(); 
+            }
+            else {
+            eprintln!("Failed to create Message texture");
+            }
             if message.time < message.max_time {
                 message.time += 1;
             }

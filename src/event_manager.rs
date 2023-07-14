@@ -20,6 +20,9 @@ pub struct EventManager {
     pub menu_settings: bool,
     pub menu_quit: bool,
     pub game_quit: bool,
+    pub game_paused: bool,
+    pub game_saving: bool,
+    pub game_loading: bool,
     pub up: bool,
     pub down: bool,
     pub left: bool,
@@ -41,6 +44,9 @@ impl EventManager {
             menu_settings: false,
             menu_quit: false,
             game_quit: false,
+            game_paused: true,
+            game_saving: false,
+            game_loading: false,
             up: false,
             down: false,
             left: false,
@@ -69,7 +75,7 @@ impl EventManager {
                     break
                 }, 
                 sdl2::event::Event::KeyUp {keycode: Some(keycode), .. } => {
-                    self.do_key_up(game, keycode);
+                    self.do_key_up(keycode);
                     break
                 },
                 sdl2::event::Event::MouseMotion { x, y, .. } => {
@@ -105,21 +111,22 @@ impl EventManager {
             sdl2::keyboard::Keycode::L => {
                 self.menu_quit = !self.menu_quit;
                 if !self.menu_quit {
-                    game.paused_state = true;
+                    self.game_paused = true;
                 }
                 else {
-                    game.paused_state = false;
+                    self.game_paused = false;
                 }
+                println!("Paused: {}", self.game_paused);
             }
-            sdl2::keyboard::Keycode::P => game.paused_state = !game.paused_state,
+            sdl2::keyboard::Keycode::P => self.game_paused = !self.game_paused,
             sdl2::keyboard::Keycode::O => {
-                if game.paused_state {
-                    game.saving = true;
+                if self.game_paused && !self.game_saving && !self.game_loading {
+                    self.game_saving = true;
                 }
             }
             sdl2::keyboard::Keycode::I => {
-                if game.paused_state && !game.saving {
-                    game.loading = true;
+                if self.game_paused && !self.game_saving && !self.game_loading {
+                    self.game_loading = true;
                 }
             }
             sdl2::keyboard::Keycode::Escape => self.game_quit = true,
@@ -146,6 +153,14 @@ impl EventManager {
                     game.seed_mode = true;
                     game.build_mode = false;
                     return
+                }
+            }
+            sdl2::keyboard::Keycode::M => {
+                if sdl2::mixer::Music::get_volume() != 0 {
+                    sdl2::mixer::Music::set_volume(0);
+                }
+                else {
+                    sdl2::mixer::Music::set_volume(50);
                 }
             }
             sdl2::keyboard::Keycode::Num1 => {
@@ -267,7 +282,6 @@ impl EventManager {
     }
 
     fn do_key_up(&mut self, 
-        game: &mut game_manager::GameManager, 
         keycode: sdl2::keyboard::Keycode
     ) {
         match keycode {

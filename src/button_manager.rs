@@ -1,4 +1,4 @@
-use crate::{player_manager, constants, texture_manager, game_manager};
+use crate::{player_manager, constants, texture_manager, game_manager, event_manager};
 
 pub enum ButtonType {
     Seed,
@@ -128,11 +128,11 @@ impl ButtonManager {
         }
     }
 
-    pub fn render_build_buttons (&mut self, player: &mut player_manager::PlayerManager, tex_man: &mut texture_manager::TextureManager<sdl2::video::WindowContext>, game: &mut game_manager::GameManager) -> Result<(), String> {
+    pub fn render_build_buttons (&mut self, player: &mut player_manager::PlayerManager, tex_man: &mut texture_manager::TextureManager<sdl2::video::WindowContext>, events: &mut event_manager::EventManager, game: &mut game_manager::GameManager) -> Result<(), String> {
         if game.build_mode {
             for button_index in 0..self.button_vec.len() {
-                self.button_vec[button_index].rect.set_x(player.rect.x() + constants::TILE_SIZE as i32 * button_index as i32 - game.screen_size.0 / 2 + constants::TILE_SIZE as i32);
-                self.button_vec[button_index].rect.set_y(constants::TILE_SIZE as i32 + player.rect.y() - game.screen_size.1 / 2 + constants::TILE_SIZE as i32);
+                self.button_vec[button_index].rect.set_x(player.rect.x() + constants::TILE_SIZE as i32 * button_index as i32 - events.screen_size.0 / 2 + constants::TILE_SIZE as i32);
+                self.button_vec[button_index].rect.set_y(constants::TILE_SIZE as i32 + player.rect.y() - events.screen_size.1 / 2 + constants::TILE_SIZE as i32);
 
                 let texture = tex_man.load(&self.button_vec[button_index].texture_path)?;
                 game.canvas.copy_ex(
@@ -150,11 +150,11 @@ impl ButtonManager {
         Ok(())
     }
 
-    pub fn render_seed_buttons (&mut self, player: &mut player_manager::PlayerManager, tex_man: &mut texture_manager::TextureManager<sdl2::video::WindowContext>, game: &mut game_manager::GameManager) -> Result<(), String> {
+    pub fn render_seed_buttons (&mut self, player: &mut player_manager::PlayerManager, tex_man: &mut texture_manager::TextureManager<sdl2::video::WindowContext>, events: &mut event_manager::EventManager, game: &mut game_manager::GameManager) -> Result<(), String> {
         if game.seed_mode {
             for button_index in 0..self.button_vec.len() {
-                self.button_vec[button_index].rect.set_x(player.rect.x() + constants::TILE_SIZE as i32 * button_index as i32 - game.screen_size.0 as i32 / 2 + constants::TILE_SIZE as i32);
-                self.button_vec[button_index].rect.set_y(constants::TILE_SIZE as i32 + player.rect.y() - game.screen_size.1 / 2 + constants::TILE_SIZE as i32);
+                self.button_vec[button_index].rect.set_x(player.rect.x() + constants::TILE_SIZE as i32 * button_index as i32 - events.screen_size.0 as i32 / 2 + constants::TILE_SIZE as i32);
+                self.button_vec[button_index].rect.set_y(constants::TILE_SIZE as i32 + player.rect.y() - events.screen_size.1 / 2 + constants::TILE_SIZE as i32);
 
                 let texture = tex_man.load(&self.button_vec[button_index].texture_path)?;
                 game.canvas.copy_ex(

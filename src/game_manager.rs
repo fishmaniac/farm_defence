@@ -9,9 +9,6 @@ pub enum Movement {
 }
 
 pub struct GameManager {
-    pub paused_state: bool,
-    pub saving: bool,
-    pub loading: bool,
     pub placed: bool,
     pub is_pathfinding: bool,
     pub build_mode: bool,
@@ -23,7 +20,6 @@ pub struct GameManager {
     pub carrot_amount: u32,
     pub tomato_amount: u32,
     pub gold_amount: u32,
-    pub screen_size: (i32, i32),
     pub cam_x: i32,
     pub cam_y: i32,
     pub frame_time: u32,
@@ -42,7 +38,7 @@ impl GameManager {
         let video_subsystem = sdl_context.video().unwrap();
         // let gl_attr = video_subsystem.gl_attr();
         //
-        // gl_attr.set_context_profile(GLProfile::Core);
+        // gl_attr.set_context_profile(sdl2::video::GLProfile::Core);
         // gl_attr.set_context_flags().debug().set();
         // gl_attr.set_context_version(3, 2);
         // gl_attr.set_multisample_buffers(1);
@@ -51,14 +47,14 @@ impl GameManager {
         let window = video_subsystem
             .window("Farm Defense", 1280, 720)
             .opengl()
-            .resizable()
-/*             .fullscreen_desktop()  */
+/*             .resizable() */
+/*             .fullscreen_desktop()   */
 /*             .fullscreen() */
             .position_centered()
             .build()
             .expect("Failed to initialize window");
         //
-        // assert_eq!(gl_attr.context_profile(), GLProfile::Core);
+        // assert_eq!(gl_attr.context_profile(), sdl2::video::GLProfile::Core);
         // assert_eq!(gl_attr.context_version(), (3, 2));
 
         let mut canvas = window.into_canvas()
@@ -69,9 +65,6 @@ impl GameManager {
         canvas.set_blend_mode(sdl2::render::BlendMode::Blend);
 
         let game = GameManager {  
-            paused_state: false,
-            saving: false,
-            loading: false,
             placed: false,
             is_pathfinding: false,
             seed_mode: false,
@@ -85,7 +78,6 @@ impl GameManager {
             gold_amount: 0,
             cam_x: 0,
             cam_y: 0,
-            screen_size: (canvas.window().display_mode().unwrap().w, canvas.window().display_mode().unwrap().h),
             frame_time: 1,
             fps: 1,
             elapsed_seconds: 0.1,
@@ -162,9 +154,9 @@ impl GameManager {
         buildings.render_buildings(self, tex_man, gui_manager);
         gui_manager.render_preview(self, tex_man);
         player.render_player(events, self, tex_man).unwrap();
-        seed_buttons.render_seed_buttons(player, tex_man, self).unwrap();
-        build_buttons.render_build_buttons(player, tex_man, self).unwrap();
+        seed_buttons.render_seed_buttons(player, tex_man, events, self).unwrap();
+        build_buttons.render_build_buttons(player, tex_man, events, self).unwrap();
         gui_manager.render_inventory_hud(events, self, tex_man);
-        gui_manager.render_messages(self, tex_man);
+        gui_manager.render_messages(self, events, tex_man);
     }
 }
