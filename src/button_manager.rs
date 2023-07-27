@@ -41,6 +41,7 @@ impl ButtonManager {
             let temp_button = self::Button {
                 rect: sdl2::rect::Rect::new(player.x, player.y, constants::TILE_SIZE, constants::TILE_SIZE),
                 texture_path: match button_index {
+                    constants::CURRENT_SEED_GUN => constants::TEXTURE_BUTTON_GUN.to_string(),
                     constants::CURRENT_SEED_SHOVEL => constants::TEXTURE_BUTTON_SHOVEL.to_string(),
                     constants::CURRENT_SEED_HO => constants::TEXTURE_BUTTON_HO.to_string(),
                     constants::CURRENT_SEED_CARROT => constants::TEXTURE_BUTTON_CARROT.to_string(),

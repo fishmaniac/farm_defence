@@ -25,7 +25,6 @@ pub struct GameManager {
     pub frame_time: u32,
     pub fps: u32,
     pub elapsed_seconds: f64,
-    pub delta_time: std::time::Duration,
     pub canvas: sdl2::render::Canvas<sdl2::video::Window>,
     pub mouse_point: sdl2::rect::Point,
     pub mouse_button: sdl2::mouse::MouseButton,
@@ -58,7 +57,7 @@ impl GameManager {
         // assert_eq!(gl_attr.context_version(), (3, 2));
 
         let mut canvas = window.into_canvas()
-            .present_vsync() 
+    /*         .present_vsync()    */
             .accelerated()
             .build()
             .expect("Failed to initialize canvas");
@@ -81,7 +80,6 @@ impl GameManager {
             frame_time: 1,
             fps: 1,
             elapsed_seconds: 0.1,
-            delta_time: std::time::Duration::new(0, 0),
             canvas,
             mouse_point: sdl2::rect::Point::new(0, 0),
             mouse_button: sdl2::mouse::MouseButton::Unknown,
@@ -90,7 +88,6 @@ impl GameManager {
         };
         game
     }
-
     pub fn prepare_background(&mut self) {
         self.canvas.set_draw_color(constants::COLOR_BACKGROUND);
         self.canvas.clear(); 
@@ -117,16 +114,9 @@ impl GameManager {
         player.update_player(events, self, level);
         self.update_camera(player);
 
-
-        //MOVE LOOP INTO UPDATE_BUILDINGS
-        for col_index in 0..level.level_vec.len() {
-            for row_index in 0..level.level_vec[col_index].len() {
-                let temp_tile = &mut level.level_vec[col_index][row_index];
-
-                buildings.update_buildings(self, towers, enemies, gui_manager, seed_buttons, build_buttons, temp_tile, col_index, row_index);      
-            }
-        }
-        level_manager::LevelManager::check_attacks(self, enemies, towers, buildings, projectiles, gui_manager);
+        buildings.update_buildings(self, events, level, player, towers, enemies, gui_manager, seed_buttons, build_buttons, projectiles);
+        level_manager::LevelManager::check_attacks(self, events, player, enemies, towers, buildings, projectiles, gui_manager);
+        projectiles.check_projectile_hit(self, events, player, enemies);
         level.delete_all_dead(self, enemies, towers, buildings, projectiles, gui_manager);
     }
 
@@ -149,7 +139,7 @@ impl GameManager {
 
         level.render_level(self, tex_man).unwrap();
         enemy_manager::EnemyManager::render_enemies(enemies, self, events, tex_man, level, gui_manager).unwrap(); 
-        projectile_manager::ProjectileManager::render_projectiles(projectiles, self, tex_man).unwrap();
+        projectile_manager::ProjectileManager::render_projectiles(projectiles, self, tex_man, events).unwrap();
         tower_manager::TowerManager::render_towers(towers, self, tex_man, gui_manager).unwrap();
         buildings.render_buildings(self, tex_man, gui_manager);
         gui_manager.render_preview(self, tex_man);

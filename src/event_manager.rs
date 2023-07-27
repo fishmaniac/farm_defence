@@ -54,7 +54,13 @@ impl EventManager {
         };
         event
     }
-
+    pub fn quit_game (
+        &mut self, 
+        game: &mut game_manager::GameManager, 
+    ) {
+        self.game_quit = true;
+        //ADD AUTOSAVE
+    }
     pub fn do_event(
         &mut self, 
         game: &mut game_manager::GameManager, 
@@ -117,7 +123,7 @@ impl EventManager {
                     self.game_paused = false;
                 }
                 println!("Paused: {}", self.game_paused);
-            }
+            },
             sdl2::keyboard::Keycode::P => self.game_paused = !self.game_paused,
             sdl2::keyboard::Keycode::O => {
                 if self.game_paused && !self.game_saving && !self.game_loading {
@@ -128,9 +134,17 @@ impl EventManager {
                 if self.game_paused && !self.game_saving && !self.game_loading {
                     self.game_loading = true;
                 }
-            }
-            sdl2::keyboard::Keycode::Escape => self.game_quit = true,
-            /*             sdl2::keyboard::Keycode::Q => game.quit = true, */
+            },
+            sdl2::keyboard::Keycode::Escape => { 
+                self.menu_quit = !self.menu_quit;
+                if !self.menu_quit {
+                    self.game_paused = true;
+                }
+                else {
+                    self.game_paused = false;
+                }
+                println!("Paused: {}", self.game_paused);
+            },
             sdl2::keyboard::Keycode::W => self.up = true,
             sdl2::keyboard::Keycode::S => self.down = true,
             sdl2::keyboard::Keycode::A => self.left = true,
@@ -144,7 +158,7 @@ impl EventManager {
                     game.seed_mode = false;
                     return
                 }
-            }
+            },
             sdl2::keyboard::Keycode::Y => {
                 if game.seed_mode {
                     game.seed_mode = false;
@@ -154,7 +168,7 @@ impl EventManager {
                     game.build_mode = false;
                     return
                 }
-            }
+            },
             sdl2::keyboard::Keycode::M => {
                 if sdl2::mixer::Music::get_volume() != 0 {
                     sdl2::mixer::Music::set_volume(0);
@@ -162,7 +176,7 @@ impl EventManager {
                 else {
                     sdl2::mixer::Music::set_volume(50);
                 }
-            }
+            },
             sdl2::keyboard::Keycode::Num1 => {
                 if game.seed_mode {
                     game.current_seed = 0;

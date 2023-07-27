@@ -20,7 +20,7 @@ pub const MAX_HEIGHT: u16 = 150;
 pub const MAX_WIDTH: u16 = 300;
 
 pub const PLAYER_SPEED: u16 = 800;
-pub const CROP_TIME: u16 = 100;
+pub const CROP_TIME: u16 = 500;
 
 pub const SEED_BUTTON_AMT: usize = 8;
 pub const BUILD_BUTTON_AMT: usize = 6;
@@ -58,6 +58,9 @@ pub static TEXTURE_BUTTON_HO: &str = "assets/ho-button.png";
 pub static TEXTURE_BUTTON_CARROT: &str = "assets/carrot-button.png";
 pub static TEXTURE_BUTTON_TOMATO: &str = "assets/tomato-button.png";
 pub static TEXTURE_BUTTON_ARCHER: &str = "assets/archer-button.png";
+pub static TEXTURE_BUTTON_GUN: &str = "assets/gun-button.png";
+
+pub static TEXTURE_PREVIEW_GUN: &str = "assets/crosshair.png";
 
 pub static TEXTURE_BUILDING_HOUSE: &str = "assets/house.png";
 pub static TEXTURE_BUILDING_HOUSE_BOTTOM_LEFT: &str = "assets/house-bottom-left.png";
@@ -101,10 +104,11 @@ pub static TEXTURE_PROJECTILE_FIREBALL: &str = "assets/projectile-fireball.png";
 pub const CURRENT_BUTTON_MENU_TITLE: usize = 0;
 pub const CURRENT_BUTTON_MENU_PLAY: usize = 1;
 pub const CURRENT_BUTTON_MENU_SETTINGS: usize = 2;
+pub const CURRENT_BUTTON_MENU_QUIT: usize = 3;
 
 pub const CURRENT_BUTTON_SETTINGS_RESOLUTION_TITLE: usize = 0;
 pub const CURRENT_BUTTON_SETTINGS_RESOLUTION_STRING: usize = 1;
-pub const CURRENT_BUTTON_SETTINGS_FULLSCREEN: usize = 2;
+pub const CURRENT_BUTTON_SETTINGS_SCREEN_MODE: usize = 2;
 pub const CURRENT_BUTTON_SETTINGS_BACK: usize = 3;
 pub const CURRENT_BUTTON_SETTINGS_RESOLUTION_MINUS: usize = 4;
 pub const CURRENT_BUTTON_SETTINGS_RESOLUTION_PLUS: usize = 5;
@@ -116,10 +120,11 @@ pub const CURRENT_BUILD_GOBLIN: usize = 2;
 pub const CURRENT_BUILD_WALL: usize = 3;
 pub const CURRENT_BUILD_BASE: usize = 4;
 
-pub const CURRENT_SEED_SHOVEL: usize = 0;
-pub const CURRENT_SEED_HO: usize = 1;
-pub const CURRENT_SEED_CARROT: usize = 2;
-pub const CURRENT_SEED_TOMATO: usize = 3;
+pub const CURRENT_SEED_GUN: usize = 0;
+pub const CURRENT_SEED_SHOVEL: usize = 1;
+pub const CURRENT_SEED_HO: usize = 2;
+pub const CURRENT_SEED_CARROT: usize = 3;
+pub const CURRENT_SEED_TOMATO: usize = 4;
 
 pub const TILE_TYPE_GRASS: char = '0';
 pub const TILE_TYPE_WALL: char = '2';
@@ -137,7 +142,7 @@ pub const TILE_TYPE_BASE: char = 'B';
 pub const ENEMY_GOBLIN_HEALTH: u16 = 100;
 pub const ENEMY_GOBLIN_RADIUS: u8 = 1;
 pub const ENEMY_GOBLIN_SPEED: u8 = 10;
-pub const ENEMY_GOBLIN_DAMAGE: u8 = 5;
+pub const ENEMY_GOBLIN_DAMAGE: u8 = 1;
 pub const ENEMY_GOBLIN_ATTACK_SPEED: u8 = 16;
 pub const ENEMY_GOBLIN_HEALTH_BAR_WIDTH: u32 = 24;
 pub const ENEMY_GOBLIN_HEALTH_BAR_HEIGHT: u32 = 4;
@@ -159,11 +164,10 @@ pub const TOWER_FIREBALL_HEALTH_BAR_HEIGHT: u32 = 6;
 pub const PROJECTILE_DESPAWN_DURATION: u8 = 32;
 pub const PROJECTILE_HIT_DESPAWN_DURATION: u8 = 2;
 
-pub const PROJECTILE_ARROW_SPEED: u8 = 8;
+pub const PROJECTILE_ARROW_SPEED: f64 = 600.0;
 pub const PROJECTILE_ARROW_RADIUS: u8 = 32;
-pub const PROJECTILE_FIREBALL_SPEED: u8 = 6;
-pub const PROJECTILE_FIREBALL_RADIUS: u8 = 128;
-
+pub const PROJECTILE_FIREBALL_SPEED: f64 = 600.0;
+pub const PROJECTILE_FIREBALL_RADIUS: u8 = 32;
 
 pub const BUILDING_BASE_HEALTH: u16 = 2000;
 pub const BUILDING_BASE_HEALTH_BAR_WIDTH: u32 = 64;

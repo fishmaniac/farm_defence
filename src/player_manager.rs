@@ -22,12 +22,17 @@ pub struct PlayerManager {
     pub left: bool,
     pub right: bool,
     pub colliding: bool, 
+    pub is_attacking: bool,
     pub x: i32,
     pub y: i32,
     pub texture_path: String,
     pub rect: sdl2::rect::Rect,
     pub direction: Direction,
     pub menu_selection: u8,
+    pub projectile_texture: String,
+    pub projectile_damage: u8,
+    pub projectile_speed: f64,
+    pub projectile_radius: u8,
 }
 
 impl PlayerManager {
@@ -38,12 +43,17 @@ impl PlayerManager {
             left: false,
             right: false,
             colliding: false, 
+            is_attacking: false,
             x: 0,
             y: 0,
             texture_path: "".to_string(),
             rect: sdl2::rect::Rect::new(events.screen_size.0 / 2, events.screen_size.1 / 2, constants::TILE_SIZE, constants::TILE_SIZE),
             direction: Direction::Up,
             menu_selection: 0,
+            projectile_texture: constants::TEXTURE_PROJECTILE_ARROW.to_string(),
+            projectile_speed: constants::PROJECTILE_ARROW_SPEED,
+            projectile_radius: constants::PROJECTILE_ARROW_RADIUS,
+            projectile_damage: 20,
         };
         player
     }

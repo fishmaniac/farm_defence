@@ -16,18 +16,18 @@ struct PathState {
     priority: usize,
 }
 
-// Implement Ord trait for State to define the ordering in the BinaryHeap
+// implement ord trait for state to define the ordering in the binaryheap
 impl Ord for PathState {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        // Reverse the ordering to create a min-heap
-        other.priority.cmp(&self.priority)
+        //this could be min or max
+        self.priority.cmp(&other.priority)
     }
 }
 
-// Implement PartialOrd trait for State to enable comparison
+// implement partialord trait for state to enable comparison
 impl PartialOrd for PathState {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(other))
+        Some(other.cmp(self))
     }
 }
 
@@ -153,15 +153,14 @@ impl EnemyManager {
         let movement_interval = 1.0 / enemy.movement_speed as f64;
         enemy.elapsed_time += events.delta_time;
         let can_move: bool = !enemy.found_target && enemy.elapsed_time > movement_interval;
-        /*         println!("Elapsed: {}\tInterval: {}", enemy.elapsed_time, movement_interval); */
 
         if can_move {
             if let Some(mut path) = enemy.final_path.take() {
                 if let Some((col, row)) = path.first() {
-                    /*                     if level.level_vec[enemy.grid_index.0][enemy.grid_index.1].tile_type == constants::TILE_TYPE_GOBLIN { */
-                    level.level_vec[enemy.grid_index.0][enemy.grid_index.1].tile_type = level.level_vec[enemy.grid_index.0][enemy.grid_index.1].original_type;
-                    level.level_vec[enemy.grid_index.0][enemy.grid_index.1].tile_data = TileData::None;
-                    /*                     } */
+/*                     if level.level_vec[enemy.grid_index.0][enemy.grid_index.1].tile_type == constants::TILE_TYPE_GOBLIN {  */
+                        level.level_vec[enemy.grid_index.0][enemy.grid_index.1].tile_type = level.level_vec[enemy.grid_index.0][enemy.grid_index.1].original_type;
+                        level.level_vec[enemy.grid_index.0][enemy.grid_index.1].tile_data = TileData::None;
+/*                     } */
                     level.level_vec[enemy.grid_index.0][enemy.grid_index.1].is_occupied = false;
                     enemy.grid_index.0 = *col;
                     enemy.grid_index.1 = *row;
@@ -223,7 +222,7 @@ impl EnemyManager {
     }
 
     pub fn astar(enemy: &mut Enemy, target: (usize, usize), level_vec: &[Vec<LevelTile>]) {
-        println!("EXECUTING A*"); 
+        /*         println!("EXECUTING A*");  */
         let initial_state = PathState {
             position: enemy.grid_index,
             priority: heuristic(enemy.grid_index, target),

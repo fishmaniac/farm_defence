@@ -1,5 +1,6 @@
 use crate::button_manager;
 use crate::constants;
+use crate::event_manager;
 use crate::player_manager;
 use crate::game_manager;
 use crate::level_manager;
@@ -179,32 +180,43 @@ impl BuildingManager {
 
     pub fn update_buildings(
         &mut self,
-        game: &mut game_manager::GameManager, 
+        game: &mut game_manager::GameManager,
+        events: &mut event_manager::EventManager,
+        level: &mut level_manager::LevelManager, 
+        player: &mut player_manager::PlayerManager,
         towers: &mut tower_manager::TowerManager, 
         enemies: &mut enemy_manager::EnemyManager, 
         gui_manager: &mut gui_manager::GUIManager,
         seed_buttons: &mut button_manager::ButtonManager, 
         build_buttons: &mut button_manager::ButtonManager,
-        temp_tile: &mut LevelTile,
-        col_index: usize,
-        row_index: usize,
+        projectiles: &mut projectile_manager::ProjectileManager,
+        // temp_tile: &mut LevelTile,
+        // col_index: usize,
+        // row_index: usize,
     ) {
-        if !game.hovering_button && sdl2::rect::Rect::contains_point(&temp_tile.rect, game.mouse_point){
-            if game.build_mode {
-                self.build_mode(game, towers, enemies, gui_manager, build_buttons, temp_tile, col_index, row_index);
-            }
+        for col_index in 0..level.level_vec.len() {
+            for row_index in 0..level.level_vec[col_index].len() {
+                let temp_tile = &mut level.level_vec[col_index][row_index];
 
-            if game.seed_mode {
-                Self::seed_mode(game, gui_manager, seed_buttons, temp_tile, col_index, row_index);
+                if !game.hovering_button && sdl2::rect::Rect::contains_point(&temp_tile.rect, game.mouse_point){
+                    if game.build_mode {
+                        self.build_mode(game, events, towers, enemies, gui_manager, build_buttons, temp_tile, col_index, row_index);
+                    }
+
+                    if game.seed_mode {
+                        self.seed_mode(game, events, player, gui_manager, seed_buttons, projectiles, temp_tile, col_index, row_index);
+                    }
+                }
+                //check for farm updates
+                Self::update_farms(temp_tile);
             }
         }
-        //CHECK FOR FARM UPDATES
-        Self::update_farms(temp_tile);
     }
 
     fn build_mode(
         &mut self,
         game: &mut game_manager::GameManager,
+        events: &mut event_manager::EventManager,
         towers: &mut tower_manager::TowerManager,
         enemies: &mut enemy_manager::EnemyManager,
         gui_manager: &mut gui_manager::GUIManager,
@@ -302,6 +314,7 @@ impl BuildingManager {
                 }
             }
             constants::CURRENT_BUILD_BASE => {
+                //add check if tiles in 2x2 area are occupied
                 if !game.placed && !temp_tile.is_occupied && temp_tile.tile_type == constants::TILE_TYPE_GRASS && temp_tile.tile_type != constants::TILE_TYPE_BASE {
                     if game.preview_mode && game.mouse_button == sdl2::mouse::MouseButton::Left {
                         game.placed = true;
@@ -325,14 +338,41 @@ impl BuildingManager {
     }
 
     fn seed_mode (
+        &mut self,
         game: &mut game_manager::GameManager, 
+        events: &mut event_manager::EventManager,
+        player: &mut player_manager::PlayerManager,
         gui_manager: &mut gui_manager::GUIManager,
         seed_buttons: &mut button_manager::ButtonManager,
+        projectiles: &mut projectile_manager::ProjectileManager,
         temp_tile: &mut LevelTile,
         col_index: usize,
         row_index: usize, 
     ) {
         match game.current_seed {
+            seed if seed == constants::CURRENT_SEED_GUN => {
+                if game.preview_mode && game.mouse_button == sdl2::mouse::MouseButton::Left {
+                    let start = (player.rect.x() + player.x, player.rect.y() + player.y);
+                    println!("spawned gun projectile");
+                    projectiles.spawn_player_projectile(player, start, start, (events.mouse_point.x + game.cam_x, events.mouse_point.y + game.cam_y));
+                    let texture = constants::TEXTURE_PREVIEW_GUN.to_string();
+                    gui_manager.preview.texture_path_bottom_left = texture;
+                    gui_manager.preview.texture_path_bottom_right = "".to_string();
+                    gui_manager.preview.texture_path_top_left = "".to_string();
+                    gui_manager.preview.texture_path_top_right = "".to_string();
+                    gui_manager.preview.index = (col_index, row_index);
+                }
+                else if game.seed_mode && seed_buttons.button_vec[constants::CURRENT_SEED_GUN].outline_visible {
+                    game.preview_mode = true;
+                    let texture = constants::TEXTURE_PREVIEW_GUN.to_string();
+                    gui_manager.preview.texture_path_bottom_left = texture;
+                    gui_manager.preview.texture_path_bottom_right = "".to_string();
+                    gui_manager.preview.texture_path_top_left = "".to_string();
+                    gui_manager.preview.texture_path_top_right = "".to_string();
+                    gui_manager.preview.index = (col_index, row_index);
+
+                }
+            }
             seed if seed == constants::CURRENT_SEED_SHOVEL => {
                 if game.preview_mode && game.mouse_button == sdl2::mouse::MouseButton::Left {
                     temp_tile.tile_type = temp_tile.original_type;
@@ -480,7 +520,7 @@ impl BuildingManager {
             }
             _ => {}
         }
-        
+
         //CHANGE TO GROWING STATE
         if temp_tile.tile_type == constants::TILE_TYPE_FIELD_EMPTY && temp_tile.state == constants::CROP_TIME {
             match temp_tile.tile_data {

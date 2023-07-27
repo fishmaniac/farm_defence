@@ -15,14 +15,14 @@ pub struct Tower {
     pub top_rect: sdl2::rect::Rect, 
     pub top_texture_path: String,
     pub attack_radius: i32,
-    pub projectile_damage: u8,
     pub attack_speed: u8,
     pub max_health: u16,
     pub health: u16,
     pub is_attacking: bool,
     pub projectile_texture: String,
+    pub projectile_damage: u8,
+    pub projectile_speed: f64,
     pub projectile_radius: u8,
-    pub projectile_speed: u8,
 }
 
 pub struct TowerManager {
@@ -102,7 +102,7 @@ impl TowerManager {
                     health: 0,
                     is_attacking: false,
                     projectile_texture: constants::TEXTURE_DEFAULT.to_string(),
-                    projectile_speed: 0,
+                    projectile_speed: 0.0,
                     projectile_radius: 0,
                     projectile_damage: 0,
 

@@ -19,149 +19,168 @@ pub struct MenuManager <'a> {
     settings_vec: Vec<MenuButton<'a>>,
     resolution_vec: Vec<(u32, u32)>,
     button_amount: usize,
-    current_resolution: usize,
+    pub current_resolution: usize,
     texture_creator: sdl2::render::TextureCreator<sdl2::video::WindowContext>,
     small_font: &'a sdl2::ttf::Font<'a, 'a>,
+    medium_font: &'a sdl2::ttf::Font<'a, 'a>,
     large_font: &'a sdl2::ttf::Font<'a, 'a>,
-
+    current_font: &'a sdl2::ttf::Font<'a, 'a>,
 }
 
 impl<'a> MenuManager<'a> {
-    pub fn new (game: &mut game_manager::GameManager, small_font: &'a sdl2::ttf::Font<'a, 'a>, large_font: &'a sdl2::ttf::Font<'a, 'a>) -> MenuManager<'a> {
+    pub fn new (game: &mut game_manager::GameManager, small_font: &'a sdl2::ttf::Font<'a, 'a>, medium_font: &'a sdl2::ttf::Font<'a, 'a>, large_font: &'a sdl2::ttf::Font<'a, 'a>) -> MenuManager<'a> {
         let menu = MenuManager {
             quit: false,
             button_vec: Vec::new(),
             settings_vec: Vec::new(),
-            resolution_vec: vec![(640, 480), (1280, 720), (1920, 1080), (2560, 1440), (4096, 2304)],
+            resolution_vec: vec![(128, 128), (640, 480), (1280, 720), (1920, 1080), (2560, 1440), (4096, 2304)],
             current_resolution: 0,
             button_amount: 3,
             texture_creator: game.canvas.texture_creator(),
             small_font,
+            medium_font,
             large_font,
+            current_font: large_font,
         };
         menu
     }
     pub fn create_menu (&mut self, game: &mut game_manager::GameManager, events: &mut event_manager::EventManager) -> Result<(), String> {
-        let texture_surface = self.large_font.render(&"Farm Defense".to_string())
+        let texture_surface = self.current_font.render(&"farm defense".to_string())
             .blended(constants::COLOR_WHITE)
             .map_err(|e| e.to_string())?;
         let main_text = self::MenuButton {
             texture_surface,
             rect: sdl2::rect::Rect::new(0, 0, 0, 0),
-            button_text: "".to_string(),
+            button_text: "farm defense".to_string(),
             clicked: false,
             hovering_button: false,
             outline_visible: false,
             last_clicked: 0,
         };
-        let texture_surface = self.large_font.render(&"Play".to_string())
+        let texture_surface = self.current_font.render(&"play".to_string())
             .blended(constants::COLOR_WHITE)
             .map_err(|e| e.to_string())?;
         let play_button = self::MenuButton {
             texture_surface,
             rect: sdl2::rect::Rect::new(0, 0, 0, 0),
-            button_text: "".to_string(),
+            button_text: "play".to_string(),
             clicked: false,
             hovering_button: false,
             outline_visible: false,
             last_clicked: 0,
         };
-        let texture_surface = self.large_font.render(&"Settings".to_string())
+        let texture_surface = self.current_font.render(&"settings".to_string())
             .blended(constants::COLOR_WHITE)
             .map_err(|e| e.to_string())?;
         let settings_button = self::MenuButton {
             texture_surface,
             rect: sdl2::rect::Rect::new(0, 0, 0, 0),
-            button_text: "".to_string(),
+            button_text: "settings".to_string(),
             clicked: false,
             hovering_button: false,
             outline_visible: false,
             last_clicked: 0,
         };
-
-        let texture_surface = self.large_font.render(&"Resolution".to_string())
+        let texture_surface = self.current_font.render(&"quit".to_string())
+            .blended(constants::COLOR_WHITE)
+            .map_err(|e| e.to_string())?;
+        let quit_button = self::MenuButton {
+            texture_surface,
+            rect: sdl2::rect::Rect::new(0, 0, 0, 0),
+            button_text: "quit".to_string(),
+            clicked: false,
+            hovering_button: false,
+            outline_visible: false,
+            last_clicked: 0,
+        };
+        let texture_surface = self.current_font.render(&"resolution".to_string())
             .blended(constants::COLOR_WHITE)
             .map_err(|e| e.to_string())?;
         let resolution_button = self::MenuButton {
             texture_surface,
             rect: sdl2::rect::Rect::new(0, 0, 0, 0),
-            button_text: "".to_string(),
+            button_text: "resolution".to_string(),
             clicked: false,
             hovering_button: false,
             outline_visible: false,
             last_clicked: 0,
         };
-        let texture_surface = self.large_font.render(&format!("{} x {}", events.screen_size.0, events.screen_size.1).to_string())
+        let texture_surface = self.current_font.render(&format!("{} x {}", events.screen_size.0, events.screen_size.1).to_string())
             .blended(constants::COLOR_WHITE)
             .map_err(|e| e.to_string())?;
         let resolution_string = self::MenuButton {
             texture_surface,
             rect: sdl2::rect::Rect::new(0, 0, 0, 0),
-            button_text: "".to_string(),
+            button_text: format!("{} x {}", events.screen_size.0, events.screen_size.1).to_string(),
             clicked: false,
             hovering_button: false,
             outline_visible: false,
             last_clicked: 0,
         };
-        let texture_surface = self.large_font.render(&"-".to_string())
+        let texture_surface = self.current_font.render(&"-".to_string())
             .blended(constants::COLOR_WHITE)
             .map_err(|e| e.to_string())?;
         let resolution_minus = self::MenuButton {
             texture_surface,
             rect: sdl2::rect::Rect::new(0, 0, 0, 0),
-            button_text: "".to_string(),
+            button_text: "-".to_string(),
             clicked: false,
             hovering_button: false,
             outline_visible: false,
             last_clicked: 0,
         };
-        let texture_surface = self.large_font.render(&"+".to_string())
+        let texture_surface = self.current_font.render(&"+".to_string())
             .blended(constants::COLOR_WHITE)
             .map_err(|e| e.to_string())?;
         let resolution_plus = self::MenuButton {
             texture_surface,
             rect: sdl2::rect::Rect::new(0, 0, 0, 0),
-            button_text: "".to_string(),
+            button_text: "+".to_string(),
             clicked: false,
             hovering_button: false,
             outline_visible: false,
             last_clicked: 0,
         };
-        let texture_surface = self.large_font.render(&format!("BACK").to_string())
+        let texture_surface = self.current_font.render(&format!("back").to_string())
             .blended(constants::COLOR_WHITE)
             .map_err(|e| e.to_string())?;
         let back_button = self::MenuButton {
             texture_surface,
             rect: sdl2::rect::Rect::new(0, 0, 0, 0),
-            button_text: "".to_string(),
+            button_text: "back".to_string(),
             clicked: false,
             hovering_button: false,
             outline_visible: false,
             last_clicked: 0,
         };
         let texture_surface;
+        let button_text;
         match game.canvas.window().fullscreen_state() {
             sdl2::video::FullscreenType::True => {
-                texture_surface = self.large_font.render(&"FULLSCREEN".to_string())
+                texture_surface = self.current_font.render(&"fullscreen".to_string())
                     .blended(constants::COLOR_WHITE)
                     .map_err(|e| e.to_string())?;
+                button_text = "fullscreen".to_string();
             }
             sdl2::video::FullscreenType::Off => {
-                texture_surface = self.large_font.render(&"WINDOWED".to_string())
+                texture_surface = self.current_font.render(&"windowed".to_string())
                     .blended(constants::COLOR_WHITE)
                     .map_err(|e| e.to_string())?;
+                button_text = "windowed".to_string();
             }
             sdl2::video::FullscreenType::Desktop => {
-                texture_surface = self.large_font.render(&"BORDERLESS".to_string())
+                texture_surface = self.current_font.render(&"borderless".to_string())
                     .blended(constants::COLOR_WHITE)
                     .map_err(|e| e.to_string())?;
+                button_text = "borderless".to_string();
+
             }
         }
 
         let fullscreen_button = self::MenuButton {
             texture_surface,
             rect: sdl2::rect::Rect::new(0, 0, 0, 0),
-            button_text: "".to_string(),
+            button_text,
             clicked: false,
             hovering_button: false,
             outline_visible: false,
@@ -172,6 +191,7 @@ impl<'a> MenuManager<'a> {
         self.button_vec.push(main_text);
         self.button_vec.push(play_button);
         self.button_vec.push(settings_button);
+        self.button_vec.push(quit_button);
         self.settings_vec.push(resolution_button);
         self.settings_vec.push(resolution_string);
         self.settings_vec.push(fullscreen_button);
@@ -181,8 +201,12 @@ impl<'a> MenuManager<'a> {
 
         Ok(())
     }
+    pub fn render_menu(&mut self) -> Result<(), String> {
+    
+        Ok(())
+    }
 
-    pub fn render_menu (&mut self, events: &mut event_manager::EventManager, game: &mut game_manager::GameManager, player: &mut player_manager::PlayerManager) -> Result<(), String> {
+    pub fn update_menu (&mut self, events: &mut event_manager::EventManager, game: &mut game_manager::GameManager, player: &mut player_manager::PlayerManager) -> Result<(), String> {
         if !events.menu_settings {
             for menu_button_index in 0..self.button_vec.len() {
                 self.update_menu_buttons(menu_button_index, game);
@@ -213,10 +237,12 @@ impl<'a> MenuManager<'a> {
                         events.menu_quit = true;
                         events.game_paused = false;
                     }
-                    else if menu_button_index == constants::CURRENT_BUTTON_MENU_SETTINGS
-                    {
+                    else if menu_button_index == constants::CURRENT_BUTTON_MENU_SETTINGS {
                         events.menu_settings = true;
                         menu_button.outline_visible = false;
+                    }
+                    else if menu_button_index == constants::CURRENT_BUTTON_MENU_QUIT {
+                        event_manager::EventManager::quit_game(events, game);
                     }
 
                     menu_button.last_clicked = 0;
@@ -231,7 +257,7 @@ impl<'a> MenuManager<'a> {
 
                 let resolution_rect_data: (i32, i32, u32, u32) = (self.settings_vec[1].rect.x(), self.settings_vec[1].rect.y(), self.settings_vec[1].rect.width(), self.settings_vec[1].rect.height());
                 let settings_button = &mut self.settings_vec[settings_button_index];
-                
+
                 let texture_result = self.texture_creator.create_texture_from_surface(&settings_button.texture_surface);
 
                 let texture = match texture_result {
@@ -273,7 +299,14 @@ impl<'a> MenuManager<'a> {
                 }
                 if settings_button_index == constants::CURRENT_BUTTON_SETTINGS_RESOLUTION_STRING { 
                     events.screen_size = (game.canvas.window().display_mode().unwrap().w, game.canvas.window().display_mode().unwrap().h);
-                    let texture_surface = self.large_font.render(&format!("{} x {}", events.screen_size.0, events.screen_size.1).to_string())
+                    let texture_surface = self.current_font.render(&format!("{} x {}", events.screen_size.0, events.screen_size.1).to_string())
+                        .blended(constants::COLOR_WHITE)
+                        .map_err(|e| e.to_string())?;
+                    settings_button.texture_surface = texture_surface;
+
+                }
+                else {
+                    let texture_surface = self.current_font.render(&settings_button.button_text)
                         .blended(constants::COLOR_WHITE)
                         .map_err(|e| e.to_string())?;
                     settings_button.texture_surface = texture_surface;
@@ -291,6 +324,11 @@ impl<'a> MenuManager<'a> {
                             if self.current_resolution > 0 {
                                 self.current_resolution -= 1;
                             }
+                            match self.current_resolution {
+                                0 => self.current_font = self.medium_font,
+                                _ => self.current_font = self.large_font,
+                            }
+                            println!("Current res: {}", self.current_resolution);
                             game.canvas.window_mut().set_size(self.resolution_vec[self.current_resolution].0, self.resolution_vec[self.current_resolution].1);
                         }
                         constants::CURRENT_BUTTON_SETTINGS_RESOLUTION_PLUS => {
@@ -298,10 +336,14 @@ impl<'a> MenuManager<'a> {
                             if self.current_resolution < self.resolution_vec.len() - 1 {
                                 self.current_resolution += 1;
                             }
+                            match self.current_resolution {
+                                0 => self.current_font = self.medium_font,
+                                _ => self.current_font = self.large_font,
+                            }
+                            println!("Current res: {}", self.current_resolution);
                             game.canvas.window_mut().set_size(self.resolution_vec[self.current_resolution].0, self.resolution_vec[self.current_resolution].1);
                         }
-                        constants::CURRENT_BUTTON_SETTINGS_FULLSCREEN => {
-
+                        constants::CURRENT_BUTTON_SETTINGS_SCREEN_MODE => {
                             let texture_surface: Option<sdl2::surface::Surface> = match game.canvas.window().fullscreen_state() {
                                 sdl2::video::FullscreenType::True => {
                                     if let Err(err) = game.canvas.window_mut().set_fullscreen(sdl2::video::FullscreenType::Off) {
@@ -309,9 +351,11 @@ impl<'a> MenuManager<'a> {
                                         None
                                     } 
                                     else {
-                                        Some(self.large_font.render(&"WINDOWED".to_string())
+                                        settings_button.button_text = "windowed".to_string();
+                                        Some(self.current_font.render(&"windowed".to_string())
                                             .blended(constants::COLOR_WHITE)
                                             .map_err(|e| e.to_string())?)
+
                                     }
                                 },
                                 sdl2::video::FullscreenType::Off => {
@@ -320,7 +364,8 @@ impl<'a> MenuManager<'a> {
                                         None
                                     } 
                                     else {
-                                        Some(self.large_font.render(&"BORDERLESS".to_string())
+                                        settings_button.button_text = "borderless".to_string();
+                                        Some(self.current_font.render(&"borderless".to_string())
                                             .blended(constants::COLOR_WHITE)
                                             .map_err(|e| e.to_string())?)
                                     }
@@ -331,7 +376,8 @@ impl<'a> MenuManager<'a> {
                                         None
                                     } 
                                     else {
-                                        Some(self.large_font.render(&"FULLSCREEN".to_string())
+                                        settings_button.button_text = "fullscreen".to_string();
+                                        Some(self.current_font.render(&"fullscreen".to_string())
                                             .blended(constants::COLOR_WHITE)
                                             .map_err(|e| e.to_string())?)
                                     }

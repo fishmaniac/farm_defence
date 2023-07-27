@@ -57,23 +57,7 @@ fn load_game (
     // }
 }
 
-fn update_main_menu (
-    menu_manager: &mut menu_manager::MenuManager,
-game: &mut game_manager::GameManager, 
-    events: &mut event_manager::EventManager, 
-    player: &mut player_manager::PlayerManager,
-    level: &mut level_manager::LevelManager,
-    towers: &mut tower_manager::TowerManager,
-    buildings: &mut building_manager::BuildingManager,
-    enemies: &mut enemy_manager::EnemyManager,
-    projectiles: &mut projectile_manager::ProjectileManager,
-    seed_buttons: &mut button_manager::ButtonManager,
-    build_buttons: &mut button_manager::ButtonManager,
-    gui_manager: &mut gui_manager::GUIManager,
 
-) {
-
-}
 
 fn game_loop (
     game: &mut game_manager::GameManager, 
@@ -103,7 +87,7 @@ fn game_loop (
         game.prepare_background();
         events.do_event(game, towers, seed_buttons, build_buttons, gui_manager);
         if !events.menu_quit {
-            menu_manager.render_menu(events, game, player);
+            menu_manager.update_menu(events, game, player);
         }
         else if !events.game_paused {
             game.update_game(events, player, level, towers, buildings, enemies, projectiles, gui_manager, seed_buttons, build_buttons);
@@ -148,6 +132,7 @@ fn main() -> Result<(), String> {
     let ttf_context = sdl2::ttf::init().map_err(|e| e.to_string())?; 
     let font_path = std::path::Path::new(&constants::FONT_PATH);
     let small_font = ttf_context.load_font(font_path, 16)?;
+    let medium_font = ttf_context.load_font(font_path, 48)?;
     let large_font = ttf_context.load_font(font_path, 64)?;
 
     let mut game = game_manager::GameManager::new(&sdl_context);
@@ -165,7 +150,7 @@ fn main() -> Result<(), String> {
     let mut gui_manager = gui_manager::GUIManager::new(&mut game, &small_font);
     gui_manager.create_inventory_hud(&mut game);
 
-    let mut menu_manager = menu_manager::MenuManager::new(&mut game, &small_font, &large_font);
+    let mut menu_manager = menu_manager::MenuManager::new(&mut game, &small_font, &medium_font, &large_font);
     menu_manager.create_menu(&mut game, &mut events);
 
     // music
