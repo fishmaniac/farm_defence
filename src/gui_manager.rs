@@ -210,7 +210,7 @@ impl<'a> GUIManager<'a> {
         Ok(())
     }
     pub fn render_health_bar_enemy (&mut self, game: &mut game_manager::GameManager, enemy: &enemy_manager::Enemy) {
-        //TODO: MATCH TO ENEMY TYPE
+        //TODO: match to enemy type
         let max_health = sdl2::rect::Rect::new(enemy.rect.x() + (enemy.rect.width() - constants::ENEMY_GOBLIN_HEALTH_BAR_WIDTH) as i32 / 2, enemy.rect.y() - constants::ENEMY_GOBLIN_HEALTH_BAR_HEIGHT as i32, constants::ENEMY_GOBLIN_HEALTH_BAR_WIDTH, constants::ENEMY_GOBLIN_HEALTH_BAR_HEIGHT);
         let health_percentage = enemy.health as f64 / enemy.max_health as f64;
 
@@ -225,7 +225,8 @@ impl<'a> GUIManager<'a> {
         game.canvas.fill_rect(current_health.rect);
     }
     pub fn render_health_bar_tower (&mut self, game: &mut game_manager::GameManager, tower: &tower_manager::Tower) {
-        //TODO: MATCH TO TOWER TYPE
+        //TODO: match to tower type
+        //TODO: store rects & update
         let max_health = sdl2::rect::Rect::new(tower.top_rect.x() + (tower.top_rect.width() - constants::TOWER_ARCHER_HEALTH_BAR_WIDTH) as i32 / 2, tower.top_rect.y() - constants::TOWER_ARCHER_HEALTH_BAR_HEIGHT as i32, constants::TOWER_ARCHER_HEALTH_BAR_WIDTH, constants::TOWER_ARCHER_HEALTH_BAR_HEIGHT);
 
         let health_percentage = tower.health as f64 / tower.max_health as f64;

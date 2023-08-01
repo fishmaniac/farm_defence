@@ -33,7 +33,7 @@ impl<'a> MenuManager<'a> {
             quit: false,
             button_vec: Vec::new(),
             settings_vec: Vec::new(),
-            resolution_vec: vec![(128, 128), (640, 480), (1280, 720), (1920, 1080), (2560, 1440), (4096, 2304)],
+            resolution_vec: vec![(640, 480), (1280, 720), (1920, 1080), (2560, 1440), (4096, 2304)],
             current_resolution: 0,
             button_amount: 3,
             texture_creator: game.canvas.texture_creator(),
@@ -298,7 +298,16 @@ impl<'a> MenuManager<'a> {
                     eprintln!("Failed to copy texture to canvas:\t{}", err);
                 }
                 if settings_button_index == constants::CURRENT_BUTTON_SETTINGS_RESOLUTION_STRING { 
-                    events.screen_size = (game.canvas.window().display_mode().unwrap().w, game.canvas.window().display_mode().unwrap().h);
+                    let screen_size_result = game.canvas.window().display_mode();
+                    let screen_size = match screen_size_result {
+                        Ok(screen_size) => screen_size,
+                        Err(err) => {
+                            //TODO: need to set back to previous screen size
+                            eprintln!("Failed to get screen size");
+                            continue;
+                        }
+                    };
+                    events.screen_size = (screen_size.w, screen_size.h);
                     let texture_surface = self.current_font.render(&format!("{} x {}", events.screen_size.0, events.screen_size.1).to_string())
                         .blended(constants::COLOR_WHITE)
                         .map_err(|e| e.to_string())?;
@@ -320,7 +329,6 @@ impl<'a> MenuManager<'a> {
                         constants::CURRENT_BUTTON_SETTINGS_RESOLUTION_STRING => {
                         }
                         constants::CURRENT_BUTTON_SETTINGS_RESOLUTION_MINUS => {
-                            //ADD ERROR HANDLING
                             if self.current_resolution > 0 {
                                 self.current_resolution -= 1;
                             }
@@ -329,10 +337,10 @@ impl<'a> MenuManager<'a> {
                                 _ => self.current_font = self.large_font,
                             }
                             println!("Current res: {}", self.current_resolution);
+                            
                             game.canvas.window_mut().set_size(self.resolution_vec[self.current_resolution].0, self.resolution_vec[self.current_resolution].1);
                         }
                         constants::CURRENT_BUTTON_SETTINGS_RESOLUTION_PLUS => {
-                            //ADD ERROR HANDLING
                             if self.current_resolution < self.resolution_vec.len() - 1 {
                                 self.current_resolution += 1;
                             }

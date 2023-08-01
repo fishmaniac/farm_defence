@@ -277,7 +277,7 @@ impl BuildingManager {
                         game.placed = true;
                         temp_tile.tile_type = constants::TILE_TYPE_GOBLIN;
                         temp_tile.tile_data = TileData::Goblin;
-                        enemies.place_enemy(temp_tile, (col_index, row_index));
+                        enemies.place_enemy(game, temp_tile, (col_index, row_index));
                     } else if game.build_mode && build_buttons.button_vec[constants::CURRENT_BUILD_GOBLIN].outline_visible {
                         game.preview_mode = true;
                         gui_manager.preview.texture_path_bottom_left = constants::TEXTURE_PREVIEW_GOBLIN_ENEMY.to_string();

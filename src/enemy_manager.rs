@@ -9,9 +9,10 @@ use crate::texture_manager;
 use crate::projectile_manager;
 use crate::gui_manager;
 use crate::tower_manager;
+use crate::pathfinding_manager;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
-struct PathState {
+pub struct PathState {
     position: (usize, usize),
     priority: usize,
 }
@@ -50,18 +51,21 @@ pub struct Enemy {
 
 pub struct EnemyManager {
     pub enemy_vec: Vec<Enemy>,
+    pub frontier: Option<std::collections::BinaryHeap<PathState>>,
 }
 
 impl EnemyManager {
     pub fn new () -> EnemyManager {
         let enemies = EnemyManager {
             enemy_vec: Vec::new(),
+            frontier: None,
         };
         enemies
     }
 
     pub fn place_enemy(
         &mut self, 
+        game: &mut game_manager::GameManager,
         temp_tile: &level_manager::LevelTile, 
         index: (usize, usize),
     ) {
@@ -114,6 +118,7 @@ impl EnemyManager {
         tex_man: &mut texture_manager::TextureManager<sdl2::video::WindowContext>, 
         level: &mut level_manager::LevelManager, 
         gui_manager: &mut gui_manager::GUIManager,
+        pathfinding_manager: &mut pathfinding_manager::PathfindingManager,
     ) -> Result<(), String> {
         for enemy in &mut self.enemy_vec {
             let pixel_index: (i32, i32) = (enemy.grid_index.0 as i32 * constants::TILE_SIZE as i32, enemy.grid_index.1 as i32 * constants::TILE_SIZE as i32);
@@ -132,19 +137,48 @@ impl EnemyManager {
                 false,
                 false,
             )?;
+            //this should not be happening in render code
 
-            Self::move_enemies(events, game, level, enemy);
+            Self::move_enemies(events, game, level, pathfinding_manager, enemy);
             if enemy.health < enemy.max_health {
                 gui_manager.render_health_bar_enemy(game, enemy);
             }
         }
+        match self.frontier {
+            None => {
+                self.frontier = Some(self.create_frontier(&level.level_vec));
+            }
+            _ => {},
+        }
         Ok(())
+    }
+    fn create_frontier (&mut self, level_vec: &[Vec<LevelTile>])-> std::collections::BinaryHeap<PathState> {
+        let mut frontier: std::collections::BinaryHeap<PathState> = std::collections::BinaryHeap::new();
+        let mut priorities: std::collections::HashMap<(usize, usize), usize> = std::collections::HashMap::new();
+
+        // let neighbors = Self::get_neighbors(current, level_vec);
+        //
+        // for next in neighbors {
+        //     let new_cost = 1;
+        //     let priority = new_cost + Self::heuristic(next, target);
+        //
+        //     if !priorities.contains_key(&next) || priority < priorities[&next] {
+        //         priorities.insert(next, priority);
+        //         frontier.push(PathState {
+        //             position: next,
+        //             priority,
+        //         });
+        //         came_from.insert(next, current);
+        //     }
+        // }
+        frontier
     }
 
     fn move_enemies (
         events: &mut event_manager::EventManager,
         game: &mut game_manager::GameManager,
         level: &mut level_manager::LevelManager, 
+        pathfinding_manager: &mut pathfinding_manager::PathfindingManager,
         enemy: &mut Enemy,
     ) {
         let has_no_targets: bool = !game.target_vec.is_empty() && enemy.final_path.is_none() && !enemy.found_target;
@@ -157,10 +191,10 @@ impl EnemyManager {
         if can_move {
             if let Some(mut path) = enemy.final_path.take() {
                 if let Some((col, row)) = path.first() {
-/*                     if level.level_vec[enemy.grid_index.0][enemy.grid_index.1].tile_type == constants::TILE_TYPE_GOBLIN {  */
+                    if level.level_vec[enemy.grid_index.0][enemy.grid_index.1].tile_type == constants::TILE_TYPE_GOBLIN {  
                         level.level_vec[enemy.grid_index.0][enemy.grid_index.1].tile_type = level.level_vec[enemy.grid_index.0][enemy.grid_index.1].original_type;
                         level.level_vec[enemy.grid_index.0][enemy.grid_index.1].tile_data = TileData::None;
-/*                     } */
+                    }
                     level.level_vec[enemy.grid_index.0][enemy.grid_index.1].is_occupied = false;
                     enemy.grid_index.0 = *col;
                     enemy.grid_index.1 = *row;
@@ -214,10 +248,6 @@ impl EnemyManager {
                 Self::astar(enemy, target, &level.level_vec);
                 game.is_pathfinding = true;
             }
-            else {
-                //idk abt this
-                game.is_pathfinding = true;
-            }
         }
     }
 
@@ -225,12 +255,12 @@ impl EnemyManager {
         /*         println!("EXECUTING A*");  */
         let initial_state = PathState {
             position: enemy.grid_index,
-            priority: heuristic(enemy.grid_index, target),
+            priority: Self::heuristic(enemy.grid_index, target),
         };
 
         let mut frontier: std::collections::BinaryHeap<PathState> = [initial_state].into();
         let mut priorities: std::collections::HashMap<(usize, usize), usize> = std::collections::HashMap::new();
-        let mut came_from: std::collections::HashMap<(usize, usize), (usize, usize)> = std::collections::HashMap::new();
+        let mut final_path: std::collections::HashMap<(usize, usize), (usize, usize)> = std::collections::HashMap::new();
 
         priorities.insert(enemy.grid_index, initial_state.priority);
 
@@ -240,19 +270,20 @@ impl EnemyManager {
             if current == target {
                 let mut path = vec![current];
                 let mut current = current;
-                while let Some(&prev) = came_from.get(&current) {
+                while let Some(&prev) = final_path.get(&current) {
                     path.push(prev);
                     current = prev;
                 }
                 path.reverse();
                 enemy.final_path = Some(path);
+                return
             }
 
-            let neighbors = get_neighbors(current, level_vec);
+            let neighbors = Self::get_neighbors(current, level_vec);
 
             for next in neighbors {
                 let new_cost = 1;
-                let priority = new_cost + heuristic(next, target);
+                let priority = new_cost + Self::heuristic(next, target);
 
                 if !priorities.contains_key(&next) || priority < priorities[&next] {
                     priorities.insert(next, priority);
@@ -260,71 +291,71 @@ impl EnemyManager {
                         position: next,
                         priority,
                     });
-                    came_from.insert(next, current);
+                    final_path.insert(next, current);
                 }
             }
         }
-
-        fn heuristic(position: (usize, usize), goal: (usize, usize)) -> usize {
-            let (x1, y1) = position;
-            let (x2, y2) = goal;
-
-            let dx = (x1 as isize - x2 as isize).abs() as usize;
-            let dy = (y1 as isize - y2 as isize).abs() as usize;
-
-            dx + dy
-        }
-        fn get_neighbors(position: (usize, usize), level_vec: &[Vec<LevelTile>]) -> Vec<(usize, usize)> {
-            let (x, y) = position;
-            let width = level_vec[0].len();
-            let height = level_vec.len();
-            let mut neighbors = Vec::with_capacity(8);
-            let top_tile = &level_vec[x][y - 1];
-            let bottom_tile = &level_vec[x][y + 1]; 
-            let left_tile = &level_vec[x - 1][y];
-            let right_tile = &level_vec[x + 1][y];
-            let top_left_tile = &level_vec[x - 1][y - 1];
-            let top_right_tile = &level_vec[x - 1][y + 1];
-            let bottom_left_tile = &level_vec[x + 1][y - 1];
-            let bottom_right_tile = &level_vec[x + 1][y + 1];
-
-            let tile_types_to_avoid = [
-                constants::TILE_TYPE_WALL,
-            ];
-
-            //Up
-            if y > 0 && !tile_types_to_avoid.contains(&top_tile.tile_type) && !top_tile.is_occupied {
-                neighbors.push((x, y - 1));
-            }
-            //Down
-            if y < height - 1 && !tile_types_to_avoid.contains(&bottom_tile.tile_type) && !bottom_tile.is_occupied {
-                neighbors.push((x, y + 1));
-            }
-            //Left
-            if x > 0 && !tile_types_to_avoid.contains(&left_tile.tile_type) && !left_tile.is_occupied {
-                neighbors.push((x - 1, y));
-            }
-            //Right
-            if x < width - 1 && !tile_types_to_avoid.contains(&right_tile.tile_type) && !right_tile.is_occupied {
-                neighbors.push((x + 1, y));
-            }
-            // Top-left
-            if x > 0 && y > 0 && !tile_types_to_avoid.contains(&top_left_tile.tile_type) && !top_left_tile.is_occupied {
-                neighbors.push((x - 1, y - 1));
-            }
-            // Top-right
-            if x > 0 && y < height - 1 && !tile_types_to_avoid.contains(&top_right_tile.tile_type) && !top_right_tile.is_occupied {
-                neighbors.push((x - 1, y + 1));
-            }
-            // Bottom-left
-            if x < width - 1 && y > 0 && !tile_types_to_avoid.contains(&bottom_left_tile.tile_type) && !bottom_left_tile.is_occupied {
-                neighbors.push((x + 1, y - 1));
-            }
-            // Bottom-right
-            if x < width - 1 && y < height - 1 && !tile_types_to_avoid.contains(&bottom_right_tile.tile_type) && !bottom_right_tile.is_occupied {
-                neighbors.push((x + 1, y + 1));
-            }            
-            neighbors
-        }
     }
+    fn get_neighbors(position: (usize, usize), level_vec: &[Vec<LevelTile>]) -> Vec<(usize, usize)> {
+        let (x, y) = position;
+        let width = level_vec[0].len();
+        let height = level_vec.len();
+        let mut neighbors = Vec::with_capacity(8);
+        let top_tile = &level_vec[x][y - 1];
+        let bottom_tile = &level_vec[x][y + 1]; 
+        let left_tile = &level_vec[x - 1][y];
+        let right_tile = &level_vec[x + 1][y];
+        let top_left_tile = &level_vec[x - 1][y - 1];
+        let top_right_tile = &level_vec[x - 1][y + 1];
+        let bottom_left_tile = &level_vec[x + 1][y - 1];
+        let bottom_right_tile = &level_vec[x + 1][y + 1];
+
+        let tile_types_to_avoid = [
+            constants::TILE_TYPE_WALL,
+        ];
+
+        //Up
+        if y > 0 && !tile_types_to_avoid.contains(&top_tile.tile_type) && !top_tile.is_occupied {
+            neighbors.push((x, y - 1));
+        }
+        //Down
+        if y < height - 1 && !tile_types_to_avoid.contains(&bottom_tile.tile_type) && !bottom_tile.is_occupied {
+            neighbors.push((x, y + 1));
+        }
+        //Left
+        if x > 0 && !tile_types_to_avoid.contains(&left_tile.tile_type) && !left_tile.is_occupied {
+            neighbors.push((x - 1, y));
+        }
+        //Right
+        if x < width - 1 && !tile_types_to_avoid.contains(&right_tile.tile_type) && !right_tile.is_occupied {
+            neighbors.push((x + 1, y));
+        }
+        // Top-left
+        if x > 0 && y > 0 && !tile_types_to_avoid.contains(&top_left_tile.tile_type) && !top_left_tile.is_occupied {
+            neighbors.push((x - 1, y - 1));
+        }
+        // Top-right
+        if x > 0 && y < height - 1 && !tile_types_to_avoid.contains(&top_right_tile.tile_type) && !top_right_tile.is_occupied {
+            neighbors.push((x - 1, y + 1));
+        }
+        // Bottom-left
+        if x < width - 1 && y > 0 && !tile_types_to_avoid.contains(&bottom_left_tile.tile_type) && !bottom_left_tile.is_occupied {
+            neighbors.push((x + 1, y - 1));
+        }
+        // Bottom-right
+        if x < width - 1 && y < height - 1 && !tile_types_to_avoid.contains(&bottom_right_tile.tile_type) && !bottom_right_tile.is_occupied {
+            neighbors.push((x + 1, y + 1));
+        }            
+        neighbors
+    }
+    fn heuristic(position: (usize, usize), goal: (usize, usize)) -> usize {
+        let (x1, y1) = position;
+        let (x2, y2) = goal;
+
+        let dx = (x1 as isize - x2 as isize).abs() as usize;
+        let dy = (y1 as isize - y2 as isize).abs() as usize;
+
+        dx + dy
+    }
+
 }

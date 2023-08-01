@@ -11,6 +11,7 @@ pub mod projectile_manager;
 pub mod gui_manager;
 pub mod button_manager;
 pub mod menu_manager;
+pub mod pathfinding_manager;
 
 fn save_game (
     game: &mut game_manager::GameManager, 
@@ -73,6 +74,7 @@ fn game_loop (
     build_buttons: &mut button_manager::ButtonManager,
     gui_manager: &mut gui_manager::GUIManager,
     menu_manager: &mut menu_manager::MenuManager,
+    pathfinding_manager: &mut pathfinding_manager::PathfindingManager,
 ) -> Result<(), String> {
     let mut frame_count: u32 = 0;
     let mut last_fps_time = std::time::Instant::now();
@@ -91,7 +93,7 @@ fn game_loop (
         }
         else if !events.game_paused {
             game.update_game(events, player, level, towers, buildings, enemies, projectiles, gui_manager, seed_buttons, build_buttons);
-            game.render_game(tex_man, events, player, level, towers, buildings, enemies, projectiles, gui_manager, seed_buttons, build_buttons);
+            game.render_game(tex_man, events, player, level, towers, buildings, enemies, projectiles, gui_manager, seed_buttons, build_buttons, pathfinding_manager);
 
 
             game.frame_time += 1;
@@ -153,7 +155,9 @@ fn main() -> Result<(), String> {
     let mut menu_manager = menu_manager::MenuManager::new(&mut game, &small_font, &medium_font, &large_font);
     menu_manager.create_menu(&mut game, &mut events);
 
-    // music
+    let mut pathfinding_manager = pathfinding_manager::PathfindingManager::new();
+
+    // TODO: music manager here
     sdl2::mixer::open_audio(44100, sdl2::mixer::DEFAULT_FORMAT, 2, 2048)?;
     sdl2::mixer::allocate_channels(2);
 
@@ -165,7 +169,7 @@ fn main() -> Result<(), String> {
     level.create_level(); 
     level.read_file("farm.txt").unwrap();
 
-    game_loop(&mut game, &mut tex_man, &mut events, &mut player, &mut level, &mut towers, &mut buildings, &mut enemies, &mut projectiles, &mut seed_buttons, &mut build_buttons, &mut gui_manager, &mut menu_manager);
+    game_loop(&mut game, &mut tex_man, &mut events, &mut player, &mut level, &mut towers, &mut buildings, &mut enemies, &mut projectiles, &mut seed_buttons, &mut build_buttons, &mut gui_manager, &mut menu_manager, &mut pathfinding_manager);
 
     Ok(())
 }

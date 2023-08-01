@@ -1,4 +1,4 @@
-use crate::{level_manager, button_manager, player_manager, event_manager, texture_manager, constants, tower_manager, enemy_manager, gui_manager, projectile_manager, building_manager};
+use crate::{level_manager, button_manager, player_manager, event_manager, texture_manager, constants, tower_manager, enemy_manager, gui_manager, projectile_manager, building_manager, pathfinding_manager};
 
 pub enum Movement {
     Up,
@@ -57,7 +57,7 @@ impl GameManager {
         // assert_eq!(gl_attr.context_version(), (3, 2));
 
         let mut canvas = window.into_canvas()
-    /*         .present_vsync()    */
+/*             .present_vsync()    */
             .accelerated()
             .build()
             .expect("Failed to initialize canvas");
@@ -134,11 +134,12 @@ impl GameManager {
         gui_manager: &mut gui_manager::GUIManager,
         seed_buttons: &mut button_manager::ButtonManager, 
         build_buttons: &mut button_manager::ButtonManager,
+        pathfinding_manager: &mut pathfinding_manager::PathfindingManager,
     ) {
 
 
         level.render_level(self, tex_man).unwrap();
-        enemy_manager::EnemyManager::render_enemies(enemies, self, events, tex_man, level, gui_manager).unwrap(); 
+        enemy_manager::EnemyManager::render_enemies(enemies, self, events, tex_man, level, gui_manager, pathfinding_manager).unwrap(); 
         projectile_manager::ProjectileManager::render_projectiles(projectiles, self, tex_man, events).unwrap();
         tower_manager::TowerManager::render_towers(towers, self, tex_man, gui_manager).unwrap();
         buildings.render_buildings(self, tex_man, gui_manager);
