@@ -81,7 +81,7 @@ impl ProjectileManager {
 
     pub fn check_projectile_hit(&mut self, game: &mut game_manager::GameManager, events: &mut event_manager::EventManager, player: &mut player_manager::PlayerManager, enemies: &mut enemy_manager::EnemyManager) {
         for enemy in &mut enemies.enemy_vec {
-            let enemy_pos_pixel = (constants::TILE_SIZE as i32 * enemy.grid_index.0 as i32, constants::TILE_SIZE as i32 * enemy.grid_index.1 as i32);
+            let enemy_pos_pixel = (enemy.pixel_index.0 as i32, enemy.pixel_index.1 as i32);
 
             if player.is_attacking {
                 let start = (player.rect.x() + player.x, player.rect.y() + player.y);

@@ -37,12 +37,14 @@ pub struct Building {
 
 pub struct BuildingManager {
     pub building_vec: Vec<Building>,
+    pub base_created: bool,
 }
 
 impl BuildingManager {
     pub fn new() -> BuildingManager {
         let buildings = BuildingManager {
             building_vec: Vec::new(),
+            base_created: false,
         };
         buildings
     }
@@ -77,7 +79,8 @@ impl BuildingManager {
                     health: constants::BUILDING_BASE_HEALTH,
                 };
 
-                if !self.building_vec.iter().any(|building| building.building_type == BuildingType::Base) {
+                if !self.base_created {
+                    self.base_created = true;
                     gui_manager.create_message("base created, make sure you keep it safe".to_string(), 256);
                     self.building_vec.push(building);
                     game.base_location = Some((col_index, row_index));
@@ -228,7 +231,8 @@ impl BuildingManager {
         let is_not_a_tower: bool = temp_tile.tile_type != constants::TILE_TYPE_ARCHER_BOTTOM && temp_tile.tile_type != constants::TILE_TYPE_FIREBALL_BOTTOM;
         match game.current_build {
             constants::CURRENT_BUILD_ARCHER_TOWER => {
-                if !game.placed && temp_tile.tile_type == constants::TILE_TYPE_GRASS && is_not_a_tower {
+                if !game.placed && temp_tile.tile_type == constants::TILE_TYPE_GRASS && 
+                is_not_a_tower {
                     if game.preview_mode && game.mouse_button == sdl2::mouse::MouseButton::Left {
                         game.placed = true;
                         temp_tile.tile_type = constants::TILE_TYPE_ARCHER_BOTTOM;
@@ -272,12 +276,12 @@ impl BuildingManager {
 
             }
             constants::CURRENT_BUILD_GOBLIN => {
-                if temp_tile.tile_type == constants::TILE_TYPE_GRASS && temp_tile.tile_type != constants::TILE_TYPE_GOBLIN {
-                    if game.preview_mode && game.mouse_button == sdl2::mouse::MouseButton::Left {
+                if temp_tile.tile_type == constants::TILE_TYPE_GRASS {
+                    if /* !game.placed &&  */game.preview_mode && game.mouse_button == sdl2::mouse::MouseButton::Left {
                         game.placed = true;
-                        temp_tile.tile_type = constants::TILE_TYPE_GOBLIN;
-                        temp_tile.tile_data = TileData::Goblin;
-                        enemies.place_enemy(game, temp_tile, (col_index, row_index));
+                        // temp_tile.tile_type = constants::TILE_TYPE_GOBLIN;
+                        // temp_tile.tile_data = TileData::Goblin;
+                        enemies.place_enemy(game, temp_tile, TileData::Goblin, (col_index, row_index));
                     } else if game.build_mode && build_buttons.button_vec[constants::CURRENT_BUILD_GOBLIN].outline_visible {
                         game.preview_mode = true;
                         gui_manager.preview.texture_path_bottom_left = constants::TEXTURE_PREVIEW_GOBLIN_ENEMY.to_string();
@@ -334,6 +338,9 @@ impl BuildingManager {
                 }
             }
             _ => {}
+        }
+        if game.placed {
+            enemy_manager::EnemyManager::repath_all_enemies(enemies);
         }
     }
 

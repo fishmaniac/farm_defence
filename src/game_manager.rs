@@ -110,16 +110,17 @@ impl GameManager {
         gui_manager: &mut gui_manager::GUIManager,
         seed_buttons: &mut button_manager::ButtonManager, 
         build_buttons: &mut button_manager::ButtonManager,
+        pathfinding_manager: &mut pathfinding_manager::PathfindingManager,
     ) {
         player.update_player(events, self, level);
         self.update_camera(player);
 
         buildings.update_buildings(self, events, level, player, towers, enemies, gui_manager, seed_buttons, build_buttons, projectiles);
         level_manager::LevelManager::check_attacks(self, events, player, enemies, towers, buildings, projectiles, gui_manager);
+        enemies.move_enemies(events, self, level, pathfinding_manager);
         projectiles.check_projectile_hit(self, events, player, enemies);
-        level.delete_all_dead(self, enemies, towers, buildings, projectiles, gui_manager);
+        self.delete_all_dead(level, enemies, towers, buildings, projectiles, gui_manager);
     }
-
 
     pub fn render_game(
         &mut self, 
@@ -134,12 +135,11 @@ impl GameManager {
         gui_manager: &mut gui_manager::GUIManager,
         seed_buttons: &mut button_manager::ButtonManager, 
         build_buttons: &mut button_manager::ButtonManager,
-        pathfinding_manager: &mut pathfinding_manager::PathfindingManager,
     ) {
 
 
         level.render_level(self, tex_man).unwrap();
-        enemy_manager::EnemyManager::render_enemies(enemies, self, events, tex_man, level, gui_manager, pathfinding_manager).unwrap(); 
+        enemy_manager::EnemyManager::render_enemies(enemies, self, tex_man, gui_manager).unwrap(); 
         projectile_manager::ProjectileManager::render_projectiles(projectiles, self, tex_man, events).unwrap();
         tower_manager::TowerManager::render_towers(towers, self, tex_man, gui_manager).unwrap();
         buildings.render_buildings(self, tex_man, gui_manager);
@@ -150,4 +150,83 @@ impl GameManager {
         gui_manager.render_inventory_hud(events, self, tex_man);
         gui_manager.render_messages(self, events, tex_man);
     }
+    pub fn delete_all_dead (
+        &mut self,
+        level: &mut level_manager::LevelManager,
+        enemies: &mut enemy_manager::EnemyManager, 
+        towers: &mut tower_manager::TowerManager,
+        buildings: &mut building_manager::BuildingManager,
+        projectiles: &mut projectile_manager::ProjectileManager,
+        gui_manager: &mut gui_manager::GUIManager,
+    ) {
+        for enemy_index in (0..enemies.enemy_vec.len()).rev() {
+            let enemy = &mut enemies.enemy_vec[enemy_index];
+            if let Some(target) = enemy.current_target {
+                if !self.target_vec.contains(&target) {
+                    enemy.current_target = None;
+                }
+            }
+
+            if enemy.health == 0 {
+                //MAYBE REMOVE TILE TYPE
+                level.level_vec[enemy.grid_index.0][enemy.grid_index.1].tile_type = level.level_vec[enemy.grid_index.0][enemy.grid_index.1].original_type; 
+                level.level_vec[enemy.grid_index.0][enemy.grid_index.1].tile_data = level_manager::TileData::None;
+                level.level_vec[enemy.grid_index.0][enemy.grid_index.1].is_occupied = false;
+                enemies.enemy_vec.remove(enemy_index);
+                if buildings.building_vec.iter().any(|building| building.building_type == building_manager::BuildingType::Base) {                
+                    self.gold_amount += 1;
+                }
+            }
+
+        }
+        for tower_index in (0..towers.tower_vec.len()).rev() {
+            let tower = &mut towers.tower_vec[tower_index];
+
+            if tower.health == 0 {
+                for target_index in (0..self.target_vec.len()).rev() {
+                    let target = self.target_vec[target_index];
+
+                    if target == tower.bottom_index {
+                        for enemy in &mut enemies.enemy_vec {
+                            if enemy.current_target == Some(target) {
+                                enemy.current_target = None;
+                            }
+                        }
+
+                        self.target_vec.remove(target_index);
+                    }
+                }
+                //@@!!REMOVE AND REDO? this is cause of path bug!!@@
+                // for enemy_index in (0..enemies.enemy_vec.len()).rev() {
+                //     enemies.enemy_vec[enemy_index].found_target = false;
+                // }
+                level.level_vec[tower.bottom_index.0][tower.bottom_index.1].tile_type = level.level_vec[tower.bottom_index.0][tower.bottom_index.1].original_type;
+                level.level_vec[tower.bottom_index.0][tower.bottom_index.1].tile_data = level_manager::TileData::None;
+                level.level_vec[tower.bottom_index.0][tower.bottom_index.1].is_occupied = false;
+                towers.tower_vec.remove(tower_index);
+            }
+        }
+        for projectile_index in (0..projectiles.projectile_vec.len()).rev() {
+            let projectile = &mut projectiles.projectile_vec[projectile_index];
+            let do_despawn_projectile: bool = (projectile.hit_target && projectile.time > constants::PROJECTILE_HIT_DESPAWN_DURATION) || projectile.time > constants::PROJECTILE_DESPAWN_DURATION;
+
+            if do_despawn_projectile {
+                projectiles.projectile_vec.remove(projectile_index);
+            }
+        }
+        for building_index in (0..buildings.building_vec.len()).rev() {
+            let building = &mut buildings.building_vec[building_index];
+            if building.health == 0 {
+                if building.building_type == building_manager::BuildingType::Base {
+                    //CLEAR TARGET VEC & SET PATH TO LOCATION WHERE ENEMIES CAN BE DESTROYED
+                    //ALLOW PLAYER TIME TO REBUILD
+                    self.gold_amount = 0;
+                    buildings.base_created = false;
+                    gui_manager.create_message("base destroyed, time to rebuild".to_string(), 256);
+                }
+                buildings.building_vec.remove(building_index);
+            }
+        }
+    }
+
 }

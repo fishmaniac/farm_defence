@@ -12,6 +12,7 @@ pub mod gui_manager;
 pub mod button_manager;
 pub mod menu_manager;
 pub mod pathfinding_manager;
+pub mod utilities;
 
 fn save_game (
     game: &mut game_manager::GameManager, 
@@ -48,7 +49,9 @@ fn load_game (
     build_buttons: &mut button_manager::ButtonManager,
     health_bars: &mut gui_manager::GUIManager,
 ) {
-    // let load_path = "saves/save.bin";
+    // let load_path: &str = "saves/save.bin";
+    // let load_file = include_bytes!(load_path);
+
     // match level_manager::LevelManager::load_from_file(&load_path) {
     //     Ok(loaded_level) => {
     //         *level = loaded_level;
@@ -92,8 +95,8 @@ fn game_loop (
             menu_manager.update_menu(events, game, player);
         }
         else if !events.game_paused {
-            game.update_game(events, player, level, towers, buildings, enemies, projectiles, gui_manager, seed_buttons, build_buttons);
-            game.render_game(tex_man, events, player, level, towers, buildings, enemies, projectiles, gui_manager, seed_buttons, build_buttons, pathfinding_manager);
+            game.update_game(events, player, level, towers, buildings, enemies, projectiles, gui_manager, seed_buttons, build_buttons, pathfinding_manager);
+            game.render_game(tex_man, events, player, level, towers, buildings, enemies, projectiles, gui_manager, seed_buttons, build_buttons);
 
 
             game.frame_time += 1;
@@ -102,7 +105,7 @@ fn game_loop (
                 let elapsed_fps_time = last_fps_time.elapsed();
                 game.elapsed_seconds = elapsed_fps_time.as_secs_f64();
                 game.fps = (frame_count as f64 / game.elapsed_seconds) as u32;
-                println!("\nFPS: {}\tELAPSED: {:.4}\tFRAME TIME: {}\tPLAYER POS: X: {}\tY: {}\nCARROTS: {}\tTOMATOES: {}\tDELTA TIME: {}\tPATHING: {}\n", game.fps, game.elapsed_seconds, game.frame_time, player.x, player.y, game.carrot_amount, game.tomato_amount, events.delta_time, game.is_pathfinding);
+/*                 println!("\nFPS: {}\tELAPSED: {:.4}\tFRAME TIME: {}\tPLAYER POS: X: {}\tY: {}\nCARROTS: {}\tTOMATOES: {}\tDELTA TIME: {}\tPATHING: {}\n", game.fps, game.elapsed_seconds, game.frame_time, player.x, player.y, game.carrot_amount, game.tomato_amount, events.delta_time, game.is_pathfinding); */
                 frame_count = 0;
                 last_fps_time = std::time::Instant::now();
             }

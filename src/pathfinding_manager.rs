@@ -1,5 +1,6 @@
 use crate::level_manager;
 use crate::enemy_manager;
+use crate::utilities;
 use crate::constants;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
@@ -45,26 +46,62 @@ impl PathfindingManager {
         let frontier: std::collections::BinaryHeap<PathState> = [initial_state].into();
         self.frontier = Some(frontier);
     }
-
+    fn remove_path_duplicates(final_path: &mut Vec<(usize, usize)>) {
+        for current_index in (0..final_path.len()).rev() {
+            if current_index != 0 && 
+            final_path[current_index] == final_path[current_index - 1] {
+                final_path.remove(current_index);
+            }
+        }
+    }
     pub fn astar(&mut self, enemy: &mut enemy_manager::Enemy, target: (usize, usize), level_vec: &[Vec<level_manager::LevelTile>]) {
-        let mut final_path: Vec<(usize, usize)> = Vec::new();
-
+        println!("EXECUTING A*"); 
         let initial_state = PathState {
             position: enemy.grid_index,
             priority: Self::heuristic(enemy.grid_index, target),
         };
-        println!("Initial Priotity: {:?}{}", enemy.grid_index, initial_state.priority);
 
         let mut frontier: std::collections::BinaryHeap<PathState> = [initial_state].into();
+        let mut priorities: std::collections::HashMap<(usize, usize), usize> = std::collections::HashMap::new();
+        let mut came_from: std::collections::HashMap<(usize, usize), (usize, usize)> = std::collections::HashMap::new();
 
-        while !frontier.is_empty() {
-            let current = frontier.pop();
+        priorities.insert(enemy.grid_index, initial_state.priority);
 
-/*             let neighbors = Self::get_neighbors(current, level_vec); */
+        while let Some(current_state) = frontier.pop() {
+            let current = current_state.position;
+
+            if current == target {
+                let mut path = vec![current];
+                let mut current = current;
+                while let Some(&prev) = came_from.get(&current) {
+                    path.push(prev);
+                    current = prev;
+                }
+                path.reverse();
+                enemy.final_path = Some(path);
+                println!("ASTAR PATH: {:?}", enemy.final_path);
+                return
+            }
+
+            let neighbors = Self::get_neighbors(current, level_vec);
+
+            for next in neighbors {
+                let new_cost = 1;
+                let priority = new_cost + Self::heuristic(next, target);
+
+                if !priorities.contains_key(&next) || priority < priorities[&next] {
+                    priorities.insert(next, priority);
+                    frontier.push(PathState {
+                        position: next,
+                        priority,
+                    });
+                    came_from.insert(next, current);
+                }
+            }
         }
     }
-    fn get_neighbors(position: (usize, usize), level_vec: &[Vec<level_manager::LevelTile>]) -> Vec<(usize, usize)> {
-        let (x, y) = position;
+    fn get_neighbors(start: (usize, usize), level_vec: &[Vec<level_manager::LevelTile>]) -> Vec<(usize, usize)> {
+        let (x, y) = start;
         let width = level_vec[0].len();
         let height = level_vec.len();
         let mut neighbors = Vec::with_capacity(8);
@@ -77,47 +114,61 @@ impl PathfindingManager {
         let bottom_left_tile = &level_vec[x + 1][y - 1];
         let bottom_right_tile = &level_vec[x + 1][y + 1];
 
-        let tile_types_to_avoid = [
-            constants::TILE_TYPE_WALL,
-        ];
-
-        //Up
-        if y > 0 && !tile_types_to_avoid.contains(&top_tile.tile_type) && !top_tile.is_occupied {
+        // Top
+        if !top_tile.is_occupied 
+        && y > 0 
+        && utilities::tile_not_collidable(top_tile) {
             neighbors.push((x, y - 1));
         }
-        //Down
-        if y < height - 1 && !tile_types_to_avoid.contains(&bottom_tile.tile_type) && !bottom_tile.is_occupied {
+        // Bottom
+        if !bottom_tile.is_occupied 
+        && y < height - 1
+        && utilities::tile_not_collidable(bottom_tile) {
             neighbors.push((x, y + 1));
         }
-        //Left
-        if x > 0 && !tile_types_to_avoid.contains(&left_tile.tile_type) && !left_tile.is_occupied {
+        // Left
+        if !left_tile.is_occupied 
+        && x > 0
+        && utilities::tile_not_collidable(left_tile) {
             neighbors.push((x - 1, y));
         }
-        //Right
-        if x < width - 1 && !tile_types_to_avoid.contains(&right_tile.tile_type) && !right_tile.is_occupied {
+        // Right
+        if !right_tile.is_occupied 
+        && x < width - 1 
+        && utilities::tile_not_collidable(right_tile) {
             neighbors.push((x + 1, y));
         }
         // Top-left
-        if x > 0 && y > 0 && !tile_types_to_avoid.contains(&top_left_tile.tile_type) && !top_left_tile.is_occupied {
+        if !top_left_tile.is_occupied 
+        && x > 0 && y > 0 
+        && utilities::tile_not_collidable(top_left_tile) {
             neighbors.push((x - 1, y - 1));
         }
         // Top-right
-        if x > 0 && y < height - 1 && !tile_types_to_avoid.contains(&top_right_tile.tile_type) && !top_right_tile.is_occupied {
+        if !top_right_tile.is_occupied 
+        && x > 0 && y < height - 1 
+        && utilities::tile_not_collidable(top_right_tile) {
             neighbors.push((x - 1, y + 1));
         }
         // Bottom-left
-        if x < width - 1 && y > 0 && !tile_types_to_avoid.contains(&bottom_left_tile.tile_type) && !bottom_left_tile.is_occupied {
+        if !bottom_left_tile.is_occupied
+        && x < width - 1 && y > 0 
+        && utilities::tile_not_collidable(bottom_left_tile) {
+
             neighbors.push((x + 1, y - 1));
         }
         // Bottom-right
-        if x < width - 1 && y < height - 1 && !tile_types_to_avoid.contains(&bottom_right_tile.tile_type) && !bottom_right_tile.is_occupied {
+        if !bottom_right_tile.is_occupied
+        && x < width - 1 && y < height - 1 
+        && utilities::tile_not_collidable(bottom_right_tile) {
             neighbors.push((x + 1, y + 1));
         }            
         neighbors
     }
-    fn heuristic(position: (usize, usize), goal: (usize, usize)) -> usize {
-        let (x1, y1) = position;
-        let (x2, y2) = goal;
+
+    fn heuristic(start: (usize, usize), target: (usize, usize)) -> usize {
+        let (x1, y1) = start;
+        let (x2, y2) = target;
 
         let dx = (x1 as isize - x2 as isize).abs() as usize;
         let dy = (y1 as isize - y2 as isize).abs() as usize;

@@ -7,7 +7,6 @@ use std::io::{BufRead, BufReader, Write, Read};
 use std::env;
 
 use crate::{constants, projectile_manager, gui_manager, game_manager, building_manager, player_manager, event_manager};
-use crate::game_manager::GameManager;
 use crate::texture_manager::TextureManager;
 use crate::player_manager::PlayerManager;
 use crate::tower_manager;
@@ -209,9 +208,11 @@ impl LevelManager {
         for tower in &mut towers.tower_vec {
             let tower_pos_pixel = (constants::TILE_SIZE as i32 * tower.top_index.0 as i32, constants::TILE_SIZE as i32 * tower.top_index.1 as i32);
             for enemy in &mut enemies.enemy_vec {
-                let enemy_pos_pixel = (constants::TILE_SIZE as i32 * enemy.grid_index.0 as i32, constants::TILE_SIZE as i32 * enemy.grid_index.1 as i32);
-                let tower_can_attack: bool = tower_manager::TowerManager::is_within_area((tower.bottom_index.0 as i32, tower.bottom_index.1 as i32), (enemy.grid_index.0 as i32, enemy.grid_index.1 as i32), tower.attack_radius) && game.frame_time % tower.attack_speed as u32 == 0;
-                let enemy_can_attack: bool = tower_manager::TowerManager::is_within_area((tower.bottom_index.0 as i32, tower.bottom_index.1 as i32), (enemy.grid_index.0 as i32, enemy.grid_index.1 as i32), enemy.attack_radius as i32) && game.frame_time % enemy.attack_speed as u32 == 0;
+                /* let enemy_pos_pixel = (constants::TILE_SIZE as i32 * enemy.grid_index.0 as i32, constants::TILE_SIZE as i32 * enemy.grid_index.1 as i32); */
+                let enemy_pos_pixel = (enemy.pixel_index.0 as i32, enemy.pixel_index.1 as i32);
+                //need to add delta time here
+                let tower_can_attack: bool = tower_manager::TowerManager::is_within_area(tower_pos_pixel, enemy_pos_pixel, tower.attack_radius) && game.frame_time % tower.attack_speed as u32 == 0;
+                let enemy_can_attack: bool = tower_manager::TowerManager::is_within_area(tower_pos_pixel, enemy_pos_pixel, enemy.attack_radius as i32) && game.frame_time % enemy.attack_speed as u32 == 0;
 
                 //TOWER ATTACK
                 if enemy.health != 0 {
@@ -233,7 +234,7 @@ impl LevelManager {
                     else {
                         tower.health = 0;
                     }
-                    enemy.found_target = true;
+/*                     enemy.found_target = true; */
                 }
 
             }
@@ -251,76 +252,12 @@ impl LevelManager {
                     else {
                         building.health = 0;
                     }
-                    enemy.found_target = true;
+/*                     enemy.found_target = true; */
                     gui_manager.create_unique_message("base is under attack!".to_string(), 128);
                 }
 
             }
 
-        }
-    }
-    pub fn delete_all_dead (
-        &mut self,
-        game: &mut game_manager::GameManager,
-        enemies: &mut enemy_manager::EnemyManager, 
-        towers: &mut tower_manager::TowerManager,
-        buildings: &mut building_manager::BuildingManager,
-        projectiles: &mut projectile_manager::ProjectileManager,
-        gui_manager: &mut gui_manager::GUIManager,
-    ) {
-        for enemy_index in (0..enemies.enemy_vec.len()).rev() {
-            let enemy = &mut enemies.enemy_vec[enemy_index];
-
-            if enemy.health == 0 {
-                //MAYBE REMOVE TILE TYPE
-                self.level_vec[enemy.grid_index.0][enemy.grid_index.1].tile_type = self.level_vec[enemy.grid_index.0][enemy.grid_index.1].original_type; 
-                self.level_vec[enemy.grid_index.0][enemy.grid_index.1].tile_data = TileData::None;
-                self.level_vec[enemy.grid_index.0][enemy.grid_index.1].is_occupied = false;
-                enemies.enemy_vec.remove(enemy_index);
-                if buildings.building_vec.iter().any(|building| building.building_type == building_manager::BuildingType::Base) {                
-                    game.gold_amount += 1;
-                }
-            }
-        }
-        for tower_index in (0..towers.tower_vec.len()).rev() {
-            let tower = &mut towers.tower_vec[tower_index];
-
-            if tower.health == 0 {
-                for target_index in (0..game.target_vec.len()).rev() {
-                    let target = game.target_vec[target_index];
-
-                    if target == tower.bottom_index {
-                        game.target_vec.remove(target_index);
-                    }
-                }
-                for enemy_index in (0..enemies.enemy_vec.len()).rev() {
-                    enemies.enemy_vec[enemy_index].found_target = false;
-                }
-                self.level_vec[tower.bottom_index.0][tower.bottom_index.1].tile_type = self.level_vec[tower.bottom_index.0][tower.bottom_index.1].original_type;
-                self.level_vec[tower.bottom_index.0][tower.bottom_index.1].tile_data = TileData::None;
-                self.level_vec[tower.bottom_index.0][tower.bottom_index.1].is_occupied = false;
-                towers.tower_vec.remove(tower_index);
-            }
-        }
-        for projectile_index in (0..projectiles.projectile_vec.len()).rev() {
-            let projectile = &mut projectiles.projectile_vec[projectile_index];
-            let do_despawn_projectile: bool = (projectile.hit_target && projectile.time > constants::PROJECTILE_HIT_DESPAWN_DURATION) || projectile.time > constants::PROJECTILE_DESPAWN_DURATION;
-
-            if do_despawn_projectile {
-                projectiles.projectile_vec.remove(projectile_index);
-            }
-        }
-        for building_index in (0..buildings.building_vec.len()).rev() {
-            let building = &mut buildings.building_vec[building_index];
-            if building.health == 0 {
-                if building.building_type == building_manager::BuildingType::Base {
-                    //CLEAR TARGET VEC & SET PATH TO LOCATION WHERE ENEMIES CAN BE DESTROYED
-                    //ALLOW PLAYER TIME TO REBUILD
-                    game.gold_amount = 0;
-                }
-                buildings.building_vec.remove(building_index);
-                gui_manager.create_message("base destroyed, time to rebuild".to_string(), 256);
-            }
         }
     }
 }
