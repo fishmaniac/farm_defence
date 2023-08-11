@@ -12,6 +12,7 @@ pub mod gui_manager;
 pub mod button_manager;
 pub mod menu_manager;
 pub mod pathfinding_manager;
+pub mod upgrade_manager;
 pub mod utilities;
 
 fn save_game (
@@ -73,6 +74,7 @@ fn game_loop (
     buildings: &mut building_manager::BuildingManager,
     enemies: &mut enemy_manager::EnemyManager,
     projectiles: &mut projectile_manager::ProjectileManager,
+    upgrade_manager: &mut upgrade_manager::UpgradeManager,
     seed_buttons: &mut button_manager::ButtonManager,
     build_buttons: &mut button_manager::ButtonManager,
     gui_manager: &mut gui_manager::GUIManager,
@@ -95,8 +97,8 @@ fn game_loop (
             menu_manager.update_menu(events, game, player);
         }
         else if !events.game_paused {
-            game.update_game(events, player, level, towers, buildings, enemies, projectiles, gui_manager, seed_buttons, build_buttons, pathfinding_manager);
-            game.render_game(tex_man, events, player, level, towers, buildings, enemies, projectiles, gui_manager, seed_buttons, build_buttons);
+            game.update_game(events, player, level, towers, buildings, enemies, projectiles, upgrade_manager, gui_manager, seed_buttons, build_buttons, pathfinding_manager);
+            game.render_game(tex_man, events, player, level, towers, buildings, enemies, projectiles, upgrade_manager, gui_manager, seed_buttons, build_buttons);
 
 
             game.frame_time += 1;
@@ -105,7 +107,7 @@ fn game_loop (
                 let elapsed_fps_time = last_fps_time.elapsed();
                 game.elapsed_seconds = elapsed_fps_time.as_secs_f64();
                 game.fps = (frame_count as f64 / game.elapsed_seconds) as u32;
-/*                 println!("\nFPS: {}\tELAPSED: {:.4}\tFRAME TIME: {}\tPLAYER POS: X: {}\tY: {}\nCARROTS: {}\tTOMATOES: {}\tDELTA TIME: {}\tPATHING: {}\n", game.fps, game.elapsed_seconds, game.frame_time, player.x, player.y, game.carrot_amount, game.tomato_amount, events.delta_time, game.is_pathfinding); */
+/*                 println!("\nFPS: {}\tELAPSED: {:.4}\tFRAME TIME: {}\tPLAYER POS: X: {}\tY: {}\nCARROTS: {}\tTOMATOES: {}\tDELTA TIME: {}\tPATHING: {}\tBUILD_MODE: {}\tSEED_MODE: {}\tUPGRADE_MODE: {}\n", game.fps, game.elapsed_seconds, game.frame_time, player.x, player.y, game.carrot_amount, game.tomato_amount, events.delta_time, game.is_pathfinding, game.build_mode, game.seed_mode, game.upgrade_mode); */
                 frame_count = 0;
                 last_fps_time = std::time::Instant::now();
             }
@@ -150,6 +152,7 @@ fn main() -> Result<(), String> {
     let mut buildings = building_manager::BuildingManager::new();
     let mut enemies = enemy_manager::EnemyManager::new();
     let mut projectiles = projectile_manager::ProjectileManager::new();
+    let mut upgrade_manager = upgrade_manager::UpgradeManager::new(&mut game, &small_font);
     let mut seed_buttons = button_manager::ButtonManager::new(constants::SEED_BUTTON_AMT, button_manager::ButtonType::Seed, &player);
     let mut build_buttons = button_manager::ButtonManager::new(constants::BUILD_BUTTON_AMT, button_manager::ButtonType::Build, &player);
     let mut gui_manager = gui_manager::GUIManager::new(&mut game, &small_font);
@@ -172,7 +175,7 @@ fn main() -> Result<(), String> {
     level.create_level(); 
     level.read_file("farm.txt").unwrap();
 
-    game_loop(&mut game, &mut tex_man, &mut events, &mut player, &mut level, &mut towers, &mut buildings, &mut enemies, &mut projectiles, &mut seed_buttons, &mut build_buttons, &mut gui_manager, &mut menu_manager, &mut pathfinding_manager);
+    game_loop(&mut game, &mut tex_man, &mut events, &mut player, &mut level, &mut towers, &mut buildings, &mut enemies, &mut projectiles, &mut upgrade_manager, &mut seed_buttons, &mut build_buttons, &mut gui_manager, &mut menu_manager, &mut pathfinding_manager);
 
     Ok(())
 }

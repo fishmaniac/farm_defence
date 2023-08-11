@@ -1,4 +1,4 @@
-use crate::{level_manager, button_manager, player_manager, event_manager, texture_manager, constants, tower_manager, enemy_manager, gui_manager, projectile_manager, building_manager, pathfinding_manager};
+use crate::{level_manager, button_manager, player_manager, event_manager, texture_manager, constants, tower_manager, enemy_manager, gui_manager, projectile_manager, building_manager, pathfinding_manager, upgrade_manager};
 
 pub enum Movement {
     Up,
@@ -13,6 +13,7 @@ pub struct GameManager {
     pub is_pathfinding: bool,
     pub build_mode: bool,
     pub seed_mode: bool,
+    pub upgrade_mode: bool,
     pub preview_mode: bool,
     pub hovering_button: bool,
     pub current_seed: usize,
@@ -69,6 +70,7 @@ impl GameManager {
             seed_mode: false,
             build_mode: false,
             preview_mode: false,
+            upgrade_mode: false,
             hovering_button: false,
             current_seed: usize::MAX,
             current_build: usize::MAX,
@@ -107,6 +109,7 @@ impl GameManager {
         buildings: &mut building_manager::BuildingManager,
         enemies: &mut enemy_manager::EnemyManager, 
         projectiles: &mut projectile_manager::ProjectileManager,
+        upgrade_manager: &mut upgrade_manager::UpgradeManager,
         gui_manager: &mut gui_manager::GUIManager,
         seed_buttons: &mut button_manager::ButtonManager, 
         build_buttons: &mut button_manager::ButtonManager,
@@ -115,7 +118,7 @@ impl GameManager {
         player.update_player(events, self, level);
         self.update_camera(player);
 
-        buildings.update_buildings(self, events, level, player, towers, enemies, gui_manager, seed_buttons, build_buttons, projectiles);
+        buildings.update_buildings(self, events, level, player, towers, enemies, upgrade_manager, gui_manager, seed_buttons, build_buttons, projectiles);
         level_manager::LevelManager::check_attacks(self, events, player, enemies, towers, buildings, projectiles, gui_manager);
         enemies.move_enemies(events, self, level, pathfinding_manager);
         projectiles.check_projectile_hit(self, events, player, enemies);
@@ -132,6 +135,7 @@ impl GameManager {
         buildings: &mut building_manager::BuildingManager,
         enemies: &mut enemy_manager::EnemyManager, 
         projectiles: &mut projectile_manager::ProjectileManager,
+        upgrade_manager: &mut upgrade_manager::UpgradeManager,
         gui_manager: &mut gui_manager::GUIManager,
         seed_buttons: &mut button_manager::ButtonManager, 
         build_buttons: &mut button_manager::ButtonManager,
@@ -145,6 +149,7 @@ impl GameManager {
         buildings.render_buildings(self, tex_man, gui_manager);
         gui_manager.render_preview(self, tex_man);
         player.render_player(events, self, tex_man).unwrap();
+        upgrade_manager.render_upgrade_menu(self);
         seed_buttons.render_seed_buttons(player, tex_man, events, self).unwrap();
         build_buttons.render_build_buttons(player, tex_man, events, self).unwrap();
         gui_manager.render_inventory_hud(events, self, tex_man);
@@ -168,9 +173,6 @@ impl GameManager {
             }
 
             if enemy.health == 0 {
-                //MAYBE REMOVE TILE TYPE
-                level.level_vec[enemy.grid_index.0][enemy.grid_index.1].tile_type = level.level_vec[enemy.grid_index.0][enemy.grid_index.1].original_type; 
-                level.level_vec[enemy.grid_index.0][enemy.grid_index.1].tile_data = level_manager::TileData::None;
                 level.level_vec[enemy.grid_index.0][enemy.grid_index.1].is_occupied = false;
                 enemies.enemy_vec.remove(enemy_index);
                 if buildings.building_vec.iter().any(|building| building.building_type == building_manager::BuildingType::Base) {                

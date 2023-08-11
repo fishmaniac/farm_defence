@@ -46,14 +46,6 @@ impl PathfindingManager {
         let frontier: std::collections::BinaryHeap<PathState> = [initial_state].into();
         self.frontier = Some(frontier);
     }
-    fn remove_path_duplicates(final_path: &mut Vec<(usize, usize)>) {
-        for current_index in (0..final_path.len()).rev() {
-            if current_index != 0 && 
-            final_path[current_index] == final_path[current_index - 1] {
-                final_path.remove(current_index);
-            }
-        }
-    }
     pub fn astar(&mut self, enemy: &mut enemy_manager::Enemy, target: (usize, usize), level_vec: &[Vec<level_manager::LevelTile>]) {
         println!("EXECUTING A*"); 
         let initial_state = PathState {
@@ -99,6 +91,9 @@ impl PathfindingManager {
                 }
             }
         }
+    }
+    pub fn astar_new(&mut self, enemy: &mut enemy_manager::Enemy, target: (usize, usize), level_vec: &[Vec<level_manager::LevelTile>]) {
+
     }
     fn get_neighbors(start: (usize, usize), level_vec: &[Vec<level_manager::LevelTile>]) -> Vec<(usize, usize)> {
         let (x, y) = start;

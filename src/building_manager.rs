@@ -11,6 +11,7 @@ use crate::projectile_manager;
 use crate::gui_manager;
 use crate::tower_manager;
 use crate::enemy_manager;
+use crate::upgrade_manager;
 
 #[derive(PartialEq)]
 pub enum BuildingType {
@@ -189,6 +190,7 @@ impl BuildingManager {
         player: &mut player_manager::PlayerManager,
         towers: &mut tower_manager::TowerManager, 
         enemies: &mut enemy_manager::EnemyManager, 
+        upgrade_manager: &mut upgrade_manager::UpgradeManager,
         gui_manager: &mut gui_manager::GUIManager,
         seed_buttons: &mut button_manager::ButtonManager, 
         build_buttons: &mut button_manager::ButtonManager,
@@ -205,9 +207,15 @@ impl BuildingManager {
                     if game.build_mode {
                         self.build_mode(game, events, towers, enemies, gui_manager, build_buttons, temp_tile, col_index, row_index);
                     }
-
-                    if game.seed_mode {
+                    else if game.seed_mode {
                         self.seed_mode(game, events, player, gui_manager, seed_buttons, projectiles, temp_tile, col_index, row_index);
+                    }
+                    else if game.mouse_button == sdl2::mouse::MouseButton::Left {
+                        upgrade_manager.check_upgrade(game, enemies, towers, self, gui_manager, temp_tile, (col_index, row_index));
+                        //upgrade mode
+                    }
+                    else if game.mouse_button == sdl2::mouse::MouseButton::Right {
+                        println!("INSPECT TILE TYPE: {:?}", temp_tile.tile_type);
                     }
                 }
                 //check for farm updates
@@ -277,10 +285,8 @@ impl BuildingManager {
             }
             constants::CURRENT_BUILD_GOBLIN => {
                 if temp_tile.tile_type == constants::TILE_TYPE_GRASS {
-                    if /* !game.placed &&  */game.preview_mode && game.mouse_button == sdl2::mouse::MouseButton::Left {
+                    if !game.placed && game.preview_mode && game.mouse_button == sdl2::mouse::MouseButton::Left {
                         game.placed = true;
-                        // temp_tile.tile_type = constants::TILE_TYPE_GOBLIN;
-                        // temp_tile.tile_data = TileData::Goblin;
                         enemies.place_enemy(game, temp_tile, TileData::Goblin, (col_index, row_index));
                     } else if game.build_mode && build_buttons.button_vec[constants::CURRENT_BUILD_GOBLIN].outline_visible {
                         game.preview_mode = true;

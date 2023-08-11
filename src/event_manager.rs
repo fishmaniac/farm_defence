@@ -156,6 +156,7 @@ impl EventManager {
                 else {
                     game.build_mode = true;
                     game.seed_mode = false;
+                    game.upgrade_mode = false;
                     return
                 }
             },
@@ -166,6 +167,7 @@ impl EventManager {
                 else {
                     game.seed_mode = true;
                     game.build_mode = false;
+                    game.upgrade_mode = false;
                     return
                 }
             },

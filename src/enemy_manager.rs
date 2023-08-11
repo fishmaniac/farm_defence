@@ -143,9 +143,9 @@ impl EnemyManager {
                     enemy.final_path = None;
                     return;
                 }
-                let mut speed: u16 = (enemy.movement_speed as f64 * events.delta_time as f64) as u16;
+                let speed: u16 = (enemy.movement_speed as f64 * events.delta_time as f64) as u16;
 
-                let target_pixel_index = (enemy_path[0].0 as u32 * constants::TILE_SIZE, 
+                let target_pixel_index = (enemy_path[0].0 as u32 * constants::TILE_SIZE,
                     enemy_path[0].1 as u32 * constants::TILE_SIZE);
                 let mut new_pixel_index: (u32, u32) = enemy.pixel_index;
                 let distance_to_target = ((target_pixel_index.0 as i32 - new_pixel_index.0 as i32).abs(),
