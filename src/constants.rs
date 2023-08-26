@@ -15,6 +15,8 @@ pub const COLOR_RED: sdl2::pixels::Color = sdl2::pixels::Color::RGBA(255, 0, 0, 
 pub const COLOR_GREEN: sdl2::pixels::Color = sdl2::pixels::Color::RGBA(0, 255, 0, 255);
 pub const COLOR_WHITE: sdl2::pixels::Color = sdl2::pixels::Color::RGBA(255, 255, 255, 255);
 
+pub const MIN_GAME_RATE: f64 = 1.0 / 180.0;
+
 pub const TILE_SIZE: u32 = 32;
 pub const MAX_HEIGHT: u16 = 150;
 pub const MAX_WIDTH: u16 = 300;
@@ -94,7 +96,6 @@ pub static TEXTURE_TOWER_FIREBALL_BOTTOM: &str = "assets/fireball-tower-bottom.p
 pub static TEXTURE_PREVIEW_TOWER_FIREBALL_BOTTOM: &str = "assets/preview-fireball-tower-bottom.png";
 pub static TEXTURE_PREVIEW_TOWER_FIREBALL_TOP: &str = "assets/preview-fireball-tower-top.png";
 
-
 pub static TEXTURE_GOBLIN_ENEMY_FRONT: &str = "assets/goblin-enemy-front.png";
 pub static TEXTURE_PREVIEW_GOBLIN_ENEMY: &str = "assets/preview-goblin-enemy.png";
 
@@ -112,7 +113,6 @@ pub const CURRENT_BUTTON_SETTINGS_SCREEN_MODE: usize = 2;
 pub const CURRENT_BUTTON_SETTINGS_BACK: usize = 3;
 pub const CURRENT_BUTTON_SETTINGS_RESOLUTION_MINUS: usize = 4;
 pub const CURRENT_BUTTON_SETTINGS_RESOLUTION_PLUS: usize = 5;
-
 
 pub const CURRENT_BUILD_ARCHER_TOWER: usize = 0;
 pub const CURRENT_BUILD_FIREBALL_TOWER: usize = 1;

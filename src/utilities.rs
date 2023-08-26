@@ -29,8 +29,7 @@ pub fn tile_not_collidable(tile: &level_manager::LevelTile) -> bool {
     }
 }
 
-
-pub fn check_player_collisions (player: &mut player_manager::PlayerManager, game: &mut game_manager::GameManager, events: &mut event_manager::EventManager, new_position: (i32, i32), level: &mut level_manager::LevelManager) -> bool {
+pub fn check_player_collisions(player: &mut player_manager::PlayerManager, game: &mut game_manager::GameManager, events: &mut event_manager::EventManager, new_position: (i32, i32), level: &mut level_manager::LevelManager) -> bool {
     let mut colliding = false;
     let tile_size_offset = constants::TILE_SIZE as i32 / 2;
     let new_offset = constants::TILE_SIZE as i32 / 4;

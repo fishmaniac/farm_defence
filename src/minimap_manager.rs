@@ -1,0 +1,1 @@
+//do bitmap load

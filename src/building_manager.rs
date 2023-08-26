@@ -29,7 +29,7 @@ pub struct Building {
     pub texture_path_top_left: String,
     pub texture_path_top_right: String,    
     pub building_type: BuildingType,
-    pub grid_index: (i32, i32),
+    pub grid_index: (usize, usize),
     pub pixel_index: (i32, i32),
     pub last_damaged: u16,
     pub max_health: u16,
@@ -73,8 +73,8 @@ impl BuildingManager {
                     texture_path_top_left: constants::TEXTURE_BUILDING_HOUSE_TOP_LEFT.to_string(),
                     texture_path_top_right: constants::TEXTURE_BUILDING_HOUSE_TOP_RIGHT.to_string(),
                     building_type: BuildingType::Base,
-                    grid_index: (col_index as i32, row_index as i32),
-                    pixel_index: (col_index as i32 * constants::TILE_SIZE as i32, row_index as i32 * constants::TILE_SIZE as i32),
+                    grid_index: (col_index, row_index),
+                    pixel_index: ((col_index * constants::TILE_SIZE as usize) as i32, (row_index * constants::TILE_SIZE as usize) as i32),
                     last_damaged: 0,
                     max_health: constants::BUILDING_BASE_HEALTH,
                     health: constants::BUILDING_BASE_HEALTH,
@@ -104,8 +104,8 @@ impl BuildingManager {
                     texture_path_top_left: constants::TEXTURE_DEFAULT.to_string(),
                     texture_path_top_right: constants::TEXTURE_DEFAULT.to_string(),
                     building_type: BuildingType::None,
-                    grid_index: (col_index as i32, row_index as i32), 
-                    pixel_index: (col_index as i32 * constants::TILE_SIZE as i32, row_index as i32 * constants::TILE_SIZE as i32),
+                    grid_index: (col_index, row_index),
+                    pixel_index: ((col_index * constants::TILE_SIZE as usize) as i32, (row_index * constants::TILE_SIZE as usize) as i32),
                     last_damaged: 0,
                     max_health: 0,
                     health: 0,
@@ -211,7 +211,7 @@ impl BuildingManager {
                         self.seed_mode(game, events, player, gui_manager, seed_buttons, projectiles, temp_tile, col_index, row_index);
                     }
                     else if game.mouse_button == sdl2::mouse::MouseButton::Left {
-                        upgrade_manager.check_upgrade(game, enemies, towers, self, gui_manager, temp_tile, (col_index, row_index));
+                        upgrade_manager.check_upgrade(game, towers, self, gui_manager, temp_tile, (col_index, row_index));
                         //upgrade mode
                     }
                     else if game.mouse_button == sdl2::mouse::MouseButton::Right {
@@ -285,7 +285,7 @@ impl BuildingManager {
             }
             constants::CURRENT_BUILD_GOBLIN => {
                 if temp_tile.tile_type == constants::TILE_TYPE_GRASS {
-                    if !game.placed && game.preview_mode && game.mouse_button == sdl2::mouse::MouseButton::Left {
+                    if /* !game.placed &&  */game.preview_mode && game.mouse_button == sdl2::mouse::MouseButton::Left {
                         game.placed = true;
                         enemies.place_enemy(game, temp_tile, TileData::Goblin, (col_index, row_index));
                     } else if game.build_mode && build_buttons.button_vec[constants::CURRENT_BUILD_GOBLIN].outline_visible {

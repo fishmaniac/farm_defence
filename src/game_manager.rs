@@ -58,7 +58,7 @@ impl GameManager {
         // assert_eq!(gl_attr.context_version(), (3, 2));
 
         let mut canvas = window.into_canvas()
-/*             .present_vsync()    */
+            .present_vsync()   
             .accelerated()
             .build()
             .expect("Failed to initialize canvas");
@@ -76,7 +76,7 @@ impl GameManager {
             current_build: usize::MAX,
             carrot_amount: 0,
             tomato_amount: 0,
-            gold_amount: 0,
+            gold_amount: 9999,
             cam_x: 0,
             cam_y: 0,
             frame_time: 1,
@@ -122,6 +122,7 @@ impl GameManager {
         level_manager::LevelManager::check_attacks(self, events, player, enemies, towers, buildings, projectiles, gui_manager);
         enemies.move_enemies(events, self, level, pathfinding_manager);
         projectiles.check_projectile_hit(self, events, player, enemies);
+        upgrade_manager.update_upgrade_menus(self, events, towers);
         self.delete_all_dead(level, enemies, towers, buildings, projectiles, gui_manager);
     }
 
@@ -142,14 +143,15 @@ impl GameManager {
     ) {
 
 
-        level.render_level(self, tex_man).unwrap();
+        level.render_level(self, tex_man, player, events).unwrap();
         enemy_manager::EnemyManager::render_enemies(enemies, self, tex_man, gui_manager).unwrap(); 
         projectile_manager::ProjectileManager::render_projectiles(projectiles, self, tex_man, events).unwrap();
         tower_manager::TowerManager::render_towers(towers, self, tex_man, gui_manager).unwrap();
         buildings.render_buildings(self, tex_man, gui_manager);
-        gui_manager.render_preview(self, tex_man);
         player.render_player(events, self, tex_man).unwrap();
-        upgrade_manager.render_upgrade_menu(self);
+        gui_manager.render_preview(self, tex_man);
+        level.render_level_minimap(self, tex_man, player, events);
+        upgrade_manager.render_upgrade_menus(self);
         seed_buttons.render_seed_buttons(player, tex_man, events, self).unwrap();
         build_buttons.render_build_buttons(player, tex_man, events, self).unwrap();
         gui_manager.render_inventory_hud(events, self, tex_man);
@@ -219,6 +221,19 @@ impl GameManager {
         for building_index in (0..buildings.building_vec.len()).rev() {
             let building = &mut buildings.building_vec[building_index];
             if building.health == 0 {
+                for target_index in (0..self.target_vec.len()).rev() {
+                    let target = self.target_vec[target_index];
+
+                    if target == building.grid_index {
+                        for enemy in &mut enemies.enemy_vec {
+                            if enemy.current_target == Some(target) {
+                                enemy.current_target = None;
+                            }
+                        }
+
+                        self.target_vec.remove(target_index);
+                    }
+                }
                 if building.building_type == building_manager::BuildingType::Base {
                     //CLEAR TARGET VEC & SET PATH TO LOCATION WHERE ENEMIES CAN BE DESTROYED
                     //ALLOW PLAYER TIME TO REBUILD

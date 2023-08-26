@@ -75,8 +75,8 @@ impl ProjectileManager {
         let direction_x = dx as f32 / distance;
         let direction_y = dy as f32 / distance;
 
-        projectile.position.0 += (direction_x * (projectile.speed * events.delta_time) as f32) as i32;
-        projectile.position.1 += (direction_y * (projectile.speed * events.delta_time) as f32) as i32;
+        projectile.position.0 += (direction_x * (projectile.speed * events.delta_time.max(constants::MIN_GAME_RATE)) as f32) as i32;
+        projectile.position.1 += (direction_y * (projectile.speed * events.delta_time.max(constants::MIN_GAME_RATE)) as f32) as i32;
     }
 
     pub fn check_projectile_hit(&mut self, game: &mut game_manager::GameManager, events: &mut event_manager::EventManager, player: &mut player_manager::PlayerManager, enemies: &mut enemy_manager::EnemyManager) {
@@ -121,7 +121,7 @@ impl ProjectileManager {
                 false,     // flip vertical
             )?;
 
-            if !tower_manager::TowerManager::is_within_area(projectile.position, projectile.target, (projectile.speed * events.delta_time) as i32) {
+            if !tower_manager::TowerManager::is_within_area(projectile.position, projectile.target, (projectile.speed * (events.delta_time).max(constants::MIN_GAME_RATE)) as i32) {
                 Self::move_projectile(projectile, events);
             }
             else {

@@ -143,7 +143,7 @@ impl EnemyManager {
                     enemy.final_path = None;
                     return;
                 }
-                let speed: u16 = (enemy.movement_speed as f64 * events.delta_time as f64) as u16;
+                let speed: u16 = (enemy.movement_speed as f64 * (events.delta_time as f64).max(constants::MIN_GAME_RATE)) as u16;
 
                 let target_pixel_index = (enemy_path[0].0 as u32 * constants::TILE_SIZE,
                     enemy_path[0].1 as u32 * constants::TILE_SIZE);

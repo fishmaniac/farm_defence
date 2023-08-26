@@ -66,7 +66,7 @@ impl PlayerManager {
     ) {
         let mut new_x: i32 = self.x;
         let mut new_y: i32 = self.y; 
-        let mut speed: i32 = (constants::PLAYER_SPEED as f64 * events.delta_time) as i32;
+        let mut speed: i32 = (constants::PLAYER_SPEED as f64 * events.delta_time.max(constants::MIN_GAME_RATE)) as i32;
         let max_speed: i32 = constants::TILE_SIZE as i32;
         speed = speed.min(max_speed);
 
@@ -124,28 +124,6 @@ impl PlayerManager {
             self.y = new_y;
         }
     }
-    // fn check_collisions (&mut self, game: &mut game_manager::GameManager, events: &mut event_manager::EventManager, new_position: (i32, i32), level: &mut level_manager::LevelManager) -> bool {
-    //     let mut colliding = false;
-    //     let tile_size_offset = constants::TILE_SIZE as i32 / 2;
-    //     let new_offset = constants::TILE_SIZE as i32 / 4;
-    //     let centered_new_x = new_position.0 + (events.screen_size.0 / 2);
-    //     let centered_new_y = new_position.1 + (events.screen_size.1 / 2);
-    //     let new_rect = sdl2::rect::Rect::new(centered_new_x - self.x + new_offset, centered_new_y - self.y + new_offset, tile_size_offset as u32, tile_size_offset as u32);
-    //     for col_index in 0..level.level_vec.len() {
-    //         for row_index in 0..level.level_vec[col_index].len() {
-    //             let temp_tile = &mut level.level_vec[col_index][row_index];
-    //
-    //             if temp_tile.rect.has_intersection(new_rect) && temp_tile.tile_type == constants::TILE_TYPE_WALL {
-    //                 colliding = true;
-    //                 break;
-    //             }
-    //         }
-    //         if colliding {
-    //             break;
-    //         }
-    //     }
-    //     colliding
-    // }
     pub fn render_player(
         &mut self, 
         events: &mut event_manager::EventManager,
