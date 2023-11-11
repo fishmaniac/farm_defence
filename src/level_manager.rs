@@ -2,10 +2,7 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::env;
 
-use crate::{constants, projectile_manager, gui_manager, game_manager, building_manager, player_manager, event_manager};
-use crate::texture_manager::TextureManager;
-use crate::tower_manager;
-use crate::enemy_manager;
+use crate::{constants, projectile_manager, gui_manager, game_manager, building_manager, player_manager, event_manager, texture_manager::TextureManager, tower_manager, enemy_manager};
 
 #[derive(PartialEq)]
 pub enum TileData {
@@ -193,55 +190,6 @@ impl LevelManager {
         }
         Ok(())
     }
-    pub fn render_level_minimap(
-        &mut self,
-        game: &mut game_manager::GameManager, 
-        tex_man: &mut TextureManager<sdl2::video::WindowContext>,
-        player: &mut player_manager::PlayerManager,
-        events: &mut event_manager::EventManager,
-    ) -> Result<(), String> {
-        //SAVE BITMAP
-
-        // for col_index in 0..self.level_vec.len() {
-        //     for row_index in 0..self.level_vec[col_index].len() {
-        //         let texture_path = &self.level_vec[col_index][row_index].texture_path;
-        //
-        //         /*                 let test = sdl2::rect::Rect::new(player.rect.x(), player.rect.y(), 100, 100); */
-        //         let mut rect = self.level_vec[col_index][row_index].rect;
-        //
-        //         // game.canvas.set_draw_color(sdl2::pixels::Color::RED);
-        //         // game.canvas.fill_rect(test);
-        //
-        //
-        //
-        //         rect.set_x(col_index as i32);
-        //         rect.set_y(row_index as i32);
-        //         rect.set_width(1);
-        //         rect.set_height(1);
-        //
-        //         if self.level_vec[col_index][row_index].rect.has_intersection(player.rect) {
-        //             game.canvas.set_draw_color(sdl2::pixels::Color::RED);
-        //             game.canvas.fill_rect(rect);
-        //         } 
-        //         else {
-        //             let texture = tex_man.load(&texture_path)?;
-        //
-        //             game.canvas.copy_ex(
-        //                 &texture,
-        //                 None,
-        //                 rect,
-        //                 0.0,
-        //                 None,
-        //                 false,
-        //                 false,
-        //             )?;
-        //         }
-        //     }
-        // }
-
-        Ok(())
-    }
-
     pub fn check_attacks (
         game: &mut game_manager::GameManager,
         events: &mut event_manager::EventManager,
@@ -299,9 +247,7 @@ impl LevelManager {
                     /*                     enemy.found_target = true; */
                     gui_manager.create_unique_message("base is under attack!".to_string(), 128);
                 }
-
             }
-
         }
     }
 }

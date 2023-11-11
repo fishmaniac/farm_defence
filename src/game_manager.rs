@@ -1,4 +1,4 @@
-use crate::{level_manager, button_manager, player_manager, event_manager, texture_manager, constants, tower_manager, enemy_manager, gui_manager, projectile_manager, building_manager, pathfinding_manager, upgrade_manager};
+use crate::{level_manager, button_manager, player_manager, event_manager, texture_manager, constants, tower_manager, enemy_manager, gui_manager, projectile_manager, building_manager, pathfinding_manager, upgrade_manager, minimap_manager};
 
 pub enum Movement {
     Up,
@@ -102,6 +102,7 @@ impl GameManager {
 
     pub fn update_game(
         &mut self, 
+        tex_man: &mut texture_manager::TextureManager<sdl2::video::WindowContext>,
         events: &mut event_manager::EventManager,
         player: &mut player_manager::PlayerManager, 
         level: &mut level_manager::LevelManager, 
@@ -111,16 +112,19 @@ impl GameManager {
         projectiles: &mut projectile_manager::ProjectileManager,
         upgrade_manager: &mut upgrade_manager::UpgradeManager,
         gui_manager: &mut gui_manager::GUIManager,
+        minimap_manager: &mut minimap_manager::MinimapManager,
         seed_buttons: &mut button_manager::ButtonManager, 
         build_buttons: &mut button_manager::ButtonManager,
         pathfinding_manager: &mut pathfinding_manager::PathfindingManager,
     ) {
         player.update_player(events, self, level);
         self.update_camera(player);
-
-        buildings.update_buildings(self, events, level, player, towers, enemies, upgrade_manager, gui_manager, seed_buttons, build_buttons, projectiles);
+        buildings.update_buildings(self, events, level, player, towers, enemies, upgrade_manager, gui_manager, minimap_manager, seed_buttons, build_buttons, projectiles);
         level_manager::LevelManager::check_attacks(self, events, player, enemies, towers, buildings, projectiles, gui_manager);
         enemies.move_enemies(events, self, level, pathfinding_manager);
+
+        minimap_manager.update_minimap(events, level, tex_man);
+
         projectiles.check_projectile_hit(self, events, player, enemies);
         upgrade_manager.update_upgrade_menus(self, events, towers);
         self.delete_all_dead(level, enemies, towers, buildings, projectiles, gui_manager);
@@ -138,6 +142,7 @@ impl GameManager {
         projectiles: &mut projectile_manager::ProjectileManager,
         upgrade_manager: &mut upgrade_manager::UpgradeManager,
         gui_manager: &mut gui_manager::GUIManager,
+        minimap_manager: &mut minimap_manager::MinimapManager,
         seed_buttons: &mut button_manager::ButtonManager, 
         build_buttons: &mut button_manager::ButtonManager,
     ) {
@@ -150,7 +155,9 @@ impl GameManager {
         buildings.render_buildings(self, tex_man, gui_manager);
         player.render_player(events, self, tex_man).unwrap();
         gui_manager.render_preview(self, tex_man);
-        level.render_level_minimap(self, tex_man, player, events);
+
+        minimap_manager.render_minimap(self, level, tex_man, player);
+
         upgrade_manager.render_upgrade_menus(self);
         seed_buttons.render_seed_buttons(player, tex_man, events, self).unwrap();
         build_buttons.render_build_buttons(player, tex_man, events, self).unwrap();

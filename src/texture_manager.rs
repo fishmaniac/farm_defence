@@ -22,13 +22,12 @@
 // https://github.com/filtoid/rusteroids/releases/tag/tutorial3
 
 use std::collections::HashMap;
-use sdl2::render::{Texture, TextureCreator};
 use sdl2::image::LoadTexture;
 use std::borrow::Borrow;
 use std::hash::Hash;
 use std::rc::Rc;
 
-pub type TextureManager<'l, T> = ResourceManager<'l, String, Texture<'l>, TextureCreator<T>>;
+pub type TextureManager<'l, T> = ResourceManager<'l, String, sdl2::render::Texture<'l>, sdl2::render::TextureCreator<T>>;
 
 pub struct ResourceManager<'l, K, R, L>
 where
@@ -77,9 +76,9 @@ pub trait ResourceLoader<'l, R> {
 }
 
 // TextureCreator knows how to load Textures
-impl<'l, T> ResourceLoader<'l, Texture<'l>> for TextureCreator<T> {
+impl<'l, T> ResourceLoader<'l, sdl2::render::Texture<'l>> for sdl2::render::TextureCreator<T> {
     type Args = str;
-    fn load(&'l self, path: &str) -> Result<Texture, String> {
+    fn load(&'l self, path: &str) -> Result<sdl2::render::Texture, String> {
         println!("INFO: LOADING TEXTURE\t{}", path);
         self.load_texture(path)
     }

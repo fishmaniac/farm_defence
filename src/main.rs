@@ -9,6 +9,7 @@ pub mod building_manager;
 pub mod enemy_manager;
 pub mod projectile_manager;
 pub mod gui_manager;
+pub mod minimap_manager;
 pub mod button_manager;
 pub mod menu_manager;
 pub mod pathfinding_manager;
@@ -77,6 +78,7 @@ fn game_loop (
     upgrade_manager: &mut upgrade_manager::UpgradeManager,
     seed_buttons: &mut button_manager::ButtonManager,
     build_buttons: &mut button_manager::ButtonManager,
+    minimap_manager: &mut minimap_manager::MinimapManager,
     gui_manager: &mut gui_manager::GUIManager,
     menu_manager: &mut menu_manager::MenuManager,
     pathfinding_manager: &mut pathfinding_manager::PathfindingManager,
@@ -97,8 +99,8 @@ fn game_loop (
             menu_manager.update_menu(events, game, player);
         }
         else if !events.game_paused {
-            game.update_game(events, player, level, towers, buildings, enemies, projectiles, upgrade_manager, gui_manager, seed_buttons, build_buttons, pathfinding_manager);
-            game.render_game(tex_man, events, player, level, towers, buildings, enemies, projectiles, upgrade_manager, gui_manager, seed_buttons, build_buttons);
+            game.update_game(tex_man, events, player, level, towers, buildings, enemies, projectiles, upgrade_manager, gui_manager, minimap_manager,seed_buttons, build_buttons, pathfinding_manager);
+            game.render_game(tex_man, events, player, level, towers, buildings, enemies, projectiles, upgrade_manager, gui_manager, minimap_manager, seed_buttons, build_buttons);
 
 
             game.frame_time += 1;
@@ -153,6 +155,7 @@ fn main() -> Result<(), String> {
     let mut enemies = enemy_manager::EnemyManager::new();
     let mut projectiles = projectile_manager::ProjectileManager::new();
     let mut upgrade_manager = upgrade_manager::UpgradeManager::new(&mut game, &small_font);
+    let mut minimap_manager = minimap_manager::MinimapManager::new(&mut game);
     let mut seed_buttons = button_manager::ButtonManager::new(constants::SEED_BUTTON_AMT, button_manager::ButtonType::Seed, &player);
     let mut build_buttons = button_manager::ButtonManager::new(constants::BUILD_BUTTON_AMT, button_manager::ButtonType::Build, &player);
     let mut gui_manager = gui_manager::GUIManager::new(&mut game, &small_font);
@@ -175,7 +178,7 @@ fn main() -> Result<(), String> {
     level.create_level(); 
     level.read_file("farm.txt").unwrap();
 
-    game_loop(&mut game, &mut tex_man, &mut events, &mut player, &mut level, &mut towers, &mut buildings, &mut enemies, &mut projectiles, &mut upgrade_manager, &mut seed_buttons, &mut build_buttons, &mut gui_manager, &mut menu_manager, &mut pathfinding_manager);
+    game_loop(&mut game, &mut tex_man, &mut events, &mut player, &mut level, &mut towers, &mut buildings, &mut enemies, &mut projectiles, &mut upgrade_manager, &mut seed_buttons, &mut build_buttons, &mut minimap_manager, &mut gui_manager, &mut menu_manager, &mut pathfinding_manager);
 
     Ok(())
 }

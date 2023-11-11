@@ -331,15 +331,16 @@ impl<'a> GUIManager<'a> {
             message.rect.set_x(events.screen_size.0 / 2);
             message.rect.set_y(2 * constants::TILE_SIZE as i32 + (constants::TILE_SIZE as i32 * message_index as i32));
 
+            //fix text_surface map_err..there should be no ?
             let text_surface = self.font.render(&message.message_text)
                 .blended(constants::COLOR_WHITE)
                 .map_err(|e| e.to_string())?;
             if let Ok(texture) = self.texture_creator.create_texture_from_surface(&text_surface) {
-            let dest = sdl2::rect::Rect::new(events.screen_size.0 / 2 - text_surface.width() as i32 / 2, 2 * constants::TILE_SIZE as i32 + (constants::TILE_SIZE as i32 * message_index as i32), text_surface.width(), text_surface.height());   
-            game.canvas.copy(&texture, None, Some(dest)).unwrap(); 
+                let dest = sdl2::rect::Rect::new(events.screen_size.0 / 2 - text_surface.width() as i32 / 2, 2 * constants::TILE_SIZE as i32 + (constants::TILE_SIZE as i32 * message_index as i32), text_surface.width(), text_surface.height());   
+                game.canvas.copy(&texture, None, Some(dest)).unwrap(); 
             }
             else {
-            eprintln!("Failed to create Message texture");
+                eprintln!("Failed to create Message texture");
             }
             if message.time < message.max_time {
                 message.time += 1;

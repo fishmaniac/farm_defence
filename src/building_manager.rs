@@ -1,6 +1,7 @@
 use crate::button_manager;
 use crate::constants;
 use crate::event_manager;
+use crate::minimap_manager;
 use crate::player_manager;
 use crate::game_manager;
 use crate::level_manager;
@@ -60,9 +61,8 @@ impl BuildingManager {
     ) {
         match building_type {
             BuildingType::Base => {
-                temp_tile.tile_type = constants::TILE_TYPE_BASE;
-                temp_tile.tile_data = TileData::Base;
-
+                // temp_tile.tile_type = constants::TILE_TYPE_BASE;
+                // temp_tile.tile_data = TileData::Base;
                 let building = self::Building {
                     bottom_left_rect: sdl2::rect::Rect::new(temp_tile.rect.x(), temp_tile.rect.y(), constants::TILE_SIZE, constants::TILE_SIZE),
                     bottom_right_rect: sdl2::rect::Rect::new(temp_tile.rect.x() + constants::TILE_SIZE as i32, temp_tile.rect.y(), constants::TILE_SIZE, constants::TILE_SIZE),
@@ -192,6 +192,7 @@ impl BuildingManager {
         enemies: &mut enemy_manager::EnemyManager, 
         upgrade_manager: &mut upgrade_manager::UpgradeManager,
         gui_manager: &mut gui_manager::GUIManager,
+        minimap_manager: &mut minimap_manager::MinimapManager,
         seed_buttons: &mut button_manager::ButtonManager, 
         build_buttons: &mut button_manager::ButtonManager,
         projectiles: &mut projectile_manager::ProjectileManager,
@@ -205,7 +206,7 @@ impl BuildingManager {
 
                 if !game.hovering_button && sdl2::rect::Rect::contains_point(&temp_tile.rect, game.mouse_point){
                     if game.build_mode {
-                        self.build_mode(game, events, towers, enemies, gui_manager, build_buttons, temp_tile, col_index, row_index);
+                        self.build_mode(game, events, towers, enemies, gui_manager, minimap_manager, build_buttons, temp_tile, col_index, row_index);
                     }
                     else if game.seed_mode {
                         self.seed_mode(game, events, player, gui_manager, seed_buttons, projectiles, temp_tile, col_index, row_index);
@@ -231,6 +232,7 @@ impl BuildingManager {
         towers: &mut tower_manager::TowerManager,
         enemies: &mut enemy_manager::EnemyManager,
         gui_manager: &mut gui_manager::GUIManager,
+        minimap_manager: &mut minimap_manager::MinimapManager,
         build_buttons: &mut button_manager::ButtonManager,
         temp_tile: &mut LevelTile,
         col_index: usize,
@@ -347,6 +349,8 @@ impl BuildingManager {
         }
         if game.placed {
             enemy_manager::EnemyManager::repath_all_enemies(enemies);
+            events.level_updated = true;
+/*             minimap_manager.update_minimap(); */
         }
     }
 
