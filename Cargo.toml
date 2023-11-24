@@ -4,6 +4,9 @@ version = "0.1.0"
 edition = "2021"
 authors = ["fishmaniac https://github.com/fishmaniac/farm_defense"]
 
+[profile.dev]
+debug = true
+
 [profile.release]
 debug = true
 

@@ -63,18 +63,43 @@ impl BuildingManager {
             BuildingType::Base => {
                 // temp_tile.tile_type = constants::TILE_TYPE_BASE;
                 // temp_tile.tile_data = TileData::Base;
+                // TODO: just make a derived impl for bigger sizes
                 let building = self::Building {
-                    bottom_left_rect: sdl2::rect::Rect::new(temp_tile.rect.x(), temp_tile.rect.y(), constants::TILE_SIZE, constants::TILE_SIZE),
-                    bottom_right_rect: sdl2::rect::Rect::new(temp_tile.rect.x() + constants::TILE_SIZE as i32, temp_tile.rect.y(), constants::TILE_SIZE, constants::TILE_SIZE),
-                    top_left_rect: sdl2::rect::Rect::new(temp_tile.rect.x(), temp_tile.rect.y() + constants::TILE_SIZE as i32, constants::TILE_SIZE, constants::TILE_SIZE),
-                    top_right_rect: sdl2::rect::Rect::new(temp_tile.rect.x() + constants::TILE_SIZE as i32, temp_tile.rect.y() + constants::TILE_SIZE as i32, constants::TILE_SIZE, constants::TILE_SIZE),
+                    bottom_left_rect: sdl2::rect::Rect::new(
+                        temp_tile.rect.x(),
+                        temp_tile.rect.y(),
+                        constants::TILE_SIZE,
+                        constants::TILE_SIZE
+                    ),
+                    bottom_right_rect: sdl2::rect::Rect::new(
+                        temp_tile.rect.x() + constants::TILE_SIZE as i32,
+                        temp_tile.rect.y(),
+                        constants::TILE_SIZE,
+                        constants::TILE_SIZE
+                    ),
+                    top_left_rect: sdl2::rect::Rect::new(
+                        temp_tile.rect.x(),
+                        temp_tile.rect.y() + constants::TILE_SIZE as i32,
+                        constants::TILE_SIZE,
+                        constants::TILE_SIZE
+                    ),
+                    top_right_rect: sdl2::rect::Rect::new(
+                        temp_tile.rect.x() + constants::TILE_SIZE as i32,
+                        temp_tile.rect.y() + constants::TILE_SIZE as i32,
+                        constants::TILE_SIZE,
+                        constants::TILE_SIZE
+                    ),
                     texture_path_bottom_left: constants::TEXTURE_BUILDING_HOUSE_BOTTOM_LEFT.to_string(),
                     texture_path_bottom_right: constants::TEXTURE_BUILDING_HOUSE_BOTTOM_RIGHT.to_string(),
                     texture_path_top_left: constants::TEXTURE_BUILDING_HOUSE_TOP_LEFT.to_string(),
                     texture_path_top_right: constants::TEXTURE_BUILDING_HOUSE_TOP_RIGHT.to_string(),
                     building_type: BuildingType::Base,
                     grid_index: (col_index, row_index),
-                    pixel_index: ((col_index * constants::TILE_SIZE as usize) as i32, (row_index * constants::TILE_SIZE as usize) as i32),
+                    pixel_index: ((
+                        col_index * constants::TILE_SIZE as usize
+                    ) as i32, (
+                        row_index * constants::TILE_SIZE as usize
+                    ) as i32),
                     last_damaged: 0,
                     max_health: constants::BUILDING_BASE_HEALTH,
                     health: constants::BUILDING_BASE_HEALTH,
@@ -95,17 +120,41 @@ impl BuildingManager {
             },
             BuildingType::None => {
                 let building = self::Building {
-                    bottom_left_rect: sdl2::rect::Rect::new(temp_tile.rect.x(), temp_tile.rect.y(), constants::TILE_SIZE, constants::TILE_SIZE),
-                    bottom_right_rect: sdl2::rect::Rect::new(temp_tile.rect.x() + constants::TILE_SIZE as i32, temp_tile.rect.y(), constants::TILE_SIZE, constants::TILE_SIZE),
-                    top_left_rect: sdl2::rect::Rect::new(temp_tile.rect.x(), temp_tile.rect.y() + constants::TILE_SIZE as i32, constants::TILE_SIZE, constants::TILE_SIZE),
-                    top_right_rect: sdl2::rect::Rect::new(temp_tile.rect.x() + constants::TILE_SIZE as i32, temp_tile.rect.y() + constants::TILE_SIZE as i32, constants::TILE_SIZE, constants::TILE_SIZE),
+                    bottom_left_rect: sdl2::rect::Rect::new(
+                        temp_tile.rect.x(),
+                        temp_tile.rect.y(),
+                        constants::TILE_SIZE,
+                        constants::TILE_SIZE
+                    ),
+                    bottom_right_rect: sdl2::rect::Rect::new(
+                        temp_tile.rect.x() + constants::TILE_SIZE as i32,
+                        temp_tile.rect.y(),
+                        constants::TILE_SIZE,
+                        constants::TILE_SIZE
+                    ),
+                    top_left_rect: sdl2::rect::Rect::new(
+                        temp_tile.rect.x(),
+                        temp_tile.rect.y() + constants::TILE_SIZE as i32,
+                        constants::TILE_SIZE,
+                        constants::TILE_SIZE
+                    ),
+                    top_right_rect: sdl2::rect::Rect::new(
+                        temp_tile.rect.x() + constants::TILE_SIZE as i32,
+                        temp_tile.rect.y() + constants::TILE_SIZE as i32,
+                        constants::TILE_SIZE,
+                        constants::TILE_SIZE
+                    ),
                     texture_path_bottom_left: constants::TEXTURE_DEFAULT.to_string(),
                     texture_path_bottom_right: constants::TEXTURE_DEFAULT.to_string(),
                     texture_path_top_left: constants::TEXTURE_DEFAULT.to_string(),
                     texture_path_top_right: constants::TEXTURE_DEFAULT.to_string(),
                     building_type: BuildingType::None,
                     grid_index: (col_index, row_index),
-                    pixel_index: ((col_index * constants::TILE_SIZE as usize) as i32, (row_index * constants::TILE_SIZE as usize) as i32),
+                    pixel_index: ((
+                        col_index * constants::TILE_SIZE as usize) as i32, (
+                        row_index * constants::TILE_SIZE as usize
+                    ) as i32
+                    ),
                     last_damaged: 0,
                     max_health: 0,
                     health: 0,
@@ -121,6 +170,7 @@ impl BuildingManager {
         gui_manager: &mut gui_manager::GUIManager,
     ) -> Result<(), String> {
         for building in &mut self.building_vec {
+            //TODO: whyyyyyyyyyyyyy
             building.bottom_left_rect.set_x(building.pixel_index.0 - game.cam_x);
             building.bottom_left_rect.set_y(building.pixel_index.1 - game.cam_y);
             let texture_bottom_left = tex_man.load(&building.texture_path_bottom_left)?;
@@ -206,6 +256,7 @@ impl BuildingManager {
 
                 if !game.hovering_button && sdl2::rect::Rect::contains_point(&temp_tile.rect, game.mouse_point){
                     if game.build_mode {
+                        //sooo many arguments....
                         self.build_mode(game, events, towers, enemies, gui_manager, minimap_manager, build_buttons, temp_tile, col_index, row_index);
                     }
                     else if game.seed_mode {
@@ -350,7 +401,7 @@ impl BuildingManager {
         if game.placed {
             enemy_manager::EnemyManager::repath_all_enemies(enemies);
             events.level_updated = true;
-/*             minimap_manager.update_minimap(); */
+            /*             minimap_manager.update_minimap(); */
         }
     }
 
@@ -371,7 +422,12 @@ impl BuildingManager {
                 if game.preview_mode && game.mouse_button == sdl2::mouse::MouseButton::Left {
                     let start = (player.rect.x() + player.x, player.rect.y() + player.y);
                     println!("spawned gun projectile");
-                    projectiles.spawn_player_projectile(player, start, start, (events.mouse_point.x + game.cam_x, events.mouse_point.y + game.cam_y));
+
+                    projectiles.spawn_player_projectile(player, start, start, (
+                        events.mouse_point.x + game.cam_x,
+                        events.mouse_point.y + game.cam_y
+                    ));
+
                     let texture = constants::TEXTURE_PREVIEW_GUN.to_string();
                     gui_manager.preview.texture_path_bottom_left = texture;
                     gui_manager.preview.texture_path_bottom_right = "".to_string();

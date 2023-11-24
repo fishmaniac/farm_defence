@@ -3,16 +3,10 @@ use crate::event_manager;
 use crate::player_manager;
 use crate::game_manager;
 use crate::level_manager;
-use crate::level_manager::LevelTile;
 use crate::level_manager::TileData;
 use crate::texture_manager;
-use crate::projectile_manager;
 use crate::gui_manager;
-use crate::tower_manager;
 use crate::pathfinding_manager;
-use crate::utilities;
-use crate::utilities::check_enemy_collisions;
-use crate::utilities::clamp_speed;
 
 pub struct Enemy {
     pub final_path: Option<Vec<(usize, usize)>>,
@@ -63,9 +57,17 @@ impl EnemyManager {
                     health: constants::ENEMY_GOBLIN_HEALTH,
                     current_target: None,
                     grid_index: index,
-                    pixel_index: (index.0 as u32 * constants::TILE_SIZE, index.1 as u32 * constants::TILE_SIZE),
+                    pixel_index: (
+                        index.0 as u32 * constants::TILE_SIZE,
+                        index.1 as u32 * constants::TILE_SIZE
+                    ),
                     direction: player_manager::Direction::Down,
-                    rect: sdl2::rect::Rect::new(temp_tile.rect.x(), temp_tile.rect.y(), constants::TILE_SIZE, constants::TILE_SIZE),
+                    rect: sdl2::rect::Rect::new(
+                        temp_tile.rect.x(),
+                        temp_tile.rect.y(),
+                        constants::TILE_SIZE,
+                        constants::TILE_SIZE
+                    ),
                     texture_path: constants::TEXTURE_GOBLIN_ENEMY_FRONT.to_string(),
                 };
                 self.enemy_vec.push(temp_enemy);
@@ -82,9 +84,17 @@ impl EnemyManager {
                     health: 1,
                     current_target: None,
                     grid_index: index,
-                    pixel_index: (index.0 as u32 * constants::TILE_SIZE, index.1 as u32 * constants::TILE_SIZE),
+                    pixel_index: (
+                        index.0 as u32 * constants::TILE_SIZE,
+                        index.1 as u32 * constants::TILE_SIZE
+                    ),
                     direction: player_manager::Direction::Down,
-                    rect: sdl2::rect::Rect::new(temp_tile.rect.x(), temp_tile.rect.y(), constants::TILE_SIZE, constants::TILE_SIZE),
+                    rect: sdl2::rect::Rect::new(
+                        temp_tile.rect.x(),
+                        temp_tile.rect.y(),
+                        constants::TILE_SIZE,
+                        constants::TILE_SIZE
+                    ),
                     texture_path: constants::TEXTURE_DEFAULT.to_string(),
                 };
                 self.enemy_vec.push(temp_enemy);
@@ -142,20 +152,28 @@ impl EnemyManager {
                 if enemy_path.is_empty() {
                     enemy.final_path = None;
                     return;
-                }
-                let speed: u16 = (enemy.movement_speed as f64 * (events.delta_time as f64).max(constants::MIN_GAME_RATE)) as u16;
+}
+                let speed: u16 = 
+                (enemy.movement_speed as f64 * (events.delta_time as f64)
+                    .max(constants::MIN_GAME_RATE)) as u16;
 
-                let target_pixel_index = (enemy_path[0].0 as u32 * constants::TILE_SIZE,
-                    enemy_path[0].1 as u32 * constants::TILE_SIZE);
+                let target_pixel_index = (
+                    enemy_path[0].0 as u32 * constants::TILE_SIZE,
+                    enemy_path[0].1 as u32 * constants::TILE_SIZE
+                );
                 let mut new_pixel_index: (u32, u32) = enemy.pixel_index;
-                let distance_to_target = ((target_pixel_index.0 as i32 - new_pixel_index.0 as i32).abs(),
-                    (target_pixel_index.1 as i32 - new_pixel_index.1 as i32).abs());
+                let distance_to_target = (
+                    (target_pixel_index.0 as i32 - new_pixel_index.0 as i32).abs(),
+                    (target_pixel_index.1 as i32 - new_pixel_index.1 as i32).abs()
+                );
 
                 if distance_to_target.0 <= speed as i32 
                 && distance_to_target.1 <= speed as i32 {
                     enemy.pixel_index = target_pixel_index;
-                    enemy.grid_index = ((enemy.pixel_index.0 / constants::TILE_SIZE) as usize,
-                        (enemy.pixel_index.1 / constants::TILE_SIZE) as usize);
+                    enemy.grid_index = (
+                        (enemy.pixel_index.0 / constants::TILE_SIZE) as usize,
+                        (enemy.pixel_index.1 / constants::TILE_SIZE) as usize
+                    );
                     enemy_path.remove(0);
                 }
                 else {
@@ -174,8 +192,10 @@ impl EnemyManager {
                     enemy.pixel_index = new_pixel_index;
                     if enemy.pixel_index.0 % 32 == 0 
                     && enemy.pixel_index.1 % 32 == 0 {
-                        enemy.grid_index = ((enemy.pixel_index.0 / 32) as usize, 
-                            (enemy.pixel_index.1 / 32) as usize);
+                        enemy.grid_index = (
+                            (enemy.pixel_index.0 / 32) as usize,
+                            (enemy.pixel_index.1 / 32) as usize
+                        );
                     }
                 }
                 enemy.final_path = Some(enemy_path.to_vec());

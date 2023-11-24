@@ -40,7 +40,10 @@ impl EventManager {
             last_performance_counter: 0,
             performance_frequency: 0,
             delta_time: 0.0,
-            screen_size: (game.canvas.window().display_mode().unwrap().w, game.canvas.window().display_mode().unwrap().h),
+            screen_size: (
+                game.canvas.window().display_mode().unwrap().w,
+                game.canvas.window().display_mode().unwrap().h
+            ),
             mouse_point: sdl2::rect::Point::new(0, 0),
             level_updated: false,
             menu_settings: false,
@@ -99,8 +102,14 @@ impl EventManager {
                     game.mouse_button = MouseButton::Unknown;
                     game.placed = false;
                 },
-                sdl2::event::Event::Window { win_event: sdl2::event::WindowEvent::Resized(width, height), .. } => {
-                    self.screen_size = (game.canvas.window().display_mode().unwrap().w, game.canvas.window().display_mode().unwrap().h);
+                sdl2::event::Event::Window {
+                    win_event: sdl2::event::WindowEvent::Resized(width, height),
+                    ..
+                } => {
+                    self.screen_size = (
+                        game.canvas.window().display_mode().unwrap().w,
+                        game.canvas.window().display_mode().unwrap().h
+                    );
                 }
                 _ => {}
             }
