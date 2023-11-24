@@ -37,7 +37,10 @@ pub struct PlayerManager {
 }
 
 impl PlayerManager {
-    pub fn new(game: &mut game_manager::GameManager, events: &mut event_manager::EventManager) -> PlayerManager {
+    pub fn new(
+        game: &mut game_manager::GameManager,
+        events: &mut event_manager::EventManager
+    ) -> PlayerManager {
         let player = PlayerManager {
             up: false,
             down: false,
@@ -48,7 +51,12 @@ impl PlayerManager {
             x: 0,
             y: 0,
             texture_path: "".to_string(),
-            rect: sdl2::rect::Rect::new(events.screen_size.0 / 2, events.screen_size.1 / 2, constants::TILE_SIZE, constants::TILE_SIZE),
+            rect: sdl2::rect::Rect::new(
+                events.screen_size.0 / 2,
+                events.screen_size.1 / 2,
+                constants::TILE_SIZE,
+                constants::TILE_SIZE
+            ),
             direction: Direction::Up,
             menu_selection: 0,
             projectile_texture: constants::TEXTURE_PROJECTILE_ARROW.to_string(),
@@ -66,7 +74,10 @@ impl PlayerManager {
     ) {
         let mut new_x: i32 = self.x;
         let mut new_y: i32 = self.y; 
-        let mut speed: i32 = (constants::PLAYER_SPEED as f64 * events.delta_time.max(constants::MIN_GAME_RATE)) as i32;
+        let mut speed: i32 = (
+        constants::PLAYER_SPEED as f64 
+        * events.delta_time.max(constants::MIN_GAME_RATE)
+    ) as i32;
         let max_speed: i32 = constants::TILE_SIZE as i32;
         speed = speed.min(max_speed);
 
@@ -132,10 +143,14 @@ impl PlayerManager {
     ) -> Result<(), String> {
         if (events.up || events.down || events.left || events.right) && game.frame_time % constants::PLAYER_SPEED as u32 == 0 {
             match self.direction {
-                Direction::Up => self.texture_path = constants::TEXTURE_PLAYER_MOVING_BACK.to_string(),
-                Direction::Down => self.texture_path = constants::TEXTURE_PLAYER_MOVING_FRONT.to_string(),
-                Direction::Left => self.texture_path = constants::TEXTURE_PLAYER_MOVING_LEFT.to_string(),
-                Direction::Right => self.texture_path = constants::TEXTURE_PLAYER_MOVING_RIGHT.to_string(),
+                Direction::Up => self.texture_path 
+                    = constants::TEXTURE_PLAYER_MOVING_BACK.to_string(),
+                Direction::Down => self.texture_path 
+                    = constants::TEXTURE_PLAYER_MOVING_FRONT.to_string(),
+                Direction::Left => self.texture_path 
+                    = constants::TEXTURE_PLAYER_MOVING_LEFT.to_string(),
+                Direction::Right => self.texture_path 
+                    = constants::TEXTURE_PLAYER_MOVING_RIGHT.to_string(),
                 _ => {
                     println!("NO PLAYER_MOVING TEXTURE");
                     self.texture_path = constants::TEXTURE_PLAYER_MOVING_FRONT.to_string();
@@ -144,14 +159,22 @@ impl PlayerManager {
         }
         else {
             match self.direction {
-                Direction::Up => self.texture_path = constants::TEXTURE_PLAYER_BACK.to_string(),
-                Direction::Down => self.texture_path = constants::TEXTURE_PLAYER_FRONT.to_string(),
-                Direction::Left => self.texture_path = constants::TEXTURE_PLAYER_LEFT.to_string(),
-                Direction::Right => self.texture_path = constants::TEXTURE_PLAYER_RIGHT.to_string(),
-                Direction::UpLeft => self.texture_path = constants::TEXTURE_PLAYER_BACK_LEFT.to_string(),
-                Direction::UpRight => self.texture_path = constants::TEXTURE_PLAYER_BACK_RIGHT.to_string(),
-                Direction::DownLeft => self.texture_path = constants::TEXTURE_PLAYER_FRONT_LEFT.to_string(),
-                Direction::DownRight => self.texture_path = constants::TEXTURE_PLAYER_FRONT_RIGHT.to_string(),
+                Direction::Up => self.texture_path 
+                    = constants::TEXTURE_PLAYER_BACK.to_string(),
+                Direction::Down => self.texture_path 
+                    = constants::TEXTURE_PLAYER_FRONT.to_string(),
+                Direction::Left => self.texture_path 
+                    = constants::TEXTURE_PLAYER_LEFT.to_string(),
+                Direction::Right => self.texture_path 
+                    = constants::TEXTURE_PLAYER_RIGHT.to_string(),
+                Direction::UpLeft => self.texture_path 
+                    = constants::TEXTURE_PLAYER_BACK_LEFT.to_string(),
+                Direction::UpRight => self.texture_path 
+                    = constants::TEXTURE_PLAYER_BACK_RIGHT.to_string(),
+                Direction::DownLeft => self.texture_path 
+                    = constants::TEXTURE_PLAYER_FRONT_LEFT.to_string(),
+                Direction::DownRight => self.texture_path 
+                    = constants::TEXTURE_PLAYER_FRONT_RIGHT.to_string(),
                 _ => {
                     println!("NO PLAYER TEXTURE");
                     self.texture_path = constants::TEXTURE_PLAYER_FRONT.to_string();

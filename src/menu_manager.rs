@@ -1,7 +1,4 @@
-use crate::event_manager;
-use crate::game_manager;
-use crate::constants;
-use crate::player_manager;
+use crate::{event_manager, game_manager, player_manager, constants, utilities};
 
 pub struct MenuButton <'a> {
     texture_surface: sdl2::surface::Surface<'a>,
@@ -28,12 +25,24 @@ pub struct MenuManager <'a> {
 }
 
 impl<'a> MenuManager<'a> {
-    pub fn new (game: &mut game_manager::GameManager, small_font: &'a sdl2::ttf::Font<'a, 'a>, medium_font: &'a sdl2::ttf::Font<'a, 'a>, large_font: &'a sdl2::ttf::Font<'a, 'a>) -> MenuManager<'a> {
+    pub fn new (
+        game: &mut game_manager::GameManager,
+        small_font: &'a sdl2::ttf::Font<'a,
+        'a>, medium_font: &'a sdl2::ttf::Font<'a, 'a>,
+        large_font: &'a sdl2::ttf::Font<'a,
+        'a>
+    ) -> MenuManager<'a> {
         let menu = MenuManager {
             quit: false,
             button_vec: Vec::new(),
             settings_vec: Vec::new(),
-            resolution_vec: vec![(640, 480), (1280, 720), (1920, 1080), (2560, 1440), (4096, 2304)],
+            resolution_vec: vec![
+                (640, 480),
+                (1280, 720),
+                (1920, 1080),
+                (2560, 1440),
+                (4096, 2304)
+            ],
             current_resolution: 0,
             button_amount: 3,
             texture_creator: game.canvas.texture_creator(),
@@ -206,7 +215,12 @@ impl<'a> MenuManager<'a> {
         Ok(())
     }
 
-    pub fn update_menu (&mut self, events: &mut event_manager::EventManager, game: &mut game_manager::GameManager, player: &mut player_manager::PlayerManager) -> Result<(), String> {
+    pub fn update_menu (
+        &mut self,
+        events: &mut event_manager::EventManager,
+        game: &mut game_manager::GameManager,
+        player: &mut player_manager::PlayerManager
+    ) -> Result<(), String> {
         if !events.menu_settings {
             for menu_button_index in 0..self.button_vec.len() {
                 self.update_menu_buttons(menu_button_index, game);
@@ -250,15 +264,25 @@ impl<'a> MenuManager<'a> {
                 menu_button.last_clicked += 1;
             }
         }
-        let bottom_of_menu = self.button_vec[self.button_vec.len() - 1].rect.y() + self.button_vec[self.button_vec.len() - 1].rect.height() as i32;
+        let bottom_of_menu = 
+        self.button_vec[self.button_vec.len() - 1]
+            .rect.y() 
+        + self.button_vec[self.button_vec.len() - 1]
+            .rect.height() as i32;
         if events.menu_settings {
             for settings_button_index in 0..self.settings_vec.len() {
                 self.update_settings_buttons(settings_button_index, game);
 
-                let resolution_rect_data: (i32, i32, u32, u32) = (self.settings_vec[1].rect.x(), self.settings_vec[1].rect.y(), self.settings_vec[1].rect.width(), self.settings_vec[1].rect.height());
+                let resolution_rect_data: (i32, i32, u32, u32) = (
+                    self.settings_vec[1].rect.x(),
+                    self.settings_vec[1].rect.y(),
+                    self.settings_vec[1].rect.width(),
+                    self.settings_vec[1].rect.height()
+                );
                 let settings_button = &mut self.settings_vec[settings_button_index];
 
-                let texture_result = self.texture_creator.create_texture_from_surface(&settings_button.texture_surface);
+                let texture_result = self.texture_creator
+                    .create_texture_from_surface(&settings_button.texture_surface);
 
                 let texture = match texture_result {
                     Ok(texture) => texture,
@@ -270,7 +294,11 @@ impl<'a> MenuManager<'a> {
 
                 match settings_button_index {
                     constants::CURRENT_BUTTON_SETTINGS_RESOLUTION_MINUS => {
-                        settings_button.rect.set_x(resolution_rect_data.0 - settings_button.texture_surface.width() as i32 - constants::TILE_SIZE as i32);
+                        settings_button.rect.set_x(
+                            resolution_rect_data.0
+                            - settings_button.texture_surface.width() as i32 
+                            - constants::TILE_SIZE as i32
+                        );
                         settings_button.rect.set_y(resolution_rect_data.1);
                         settings_button.rect.set_width(settings_button.texture_surface.width());
                         settings_button.rect.set_height(settings_button.texture_surface.height());
@@ -278,7 +306,11 @@ impl<'a> MenuManager<'a> {
                         player.rect.set_y(events.screen_size.1 / 2);
                     }
                     constants::CURRENT_BUTTON_SETTINGS_RESOLUTION_PLUS => {
-                        settings_button.rect.set_x(resolution_rect_data.0 + resolution_rect_data.2 as i32 + constants::TILE_SIZE as i32);
+                        settings_button.rect.set_x(
+                            resolution_rect_data.0 
+                            + resolution_rect_data.2 as i32 
+                            + constants::TILE_SIZE as i32
+                        );
                         settings_button.rect.set_y(resolution_rect_data.1);
                         settings_button.rect.set_width(settings_button.texture_surface.width());
                         settings_button.rect.set_height(settings_button.texture_surface.height());
@@ -286,8 +318,14 @@ impl<'a> MenuManager<'a> {
                         player.rect.set_y(events.screen_size.1 / 2);
                     }
                     _ => {
-                        settings_button.rect.set_x(events.screen_size.0 / 2 - settings_button.texture_surface.width() as i32 / 2);
-                        settings_button.rect.set_y(bottom_of_menu + (settings_button.texture_surface.height() as i32 * settings_button_index as i32));
+                        settings_button.rect.set_x(
+                            events.screen_size.0 / 2
+                            - settings_button.texture_surface.width() as i32 / 2
+                        );
+                        settings_button.rect.set_y(bottom_of_menu 
+                            + (settings_button.texture_surface.height() as i32 
+                            * settings_button_index as i32)
+                            );
                         settings_button.rect.set_width(settings_button.texture_surface.width());
                         settings_button.rect.set_height(settings_button.texture_surface.height());
                     }
@@ -308,9 +346,14 @@ impl<'a> MenuManager<'a> {
                         }
                     };
                     events.screen_size = (screen_size.w, screen_size.h);
-                    let texture_surface = self.current_font.render(&format!("{} x {}", events.screen_size.0, events.screen_size.1).to_string())
+                    let texture_surface = self.current_font.render(&format!(
+                        "{} x {}",
+                        events.screen_size.0,
+                        events.screen_size.1
+                    ).to_string())
                         .blended(constants::COLOR_WHITE)
                         .map_err(|e| e.to_string())?;
+
                     settings_button.texture_surface = texture_surface;
 
                 }
@@ -338,7 +381,10 @@ impl<'a> MenuManager<'a> {
                             }
                             println!("Current res: {}", self.current_resolution);
                             
-                            game.canvas.window_mut().set_size(self.resolution_vec[self.current_resolution].0, self.resolution_vec[self.current_resolution].1);
+                            game.canvas.window_mut().set_size(
+                                self.resolution_vec[self.current_resolution].0,
+                                self.resolution_vec[self.current_resolution].1
+                            );
                         }
                         constants::CURRENT_BUTTON_SETTINGS_RESOLUTION_PLUS => {
                             if self.current_resolution < self.resolution_vec.len() - 1 {
@@ -349,12 +395,17 @@ impl<'a> MenuManager<'a> {
                                 _ => self.current_font = self.large_font,
                             }
                             println!("Current res: {}", self.current_resolution);
-                            game.canvas.window_mut().set_size(self.resolution_vec[self.current_resolution].0, self.resolution_vec[self.current_resolution].1);
+                            game.canvas.window_mut().set_size(
+                                self.resolution_vec[self.current_resolution].0,
+                                self.resolution_vec[self.current_resolution].1
+                            );
                         }
                         constants::CURRENT_BUTTON_SETTINGS_SCREEN_MODE => {
-                            let texture_surface: Option<sdl2::surface::Surface> = match game.canvas.window().fullscreen_state() {
+                            let texture_surface: Option<sdl2::surface::Surface> 
+                            = match game.canvas.window().fullscreen_state() {
                                 sdl2::video::FullscreenType::True => {
-                                    if let Err(err) = game.canvas.window_mut().set_fullscreen(sdl2::video::FullscreenType::Off) {
+                                    if let Err(err) = game.canvas.window_mut()
+                                        .set_fullscreen(sdl2::video::FullscreenType::Off) {
                                         eprintln!("Failed to set fullscreen mode: {}", err);
                                         None
                                     } 
@@ -367,7 +418,8 @@ impl<'a> MenuManager<'a> {
                                     }
                                 },
                                 sdl2::video::FullscreenType::Off => {
-                                    if let Err(err) = game.canvas.window_mut().set_fullscreen(sdl2::video::FullscreenType::Desktop) {
+                                    if let Err(err) = game.canvas.window_mut()
+                                        .set_fullscreen(sdl2::video::FullscreenType::Desktop) {
                                         eprintln!("Failed to set fullscreen mode: {}", err);
                                         None
                                     } 
@@ -379,7 +431,8 @@ impl<'a> MenuManager<'a> {
                                     }
                                 },
                                 sdl2::video::FullscreenType::Desktop => {
-                                    if let Err(err) = game.canvas.window_mut().set_fullscreen(sdl2::video::FullscreenType::True) {
+                                    if let Err(err) = game.canvas.window_mut()
+                                        .set_fullscreen(sdl2::video::FullscreenType::True) {
                                         eprintln!("Failed to set fullscreen mode: {}", err);
                                         None
                                     } 
@@ -410,13 +463,6 @@ impl<'a> MenuManager<'a> {
         }
         Ok(())
     }
-    fn draw_rect_outline(game: &mut game_manager::GameManager, rect: sdl2::rect::Rect) {
-        game.canvas.set_draw_color(constants::COLOR_OUTLINE);
-        game.canvas.draw_line(rect.top_left(), rect.top_right()).unwrap();
-        game.canvas.draw_line(rect.bottom_left(), rect.bottom_right()).unwrap();
-        game.canvas.draw_line(rect.top_left(), rect.bottom_left()).unwrap();
-        game.canvas.draw_line(rect.top_right(), rect.bottom_right()).unwrap();
-    }
 
     pub fn update_menu_buttons (&mut self, menu_button_index: usize, game: &mut game_manager::GameManager) {
         let button = &mut self.button_vec[menu_button_index];
@@ -442,7 +488,7 @@ impl<'a> MenuManager<'a> {
             button.outline_visible = true;
         }
         if button.outline_visible {
-            Self::draw_rect_outline(game, button.rect);
+            utilities::draw_rect_outline(game, button.rect);
             for other_button_index in 0..self.button_vec.len() {
                 let other_button = &mut self.button_vec[other_button_index];
                 if other_button_index != menu_button_index {
@@ -486,7 +532,7 @@ impl<'a> MenuManager<'a> {
             button.outline_visible = true;
         }
         if button.outline_visible {
-            Self::draw_rect_outline(game, button.rect);
+            utilities::draw_rect_outline(game, button.rect);
             for other_button_index in 0..self.settings_vec.len() {
                 let other_button = &mut self.settings_vec[other_button_index];
                 if other_button_index != settings_button_index {

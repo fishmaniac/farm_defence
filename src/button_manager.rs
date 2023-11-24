@@ -1,4 +1,4 @@
-use crate::{player_manager, constants, texture_manager, game_manager, event_manager};
+use crate::{player_manager, constants, texture_manager, game_manager, event_manager, utilities};
 
 pub enum ButtonType {
     Seed,
@@ -86,26 +86,6 @@ impl ButtonManager {
         }
     }
 
-    fn draw_rect_outline(game: &mut game_manager::GameManager, rect: sdl2::rect::Rect) {
-        game.canvas.set_draw_color(constants::COLOR_OUTLINE);
-        game.canvas.draw_line(
-            rect.top_left(),
-            rect.top_right()
-        ).unwrap();
-        game.canvas.draw_line(
-            rect.bottom_left(),
-            rect.bottom_right()
-        ).unwrap();
-        game.canvas.draw_line(
-            rect.top_left(),
-            rect.bottom_left()
-        ).unwrap();
-        game.canvas.draw_line(
-            rect.top_right(),
-            rect.bottom_right()
-        ).unwrap();
-    }
-
     pub fn update_buttons (&mut self, button_index: usize, game: &mut game_manager::GameManager) {
         let button = &mut self.button_vec[button_index];
         if sdl2::rect::Rect::contains_point(&button.rect, game.mouse_point) {
@@ -130,7 +110,7 @@ impl ButtonManager {
             button.outline_visible = true;
         }
         if button.outline_visible {
-            Self::draw_rect_outline(game, button.rect);
+            utilities::draw_rect_outline(game, button.rect);
             for other_button_index in 0..self.button_vec.len() {
                 let other_button = &mut self.button_vec[other_button_index];
                 if other_button_index != button_index {

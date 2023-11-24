@@ -47,10 +47,20 @@ impl TowerManager {
             TileData::ArcherTowerBottom => {
                 let tower_tile = self::Tower {
                     bottom_index: (index.0, index.1),
-                    bottom_rect: sdl2::rect::Rect::new(temp_tile.rect.x(), temp_tile.rect.y(), constants::TILE_SIZE, constants::TILE_SIZE),
+                    bottom_rect: sdl2::rect::Rect::new(
+                        temp_tile.rect.x(),
+                        temp_tile.rect.y(),
+                        constants::TILE_SIZE,
+                        constants::TILE_SIZE
+                    ),
                     bottom_texture_path: constants::TEXTURE_TOWER_ARCHER_BOTTOM.to_string(),
                     top_index: (index.0, index.1 - 1),
-                    top_rect: sdl2::rect::Rect::new(temp_tile.rect.x(), temp_tile.rect.y() - constants::TILE_SIZE as i32, constants::TILE_SIZE, constants::TILE_SIZE),
+                    top_rect: sdl2::rect::Rect::new(
+                        temp_tile.rect.x(),
+                        temp_tile.rect.y() - constants::TILE_SIZE as i32,
+                        constants::TILE_SIZE,
+                        constants::TILE_SIZE
+                    ),
                     top_texture_path: constants::TEXTURE_TOWER_ARCHER_FRONT.to_string(),
                     attack_radius: constants::TOWER_ARCHER_RADIUS,
                     attack_speed: constants::TOWER_ARCHER_ATTACK_SPEED,
@@ -69,10 +79,20 @@ impl TowerManager {
             TileData::FireballTowerBottom => {
                 let tower_tile = self::Tower {
                     bottom_index: (index.0, index.1),
-                    bottom_rect: sdl2::rect::Rect::new(temp_tile.rect.x(), temp_tile.rect.y(), constants::TILE_SIZE, constants::TILE_SIZE),
+                    bottom_rect: sdl2::rect::Rect::new(
+                        temp_tile.rect.x(),
+                        temp_tile.rect.y(),
+                        constants::TILE_SIZE,
+                        constants::TILE_SIZE
+                    ),
                     bottom_texture_path: constants::TEXTURE_TOWER_FIREBALL_BOTTOM.to_string(),
                     top_index: (index.0, index.1 - 1),
-                    top_rect: sdl2::rect::Rect::new(temp_tile.rect.x(), temp_tile.rect.y() - constants::TILE_SIZE as i32, constants::TILE_SIZE, constants::TILE_SIZE),
+                    top_rect: sdl2::rect::Rect::new(
+                        temp_tile.rect.x(),
+                        temp_tile.rect.y() - constants::TILE_SIZE as i32,
+                        constants::TILE_SIZE,
+                        constants::TILE_SIZE
+                    ),
                     top_texture_path: constants::TEXTURE_TOWER_FIREBALL_LEFT.to_string(),
                     attack_radius: constants::TOWER_FIREBALL_RADIUS,
                     attack_speed: constants::TOWER_FIREBALL_ATTACK_SPEED,
@@ -91,10 +111,20 @@ impl TowerManager {
             _=> {
                 let tower_tile = self::Tower {
                     bottom_index: (index.0, index.1),
-                    bottom_rect: sdl2::rect::Rect::new(temp_tile.rect.x(), temp_tile.rect.y(), constants::TILE_SIZE, constants::TILE_SIZE),
+                    bottom_rect: sdl2::rect::Rect::new(
+                        temp_tile.rect.x(),
+                        temp_tile.rect.y(),
+                        constants::TILE_SIZE,
+                        constants::TILE_SIZE
+                    ),
                     bottom_texture_path: constants::TEXTURE_DEFAULT.to_string(),
                     top_index: (index.0, index.1 - 1),
-                    top_rect: sdl2::rect::Rect::new(temp_tile.rect.x(), temp_tile.rect.y() - constants::TILE_SIZE as i32, constants::TILE_SIZE, constants::TILE_SIZE),
+                    top_rect: sdl2::rect::Rect::new(
+                        temp_tile.rect.x(),
+                        temp_tile.rect.y() - constants::TILE_SIZE as i32,
+                        constants::TILE_SIZE,
+                        constants::TILE_SIZE
+                    ),
                     top_texture_path: constants::TEXTURE_DEFAULT.to_string(),
                     attack_radius: 0,
                     attack_speed: 0,
@@ -107,7 +137,10 @@ impl TowerManager {
                     projectile_damage: 0,
 
                 };
-                game.target_vec.push((tower_tile.bottom_index.0, tower_tile.bottom_index.1));
+                game.target_vec.push((
+                    tower_tile.bottom_index.0,
+                    tower_tile.bottom_index.1
+                ));
                 self.tower_vec.push(tower_tile);
             }
         }
@@ -118,7 +151,10 @@ impl TowerManager {
         health_bars: &mut gui_manager::GUIManager,
     ) -> Result<(), String> {
         for tower_bottom in &mut self.tower_vec {
-            let pixel_index: (i32, i32) = (tower_bottom.bottom_index.0 as i32 * constants::TILE_SIZE as i32, tower_bottom.bottom_index.1 as i32 * constants::TILE_SIZE as i32);
+            let pixel_index: (i32, i32) = (
+                tower_bottom.bottom_index.0 as i32 * constants::TILE_SIZE as i32,
+                tower_bottom.bottom_index.1 as i32 * constants::TILE_SIZE as i32
+            );
 
             tower_bottom.bottom_rect.set_x(pixel_index.0 - game.cam_x);
             tower_bottom.bottom_rect.set_y(pixel_index.1 - game.cam_y);
@@ -136,7 +172,10 @@ impl TowerManager {
 
         }
         for tower_top in &mut self.tower_vec {
-            let pixel_index: (i32, i32) = (tower_top.top_index.0 as i32 * constants::TILE_SIZE as i32, tower_top.top_index.1 as i32 * constants::TILE_SIZE as i32);
+            let pixel_index: (i32, i32) = (
+                tower_top.top_index.0 as i32 * constants::TILE_SIZE as i32,
+                tower_top.top_index.1 as i32 * constants::TILE_SIZE as i32
+            );
 
             tower_top.top_rect.set_x(pixel_index.0 - game.cam_x);
             tower_top.top_rect.set_y(pixel_index.1 - game.cam_y);
@@ -158,7 +197,11 @@ impl TowerManager {
         Ok(())
     }
 
-    pub fn is_within_area(tower_pos: (i32, i32), enemy_pos: (i32, i32), area: i32) -> bool {
+    pub fn is_within_area(
+        tower_pos: (i32, i32),
+        enemy_pos: (i32, i32),
+        area: i32
+    ) -> bool {
         let dx = (tower_pos.0 - enemy_pos.0).abs();
         let dy = (tower_pos.1 - enemy_pos.1).abs();
         dx <= area && dy <= area

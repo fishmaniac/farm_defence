@@ -100,3 +100,24 @@ pub fn check_enemy_collisions (
     colliding
 }
 
+pub fn draw_rect_outline(
+        game: &mut game_manager::GameManager,
+        rect: sdl2::rect::Rect
+    ) {
+        game.canvas.set_draw_color(constants::COLOR_OUTLINE);
+        game.canvas.draw_line(
+            rect.top_left(),
+            rect.top_right()
+        ).unwrap();
+        game.canvas.draw_line(
+            rect.bottom_left(),
+            rect.bottom_right()
+        ).unwrap();
+        game.canvas.draw_line(
+            rect.top_left(
+        ), rect.bottom_left()).unwrap();
+        game.canvas.draw_line(
+            rect.top_right(),
+            rect.bottom_right()
+        ).unwrap();
+    }

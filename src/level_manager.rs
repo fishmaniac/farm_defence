@@ -55,7 +55,12 @@ impl LevelManager {
         for _ in 0..constants::MAX_HEIGHT {
             let mut row = Vec::new();
             for _ in 0..constants::MAX_WIDTH {
-                let rect = sdl2::rect::Rect::new(0, 0, constants::TILE_SIZE, constants::TILE_SIZE);
+                let rect = sdl2::rect::Rect::new(
+                    0,
+                    0,
+                    constants::TILE_SIZE,
+                    constants::TILE_SIZE
+                );
 
                 row.push(LevelTile { 
                     tile_type: constants::TILE_TYPE_GRASS,
@@ -80,7 +85,12 @@ impl LevelManager {
         let file = File::open(filename)?;
         let reader = BufReader::new(file);
         let mut temp_vec: Vec<Vec<LevelTile>> = Vec::new();
-        let rect = sdl2::rect::Rect::new(0, 0, constants::TILE_SIZE, constants::TILE_SIZE);
+        let rect = sdl2::rect::Rect::new(
+            0,
+            0,
+            constants::TILE_SIZE,
+            constants::TILE_SIZE
+        );
 
         for line in reader.lines() {
             let line = line?;
@@ -170,9 +180,22 @@ impl LevelManager {
         for col_index in 0..self.level_vec.len() {
             for row_index in 0..self.level_vec[col_index].len() {
                 let temp_tile = &mut self.level_vec[col_index][row_index];
-                temp_tile.rect.set_x(constants::TILE_SIZE as i32 * col_index as i32 - game.cam_x);
-                temp_tile.rect.set_y(constants::TILE_SIZE as i32 * row_index as i32 - game.cam_y);
-                let screen_rect = sdl2::rect::Rect::new(player.rect.x() - (events.screen_size.0 / 2), player.rect.y() - (events.screen_size.1 / 2), events.screen_size.0 as u32, events.screen_size.1 as u32);
+                temp_tile.rect.set_x(
+                    constants::TILE_SIZE as i32 
+                    * col_index as i32 
+                    - game.cam_x
+                );
+                temp_tile.rect.set_y(
+                    constants::TILE_SIZE as i32 
+                    * row_index as i32 
+                    - game.cam_y
+                );
+                let screen_rect = sdl2::rect::Rect::new(
+                    player.rect.x() - (events.screen_size.0 / 2),
+                    player.rect.y() - (events.screen_size.1 / 2),
+                    events.screen_size.0 as u32,
+                    events.screen_size.1 as u32
+                );
 
                 if temp_tile.rect.has_intersection(screen_rect) {
                     let texture = tex_man.load(&temp_tile.texture_path)?;
@@ -201,19 +224,38 @@ impl LevelManager {
         gui_manager: &mut gui_manager::GUIManager,
     ) {
         for tower in &mut towers.tower_vec {
-            let tower_pos_pixel = (constants::TILE_SIZE as i32 * tower.top_index.0 as i32, constants::TILE_SIZE as i32 * tower.top_index.1 as i32);
+            let tower_pos_pixel = (
+                constants::TILE_SIZE as i32 * tower.top_index.0 as i32,
+                constants::TILE_SIZE as i32 * tower.top_index.1 as i32
+            );
             for enemy in &mut enemies.enemy_vec {
                 /* let enemy_pos_pixel = (constants::TILE_SIZE as i32 * enemy.grid_index.0 as i32, constants::TILE_SIZE as i32 * enemy.grid_index.1 as i32); */
-                let enemy_pos_pixel = (enemy.pixel_index.0 as i32, enemy.pixel_index.1 as i32);
+                let enemy_pos_pixel = (
+                    enemy.pixel_index.0 as i32,
+                    enemy.pixel_index.1 as i32
+                );
                 //need to add delta time here
-                let tower_can_attack: bool = tower_manager::TowerManager::is_within_area(tower_pos_pixel, enemy_pos_pixel, tower.attack_radius) && game.frame_time % tower.attack_speed as u32 == 0;
-                let enemy_can_attack: bool = tower_manager::TowerManager::is_within_area(tower_pos_pixel, enemy_pos_pixel, enemy.attack_radius as i32) && game.frame_time % enemy.attack_speed as u32 == 0;
+                let tower_can_attack: bool = tower_manager::TowerManager::is_within_area(
+                    tower_pos_pixel,
+                    enemy_pos_pixel,
+                    tower.attack_radius
+                ) && game.frame_time % tower.attack_speed as u32 == 0;
+                let enemy_can_attack: bool = tower_manager::TowerManager::is_within_area(
+                    tower_pos_pixel,
+                    enemy_pos_pixel,
+                    enemy.attack_radius as i32
+                ) && game.frame_time % enemy.attack_speed as u32 == 0;
 
                 //TOWER ATTACK
                 if enemy.health != 0 {
                     if tower_can_attack && !tower.is_attacking {
                         if tower_pos_pixel != enemy_pos_pixel {
-                            projectiles.spawn_tower_projectile(tower, tower_pos_pixel, tower_pos_pixel, enemy_pos_pixel);
+                            projectiles.spawn_tower_projectile(
+                                tower,
+                                tower_pos_pixel,
+                                tower_pos_pixel,
+                                enemy_pos_pixel
+                            );
                             tower.is_attacking = true;
                         }
                     }
@@ -234,8 +276,15 @@ impl LevelManager {
         }
         for building in &mut buildings.building_vec {
             for enemy in &mut enemies.enemy_vec {
-                let enemy_pos_pixel = (constants::TILE_SIZE as i32 * enemy.grid_index.0 as i32, constants::TILE_SIZE as i32 * enemy.grid_index.1 as i32);
-                let enemy_can_attack: bool = tower_manager::TowerManager::is_within_area(building.pixel_index, enemy_pos_pixel, enemy.attack_radius as i32);
+                let enemy_pos_pixel = (
+                    constants::TILE_SIZE as i32 * enemy.grid_index.0 as i32,
+                    constants::TILE_SIZE as i32 * enemy.grid_index.1 as i32
+                );
+                let enemy_can_attack: bool = tower_manager::TowerManager::is_within_area(
+                    building.pixel_index,
+                    enemy_pos_pixel,
+                    enemy.attack_radius as i32
+                );
                 if building.health != 0 && enemy_can_attack {
                     if building.health > enemy.attack_damage as u16 {
                         building.health -= enemy.attack_damage as u16;

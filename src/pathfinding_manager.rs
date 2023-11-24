@@ -37,7 +37,11 @@ impl PathfindingManager {
         };
         pathfinding_manager
     }
-    pub fn create_frontier(&mut self, start: (usize, usize), level_vec: &[Vec<level_manager::LevelTile>]) {
+    pub fn create_frontier(
+        &mut self,
+        start: (usize, usize),
+        level_vec: &[Vec<level_manager::LevelTile>]
+    ) {
         let initial_state = PathState {
             position: start,
             priority: Self::heuristic(start, (10, 10)),
@@ -46,16 +50,24 @@ impl PathfindingManager {
         let frontier: std::collections::BinaryHeap<PathState> = [initial_state].into();
         self.frontier = Some(frontier);
     }
-    pub fn astar(&mut self, enemy: &mut enemy_manager::Enemy, target: (usize, usize), level_vec: &[Vec<level_manager::LevelTile>]) {
+    pub fn astar(
+        &mut self,
+        enemy: &mut enemy_manager::Enemy,
+        target: (usize, usize),
+        level_vec: &[Vec<level_manager::LevelTile>]
+    ) {
         println!("EXECUTING A*"); 
         let initial_state = PathState {
             position: enemy.grid_index,
             priority: Self::heuristic(enemy.grid_index, target),
         };
 
-        let mut frontier: std::collections::BinaryHeap<PathState> = [initial_state].into();
-        let mut priorities: std::collections::HashMap<(usize, usize), usize> = std::collections::HashMap::new();
-        let mut came_from: std::collections::HashMap<(usize, usize), (usize, usize)> = std::collections::HashMap::new();
+        let mut frontier: std::collections::BinaryHeap<PathState> 
+        = [initial_state].into();
+        let mut priorities: std::collections::HashMap<(usize, usize), usize> 
+        = std::collections::HashMap::new();
+        let mut came_from: std::collections::HashMap<(usize, usize), (usize, usize)> 
+        = std::collections::HashMap::new();
 
         priorities.insert(enemy.grid_index, initial_state.priority);
 
@@ -92,7 +104,12 @@ impl PathfindingManager {
             }
         }
     }
-    pub fn astar_new(&mut self, enemy: &mut enemy_manager::Enemy, target: (usize, usize), level_vec: &[Vec<level_manager::LevelTile>]) {
+    pub fn astar_new(
+        &mut self,
+        enemy: &mut enemy_manager::Enemy,
+        target: (usize, usize),
+        level_vec: &[Vec<level_manager::LevelTile>]
+    ) {
 
     }
     fn get_neighbors(start: (usize, usize), level_vec: &[Vec<level_manager::LevelTile>]) -> Vec<(usize, usize)> {
