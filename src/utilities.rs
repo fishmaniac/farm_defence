@@ -22,12 +22,12 @@ pub fn clamp_speed(speed: u16, max_speed: u16) -> u16 {
     speed
 }
 
-pub fn tile_not_collidable(tile: &level_manager::LevelTile) -> bool {
+pub fn tile_collidable(tile: &level_manager::LevelTile) -> bool {
     match tile.tile_type {
         constants::TILE_TYPE_WALL => {
-            false
+            true
         },
-        _ => true,
+        _ => false,
     }
 }
 
@@ -38,6 +38,10 @@ pub fn check_player_collisions(
     new_position: (i32, i32),
     level: &mut level_manager::LevelManager
 ) -> bool {
+    /*      
+    * TODO: Make better system to allow for moving while colliding in other direction
+    * initialize new_rect once instead of recreating on each function call?  
+    */
     let mut colliding = false;
     let tile_size_offset = constants::TILE_SIZE as i32 / 2;
     let new_offset = constants::TILE_SIZE as i32 / 4;
@@ -55,7 +59,8 @@ pub fn check_player_collisions(
         for row_index in 0..level.level_vec[col_index].len() {
             let temp_tile = &mut level.level_vec[col_index][row_index];
 
-            if temp_tile.tile_type == constants::TILE_TYPE_WALL && temp_tile.rect.has_intersection(new_rect) {
+            if tile_collidable(temp_tile) 
+            && temp_tile.rect.has_intersection(new_rect) {
                 colliding = true;
                 break;
             }
@@ -88,7 +93,8 @@ pub fn check_enemy_collisions (
         for row_index in 0..level.level_vec[col_index].len() {
             let temp_tile = &mut level.level_vec[col_index][row_index];
 
-            if temp_tile.tile_type == constants::TILE_TYPE_WALL && temp_tile.rect.has_intersection(new_rect) {
+            if tile_collidable(temp_tile) 
+            && temp_tile.rect.has_intersection(new_rect) {
                 colliding = true;
                 break;
             }
@@ -101,23 +107,23 @@ pub fn check_enemy_collisions (
 }
 
 pub fn draw_rect_outline(
-        game: &mut game_manager::GameManager,
-        rect: sdl2::rect::Rect
-    ) {
-        game.canvas.set_draw_color(constants::COLOR_OUTLINE);
-        game.canvas.draw_line(
-            rect.top_left(),
-            rect.top_right()
-        ).unwrap();
-        game.canvas.draw_line(
-            rect.bottom_left(),
-            rect.bottom_right()
-        ).unwrap();
-        game.canvas.draw_line(
-            rect.top_left(
+    game: &mut game_manager::GameManager,
+    rect: sdl2::rect::Rect
+) {
+    game.canvas.set_draw_color(constants::COLOR_OUTLINE);
+    game.canvas.draw_line(
+        rect.top_left(),
+        rect.top_right()
+    ).unwrap();
+    game.canvas.draw_line(
+        rect.bottom_left(),
+        rect.bottom_right()
+    ).unwrap();
+    game.canvas.draw_line(
+        rect.top_left(
         ), rect.bottom_left()).unwrap();
-        game.canvas.draw_line(
-            rect.top_right(),
-            rect.bottom_right()
-        ).unwrap();
-    }
+    game.canvas.draw_line(
+        rect.top_right(),
+        rect.bottom_right()
+    ).unwrap();
+}
