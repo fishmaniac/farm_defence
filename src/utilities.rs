@@ -22,13 +22,17 @@ pub fn clamp_speed(speed: u16, max_speed: u16) -> u16 {
     speed
 }
 
-pub fn tile_collidable(tile: &level_manager::LevelTile) -> bool {
+fn tile_collidable(tile: &level_manager::LevelTile) -> bool {
     match tile.tile_type {
         constants::TILE_TYPE_WALL => {
             true
         },
         _ => false,
     }
+}
+
+pub fn tile_pathable(tile: &level_manager::LevelTile) -> bool {
+    return !tile.is_occupied && !tile_collidable(tile);
 }
 
 pub fn check_player_collisions(

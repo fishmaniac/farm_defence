@@ -127,56 +127,49 @@ impl PathfindingManager {
         let bottom_right_tile = &level_vec[x + 1][y + 1];
 
         // Top
-        if !top_tile.is_occupied 
-        && y > 0 
-        && utilities::tile_collidable(top_tile) {
+        if y > 0 
+        && utilities::tile_pathable(top_tile) {
             neighbors.push((x, y - 1));
         }
         // Bottom
-        if !bottom_tile.is_occupied 
-        && y < height - 1
-        && utilities::tile_collidable(bottom_tile) {
+        if y < height - 1
+        && utilities::tile_pathable(bottom_tile) {
             neighbors.push((x, y + 1));
         }
         // Left
-        if !left_tile.is_occupied 
-        && x > 0
-        && utilities::tile_collidable(left_tile) {
+        if x > 0
+        && utilities::tile_pathable(left_tile) {
             neighbors.push((x - 1, y));
         }
         // Right
-        if !right_tile.is_occupied 
-        && x < width - 1 
-        && utilities::tile_collidable(right_tile) {
+        if x < width - 1 
+        && utilities::tile_pathable(right_tile) {
             neighbors.push((x + 1, y));
         }
         // Top-left
-        if !top_left_tile.is_occupied 
-        && x > 0 && y > 0 
-        && utilities::tile_collidable(top_left_tile) {
+        if x > 0 && y > 0 
+        && utilities::tile_pathable(top_left_tile) {
             neighbors.push((x - 1, y - 1));
         }
         // Top-right
-        if !top_right_tile.is_occupied 
-        && x > 0 && y < height - 1 
-        && utilities::tile_collidable(top_right_tile) {
+        if x > 0 && y < height - 1 
+        && utilities::tile_pathable(top_right_tile) {
             neighbors.push((x - 1, y + 1));
         }
         // Bottom-left
-        if !bottom_left_tile.is_occupied
-        && x < width - 1 && y > 0 
-        && utilities::tile_collidable(bottom_left_tile) {
+        if x < width - 1 && y > 0 
+        && utilities::tile_pathable(bottom_left_tile) {
 
             neighbors.push((x + 1, y - 1));
         }
         // Bottom-right
-        if !bottom_right_tile.is_occupied
-        && x < width - 1 && y < height - 1 
-        && utilities::tile_collidable(bottom_right_tile) {
+        if x < width - 1 && y < height - 1 
+        && utilities::tile_pathable(bottom_right_tile) {
             neighbors.push((x + 1, y + 1));
         }            
         neighbors
     }
+
 
     fn heuristic(start: (usize, usize), target: (usize, usize)) -> usize {
         let (x1, y1) = start;
